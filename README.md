@@ -14,7 +14,7 @@ An end-to-end system that takes scanned passport page images as input, detects a
 | **Zuyan Tao** | Agentic Backend & System Integration |
 | **Wilson Tee** | Frontend, Data Engineering & Evaluation |
 
-**Sponsor:** Alvaro — Securiport
+**Sponsor:** Alvaro Ramirez — Securiport
 
 ## Project Architecture
 
