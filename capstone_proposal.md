@@ -5,7 +5,7 @@
 ---
 
 **University of California, Los Angeles — Master of Science in Engineering**
-**Sponsor:** Securiport (Alvaro, Sponsor Contact)
+**Sponsor:** Securiport (Alvaro Ramirez, Sponsor Contact)
 **Date:** June 1, 2026
 
 | Team Member | Role | Primary Responsibility |
