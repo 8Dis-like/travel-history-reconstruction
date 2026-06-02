@@ -1,0 +1,52 @@
+# =============================================================
+# Travel History Reconstruction — Pipeline Configuration
+# =============================================================
+
+preprocessing:
+  target_dpi: 300
+  deskew: true
+  denoise: true
+  contrast_enhancement: true  # CLAHE
+  max_image_size: 4096        # Max dimension in pixels
+
+detection:
+  model: "yolov8s"            # Options: yolov8n, yolov8s, yolov8m, yolov8l
+  weights: "models/pretrained/yolov8s.pt"
+  confidence_threshold: 0.4
+  iou_threshold: 0.45
+  classes: ["stamp"]          # Expandable: ["stamp", "visa_sticker", "handwritten_note"]
+  input_size: 640
+
+ocr:
+  engine: "paddleocr"         # Options: paddleocr, vlm
+  languages: ["en"]           # Start with English, expand later
+  paddleocr:
+    det_model_dir: null       # Use default if null
+    rec_model_dir: null
+    use_angle_cls: true
+    use_gpu: true
+  vlm:
+    model_name: "openbmb/MiniCPM-o-2_6"
+    max_tokens: 512
+    temperature: 0.1
+
+reconstruction:
+  date_formats:
+    - "%d %b %Y"    # 01 JAN 2024
+    - "%d/%m/%Y"    # 01/01/2024
+    - "%Y-%m-%d"    # 2024-01-01
+    - "%m/%d/%Y"    # 01/01/2024
+    - "%d-%m-%Y"    # 01-01-2024
+  country_code_standard: "ISO-3166-1-alpha-3"
+  confidence_threshold: 0.7   # Min confidence to include in final timeline
+
+output:
+  format: "json"              # Options: json, csv, pdf
+  include_metadata: true
+  include_crop_images: true
+  output_dir: "data/processed/results"
+
+logging:
+  level: "INFO"
+  wandb_project: "travel-history-reconstruction"
+  wandb_entity: null          # Set to your W&B team name

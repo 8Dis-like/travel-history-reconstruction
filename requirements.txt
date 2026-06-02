@@ -1,0 +1,55 @@
+# ==============================
+# Core ML & Deep Learning
+# ==============================
+torch>=2.1.0
+torchvision>=0.16.0
+ultralytics>=8.1.0          # YOLOv8 for stamp detection
+transformers>=4.40.0        # Hugging Face models (VLMs)
+accelerate>=0.27.0          # Efficient model loading
+
+# ==============================
+# OCR
+# ==============================
+paddlepaddle>=2.6.0         # PaddlePaddle backend
+paddleocr>=2.7.0            # PaddleOCR for text extraction
+
+# ==============================
+# Image Processing
+# ==============================
+opencv-python>=4.9.0
+Pillow>=10.0.0
+scikit-image>=0.22.0
+
+# ==============================
+# Data & Utilities
+# ==============================
+numpy>=1.26.0
+pandas>=2.1.0
+pyyaml>=6.0
+python-dateutil>=2.8.0
+
+# ==============================
+# API & Serving
+# ==============================
+fastapi>=0.110.0
+uvicorn>=0.27.0
+python-multipart>=0.0.9
+
+# ==============================
+# Experiment Tracking & Logging
+# ==============================
+wandb>=0.16.0
+loguru>=0.7.0
+
+# ==============================
+# Testing
+# ==============================
+pytest>=8.0.0
+pytest-cov>=4.1.0
+
+# ==============================
+# Notebooks
+# ==============================
+jupyter>=1.0.0
+matplotlib>=3.8.0
+seaborn>=0.13.0
