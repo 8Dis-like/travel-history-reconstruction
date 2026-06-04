@@ -473,7 +473,7 @@ graph LR
     subgraph "Hao Zhang — Coordinator & ML Lead"
         A1[Project planning & sponsor communication]
         A2[Stamp detection model training]
-        A3[Data collection & annotation]
+        A3[Data preprocessing pipeline]
         A4[Evaluation metrics & benchmarking]
     end
 
@@ -485,7 +485,7 @@ graph LR
     end
 
     subgraph "Wilson Tee — Data & Frontend"
-        C1[Data preprocessing pipeline]
+        C1[Data collection & annotation]
         C2[Dataset curation & augmentation]
         C3[Visualization dashboard]
         C4[Testing & documentation]
@@ -508,8 +508,9 @@ graph LR
 | Week | Stage | Deliverables | Owner |
 |---|---|---|---|
 | **1-2** | Setup & Data | Repo setup, data collection, initial annotations, environment config | All |
-| **3-4** | Stage 1 | YOLOv8 fine-tuning, stamp detection baseline, evaluation | Hao + Wilson |
-| | | Preprocessing pipeline, augmentation | Wilson |
+| **3-4** | Stage 1 | YOLOv8 fine-tuning, stamp detection baseline, evaluation | Hao |
+| | | Preprocessing pipeline, augmentation | Hao |
+| | | Data collection, annotation, dataset curation | Wilson |
 | | | OCR engine integration (PaddleOCR) | Zuyan |
 | **5** | Stage 2 | Date extraction pipeline, regex + dateutil parsing | Zuyan |
 | | | Detection model iteration, mAP optimization | Hao |

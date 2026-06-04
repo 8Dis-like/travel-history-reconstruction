@@ -5,8 +5,8 @@
 ---
 
 **University of California, Los Angeles — Master of Science in Engineering**
-**Sponsor:** Securiport (Alvaro Ramirez, Sponsor Contact)
-**Date:** June 1, 2026
+**Sponsor:** Securiport (Alvaro, Sponsor Contact)
+**Date:** June 2, 2026
 
 | Team Member | Role | Primary Responsibility |
 |---|---|---|
@@ -53,6 +53,38 @@ Currently, reconstructing a travel history from these documents requires **manua
 | O3 | Identify country and entry/exit type | Accuracy ≥ 70% on English stamps |
 | O4 | Produce chronological travel timeline | Valid ordering on ≥ 75% of test subjects |
 | O5 | Support multilingual stamp text | Functional on ≥ 3 languages |
+
+### 2.3 Language Strategy: English-First, Then Multilingual Expansion
+
+Passport stamps worldwide use dozens of languages and scripts. Rather than attempting universal multilingual support from day one — which would demand far more training data, model complexity, and validation effort — we adopt a deliberate **English-first strategy** with a planned expansion path:
+
+```mermaid
+graph LR
+    P1["Phase 1: English Only"] --> P2["Phase 2: Latin-Script Languages"] --> P3["Phase 3: Non-Latin Scripts"]
+
+    style P1 fill:#22c55e,color:#fff
+    style P2 fill:#3b82f6,color:#fff
+    style P3 fill:#f97316,color:#fff
+```
+
+**Phase 1 — English Only (Stages 1–4)**
+- All OCR models, regex parsers, and date/country extractors target English text
+- English covers the majority of international border stamps (ICAO standards recommend English annotations)
+- This lets us build and validate the full pipeline end-to-end before introducing language complexity
+- PaddleOCR's pretrained English model is used out-of-the-box — no fine-tuning required
+
+**Phase 2 — Latin-Script Languages (Stage 5a)**
+- Expand to French, Spanish, Portuguese, German — languages that share the Latin alphabet
+- PaddleOCR supports these with a simple `lang` parameter switch
+- Date formats and country name dictionaries are extended per language
+- VLM fallback (MiniCPM-o) handles mixed-language stamps without separate model training
+
+**Phase 3 — Non-Latin Scripts (Stage 5b, Stretch)**
+- Arabic, Chinese, Cyrillic, Thai, etc.
+- Requires dedicated PaddleOCR script-specific models or VLM-only extraction
+- Each script is added as a pluggable module — the pipeline architecture supports this via the `lang` config parameter
+
+**Rationale:** This staged language approach directly mirrors Alvaro's guidance: *"Start with English and discard any other language. Then, if time allows, you can go deeper with those more types of characters."* By treating multilingual support as an additive expansion rather than a prerequisite, we ensure the core pipeline is robust and demonstrable at every stage.
 
 ---
 
@@ -293,7 +325,7 @@ If a field is unreadable, set it to null.
 
 ---
 
-## 7. Output Specification
+## 7. Output Specification & Frontend Integration
 
 ### 7.1 Per-Stamp Record
 
@@ -338,6 +370,97 @@ If a field is unreadable, set it to null.
   }
 }
 ```
+
+### 7.3 Frontend Visualization & Export Design
+
+The reconstructed travel history should be **immediately actionable** — not buried in JSON files. We design a multi-channel output layer that presents results intuitively and integrates with external tools analysts already use.
+
+```mermaid
+graph TD
+    Pipeline["Pipeline Output (JSON)"] --> FE["Web Frontend Dashboard"]
+    Pipeline --> GS["Google Sheets Export"]
+    Pipeline --> PDF["PDF Report"]
+    Pipeline --> CSV["CSV Download"]
+
+    FE --> IV["Interactive Timeline Viewer"]
+    FE --> ST["Stamp Gallery with Annotations"]
+    FE --> DQ["Data Quality Dashboard"]
+
+    GS --> GA["Google Sheets API v4"]
+    GA --> Live["Live Shared Spreadsheet"]
+
+    style FE fill:#3b82f6,color:#fff
+    style GS fill:#22c55e,color:#fff
+    style PDF fill:#f97316,color:#fff
+    style CSV fill:#a855f7,color:#fff
+```
+
+**A. Web Frontend Dashboard (FastAPI + HTML/JS)**
+
+A lightweight web UI served by the FastAPI backend:
+
+| View | Description |
+|---|---|
+| **Upload** | Drag-and-drop passport page images; batch upload supported |
+| **Timeline Viewer** | Interactive chronological timeline (vis-timeline.js or similar); click any entry to see the source stamp crop |
+| **Stamp Gallery** | Grid of detected stamp crops with extracted fields overlaid; color-coded by confidence (green/yellow/red) |
+| **Data Quality Panel** | Summary stats: total stamps, parse rate, flagged conflicts, unreadable items |
+| **Export Controls** | One-click export to Google Sheets, CSV, or PDF |
+
+**B. Google Sheets Integration**
+
+Analysts and sponsors often work in spreadsheets. We provide **direct push to Google Sheets** via the Google Sheets API v4:
+
+```python
+# Export flow using gspread (Python Google Sheets client)
+import gspread
+from google.oauth2.service_account import Credentials
+
+def export_to_google_sheets(timeline_data: dict, spreadsheet_name: str):
+    """Push travel timeline to a Google Sheets spreadsheet."""
+    creds = Credentials.from_service_account_file(
+        "configs/google_credentials.json",
+        scopes=["https://www.googleapis.com/auth/spreadsheets"]
+    )
+    gc = gspread.authorize(creds)
+
+    # Create or open spreadsheet
+    try:
+        sheet = gc.open(spreadsheet_name).sheet1
+    except gspread.SpreadsheetNotFound:
+        sheet = gc.create(spreadsheet_name).sheet1
+
+    # Write headers
+    headers = ["#", "Date", "Country", "Direction", "Confidence", "Raw Text", "Source Image", "Stamp ID"]
+    sheet.update('A1:H1', [headers])
+
+    # Write timeline rows
+    rows = []
+    for i, entry in enumerate(timeline_data["timeline"], 1):
+        rows.append([
+            i, entry["date"], entry["country"], entry["direction"],
+            f"{entry['confidence']:.0%}", entry.get("raw_text", ""),
+            entry.get("source_image", ""), entry.get("stamp_id", "")
+        ])
+    sheet.update(f'A2:H{len(rows)+1}', rows)
+
+    return sheet.url
+```
+
+**Google Sheets export features:**
+- Auto-creates a new spreadsheet per subject or appends to an existing one
+- Shareable link generated automatically — team and sponsor can view/edit in real time
+- Conditional formatting applied via API: red for low-confidence, green for high-confidence rows
+- Companion "Summary" tab with aggregate statistics and data quality notes
+
+**C. Additional Export Formats**
+
+| Format | Use Case | Library |
+|---|---|---|
+| **CSV** | Bulk data processing, import to other tools | Built-in `csv` module |
+| **PDF** | Formal reports for sponsor delivery | `reportlab` or `weasyprint` |
+| **JSON** | Programmatic consumption, API responses | Native Python |
+| **Excel (.xlsx)** | Offline spreadsheet work | `openpyxl` |
 
 ---
 
@@ -463,9 +586,30 @@ graph LR
 | CI/CD | GitHub Actions | Linting, tests on PR |
 | Experiment Tracking | Weights & Biases | Training curves, model comparison |
 | Annotation | Roboflow / LabelImg | Bounding box labeling |
-| Documentation | Google Docs / Markdown | Proposal, meeting notes |
+| **Collaboration & Docs** | **Notion (free team plan)** | **Proposal co-editing, meeting notes, task board** |
 | Communication | Slack / WeChat | Daily coordination |
 | Compute | Local GPU + Colab Pro | Training and inference |
+| Frontend Export | Google Sheets API + gspread | Live spreadsheet output |
+
+### 12.1 Recommended Collaboration Tool: Notion
+
+For co-editing the proposal, tracking tasks, and sharing meeting notes, we recommend **Notion** (free for teams up to 10 members with the Education plan):
+
+| Feature | Why It Fits |
+|---|---|
+| **Real-time co-editing** | All 3 members can edit the proposal simultaneously — similar to Google Docs |
+| **Markdown native** | Our proposal is written in Markdown; Notion renders and edits it natively |
+| **Task boards (Kanban)** | Built-in project board to track stage milestones, assign tasks, set due dates |
+| **Wiki/knowledge base** | Centralize research notes, model experiment logs, and meeting minutes |
+| **Free for education** | Free with a `.edu` email; no credit card required |
+| **Integrations** | Connects to GitHub (link PRs), Google Drive, and Slack |
+
+**Alternatives considered:**
+- **Google Docs** — Excellent for co-editing, but poor for Markdown and has no task management
+- **HackMD / CodiMD** — Good Markdown co-editing, but lacks task boards
+- **GitHub Wiki** — Integrated with repo, but editing UX is poor for non-technical writing
+
+> **Setup:** One team member creates a Notion workspace → invites the other two via UCLA email → import this proposal as a Notion page → use the built-in Kanban board for sprint tracking.
 
 ---
 
