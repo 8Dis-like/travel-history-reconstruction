@@ -468,29 +468,12 @@ def export_to_google_sheets(timeline_data: dict, spreadsheet_name: str):
 
 ### 8.1 Role Assignments
 
-```mermaid
-graph LR
-    subgraph "Hao Zhang — Coordinator & ML Lead"
-        A1[Project planning & sponsor communication]
-        A2[Stamp detection model training]
-        A3[Data preprocessing pipeline]
-        A4[Evaluation metrics & benchmarking]
-    end
-
-    subgraph "Zuyan Tao — Agentic Backend"
-        B1[OCR / VLM integration]
-        B2[Pipeline orchestration]
-        B3[FastAPI backend]
-        B4[Agentic workflows & error handling]
-    end
-
-    subgraph "Wilson Tee — Data & Frontend"
-        C1[Data collection & annotation]
-        C2[Dataset curation & augmentation]
-        C3[Visualization dashboard]
-        C4[Testing & documentation]
-    end
-```
+| 🟢 Hao Zhang — Coordinator & ML Lead | 🔵 Zuyan Tao — Agentic Backend | 🟠 Wilson Tee — Data & Frontend |
+|---|---|---|
+| Project planning & sponsor communication | OCR / VLM integration | Data collection & annotation |
+| Stamp detection model training | Pipeline orchestration | Dataset curation & augmentation |
+| Data preprocessing pipeline | FastAPI backend | Visualization dashboard |
+| Evaluation metrics & benchmarking | Agentic workflows & error handling | Testing & documentation |
 
 ### 8.2 Cross-Cutting Responsibilities
 
