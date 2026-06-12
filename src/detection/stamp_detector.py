@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Stamp Detector — YOLOv8 wrapper for passport stamp localization.
 
