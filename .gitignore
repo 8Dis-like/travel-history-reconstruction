@@ -32,6 +32,8 @@ data/processed/*
 # Model weights (large files)
 models/pretrained/*
 models/finetuned/*
+*.pt
+*.onnx
 !models/pretrained/.gitkeep
 !models/finetuned/.gitkeep
 
