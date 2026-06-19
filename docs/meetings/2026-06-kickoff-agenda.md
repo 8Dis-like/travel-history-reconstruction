@@ -3,7 +3,7 @@
 **Project:** Travel History Reconstruction from Travel Documents
 **Meeting Type:** Sprint Kickoff & Coordination Sync
 **Duration:** ~45 min
-**Date/Time:** TBD (see group message for scheduling)
+**Date/Time:** TBD 
 
 ---
 
