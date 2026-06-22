@@ -2,8 +2,8 @@
 
 **Project:** Travel History Reconstruction from Travel Documents
 **Meeting Type:** Sprint Kickoff & Coordination Sync
-**Duration:** ~45 min
-**Date/Time:** TBD 
+**Duration:** ~30 min
+**Date/Time:** 7 p.m. PST, June 22
 
 ---
 
@@ -22,7 +22,7 @@ Quick recap of progress to date:
 
 ---
 
-## 2. The Road Ahead (15 min) — All
+## 2. The Road Ahead (10 min) — All
 
 Walk through our staged milestones and agree on immediate priorities:
 
@@ -45,7 +45,7 @@ The critical blocker right now is **Stage 1 completion**. Discussion points:
 
 ---
 
-## 3. Work Split (10 min) — All
+## 3. Work Split (5 min) — All
 
 Review and confirm the role assignments from the proposal:
 
@@ -63,7 +63,7 @@ Review and confirm the role assignments from the proposal:
 
 ---
 
-## 4. Coordination Methods (10 min) — All
+## 4. Coordination Methods (5 min) — All
 
 Agree on how we work together going forward:
 
@@ -71,7 +71,7 @@ Agree on how we work together going forward:
 
 | Channel | Purpose | Frequency |
 |---|---|---|
-| **WeChat / Slack** | Quick questions, daily coordination | As needed |
+| **Whatsapp** | Quick questions, daily coordination | As needed |
 | **Notion** | Docs, meeting notes, task tracking (Kanban) | Ongoing |
 | **GitHub PRs** | Code reviews (≥1 approval required) | Per feature |
 
