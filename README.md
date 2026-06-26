@@ -16,6 +16,10 @@ An end-to-end system that takes scanned passport page images as input, detects a
 
 **Sponsor:** Alvaro Ramirez — Securiport
 
+## Resources
+
+* **[Notion Teamspace Home](https://app.notion.com/p/Teamspace-Home-d4aa80630d0d8333970c81695be329f6?source=copy_link)**: Central hub for project planning, task tracking, and meeting notes.
+
 ## Project Architecture
 
 ```
@@ -35,8 +39,8 @@ Scanned Passport Image
 └────────┬────────┘
          ▼
 ┌─────────────────┐
-│ OCR / VLM        │  PaddleOCR + Qwen-VL / MiniCPM-o
-│ Extraction       │  Dates, country, arrival/departure
+│ OCR / VLM        │  OCR tool (TBD) + Qwen-VL / MiniCPM-o
+│  Extraction      │  Dates, country, arrival/departure
 └────────┬────────┘
          ▼
 ┌─────────────────┐
@@ -82,7 +86,7 @@ python -m src.api.main --input data/raw/sample_passport.jpg
 ├── src/
 │   ├── preprocessing/    # Image enhancement pipeline
 │   ├── detection/        # Stamp detection (YOLO)
-│   ├── ocr/              # Text extraction (PaddleOCR / VLM)
+│   ├── ocr/              # Text extraction (OCR tool TBD / VLM)
 │   ├── reconstruction/   # Timeline assembly & validation
 │   ├── api/              # FastAPI service / CLI entry point
 │   └── utils/            # Shared utilities

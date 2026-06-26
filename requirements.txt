@@ -10,8 +10,7 @@ accelerate>=0.27.0          # Efficient model loading
 # ==============================
 # OCR
 # ==============================
-paddlepaddle>=2.6.0         # PaddlePaddle backend
-paddleocr>=2.7.0            # PaddleOCR for text extraction
+# OCR tool will be determined by Zuyan. Dependencies to be added later.
 
 # ==============================
 # Image Processing

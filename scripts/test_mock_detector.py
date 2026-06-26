@@ -92,17 +92,18 @@ def main():
   Zuyan — here's how to plug into this:
 
   Option A: Use crops directly (simplest)
-    from paddleocr import PaddleOCR
-    ocr = PaddleOCR(use_angle_cls=True, lang='en')
-    result = ocr.ocr('data/processed/mock_crops/enhanced_page_001_MOCK_001.jpg')
+    # Example using hypothetical OCR
+    # import ocr_tool
+    # ocr = ocr_tool.load('en')
+    # result = ocr.extract('data/processed/mock_crops/enhanced_page_001_MOCK_001.jpg')
 
   Option B: Use the detector in your pipeline code
     from src.detection.mock_detector import MockStampDetector
     detector = MockStampDetector()
     result = detector.detect('data/processed/enhanced/enhanced_page_001.png')
     for det in result.detections:
-        # det.crop is a numpy array — feed directly to PaddleOCR
-        ocr_result = ocr.ocr(det.crop)
+        # det.crop is a numpy array — feed directly to your chosen OCR tool
+        # ocr_result = ocr.extract(det.crop)
 
   When best.pt is ready, swap ONE line:
     from src.detection.stamp_detector import StampDetector

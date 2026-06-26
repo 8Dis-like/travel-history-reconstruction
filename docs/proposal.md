@@ -71,17 +71,17 @@ graph LR
 - All OCR models, regex parsers, and date/country extractors target English text
 - English covers the majority of international border stamps (ICAO standards recommend English annotations)
 - This lets us build and validate the full pipeline end-to-end before introducing language complexity
-- PaddleOCR's pretrained English model is used out-of-the-box — no fine-tuning required
+- We will select an OCR engine whose pretrained English model is used out-of-the-box — no fine-tuning required
 
 **Phase 2 — Latin-Script Languages (Stage 5a)**
 - Expand to French, Spanish, Portuguese, German — languages that share the Latin alphabet
-- PaddleOCR supports these with a simple `lang` parameter switch
+- The chosen OCR engine should support these with a simple parameter switch
 - Date formats and country name dictionaries are extended per language
 - VLM fallback (MiniCPM-o) handles mixed-language stamps without separate model training
 
 **Phase 3 — Non-Latin Scripts (Stage 5b, Stretch)**
 - Arabic, Chinese, Cyrillic, Thai, etc.
-- Requires dedicated PaddleOCR script-specific models or VLM-only extraction
+- Requires dedicated OCR script-specific models or VLM-only extraction
 - Each script is added as a pluggable module — the pipeline architecture supports this via the `lang` config parameter
 
 **Rationale:** This staged language approach directly mirrors Alvaro's guidance: *"Start with English and discard any other language. Then, if time allows, you can go deeper with those more types of characters."* By treating multilingual support as an additive expansion rather than a prerequisite, we ensure the core pipeline is robust and demonstrable at every stage.
@@ -132,7 +132,7 @@ graph TD
 
 | Component | Implementation |
 |---|---|
-| OCR Engine | PaddleOCR (English) |
+| OCR Engine | To be determined by Zuyan |
 | Date Parser | `python-dateutil` + custom regex patterns |
 | Validation | Cross-check parsed dates against plausible travel date ranges |
 
@@ -171,7 +171,7 @@ graph TD
 
 | Component | Implementation |
 |---|---|
-| Multilingual OCR | PaddleOCR multilingual models + VLM fallback |
+| Multilingual OCR | Multilingual models of chosen OCR + VLM fallback |
 | Languages | Arabic, French, Spanish, Chinese (prioritized by data availability) |
 | API | FastAPI service with authentication |
 | Monitoring | Logging, error tracking, confidence dashboards |
@@ -185,7 +185,7 @@ graph TD
 ```
 ┌─────────────┐     ┌──────────────┐     ┌─────────────┐     ┌───────────────┐     ┌────────────┐
 │ Input Image │────▶│ Preprocessing│────▶│  Detection   │────▶│  Extraction   │────▶│ Reconstruct│
-│ (Passport)  │     │ Enhancement  │     │  YOLOv8      │     │  OCR / VLM    │     │ Timeline   │
+│ (Passport)  │     │ Enhancement  │     │  YOLOv8      │     │ OCR tool (TBD) + Qwen-VL / MiniCPM-oe│     │ Timeline   │
 └─────────────┘     └──────────────┘     └─────────────┘     └───────────────┘     └────────────┘
                           │                     │                     │                    │
                      Deskew, CLAHE         Bounding boxes       Structured fields     Chronological
@@ -198,7 +198,7 @@ graph TD
 |---|---|---|
 | **Language** | Python 3.11+ | ML ecosystem, team expertise |
 | **Detection** | YOLOv8 (Ultralytics) | SOTA speed/accuracy, easy fine-tuning |
-| **OCR** | PaddleOCR | Best open-source multilingual OCR |
+| **OCR** | To be determined | Evaluated by Zuyan |
 | **VLM** | MiniCPM-o / Qwen-VL | Multimodal understanding without cloud APIs |
 | **Image Processing** | OpenCV, scikit-image | Industry standard |
 | **API** | FastAPI + Uvicorn | Async, auto-docs, production-ready |
@@ -219,7 +219,7 @@ src/
 │   ├── trainer.py           # Fine-tuning script
 │   └── postprocess.py       # NMS, crop extraction
 ├── ocr/
-│   ├── paddle_engine.py     # PaddleOCR wrapper
+│   ├── ocr_engine.py        # OCR wrapper (tool TBD)
 │   ├── vlm_engine.py        # VLM-based extraction
 │   └── field_parser.py      # Date/country/direction parsing
 ├── reconstruction/
@@ -292,13 +292,14 @@ results = model.train(
 
 **Compute:** Single GPU (NVIDIA RTX 3060+ or Colab Pro) — training ~2-4 hours.
 
-### 6.2 OCR — PaddleOCR
+### 6.2 OCR — To be determined
 
-No fine-tuning needed initially. Use pretrained English model:
+No fine-tuning needed initially. Zuyan will evaluate and integrate an appropriate OCR tool. (e.g., EasyOCR, Tesseract, etc.)
 ```python
-from paddleocr import PaddleOCR
-ocr = PaddleOCR(use_angle_cls=True, lang='en', use_gpu=True)
-result = ocr.ocr(stamp_crop_image)
+# Example using hypothetical OCR
+# import ocr_tool
+# ocr = ocr_tool.load('en')
+# result = ocr.extract(stamp_crop_image)
 ```
 
 ### 6.3 VLM — Structured Extraction (Stage 3)
@@ -494,7 +495,7 @@ def export_to_google_sheets(timeline_data: dict, spreadsheet_name: str):
 | **3-4** | Stage 1 | YOLOv8 fine-tuning, stamp detection baseline, evaluation | Hao |
 | | | Preprocessing pipeline, augmentation | Hao |
 | | | Data collection, annotation, dataset curation | Wilson |
-| | | OCR engine integration (PaddleOCR) | Zuyan |
+| | | OCR engine integration (Tool TBD) | Zuyan |
 | **5** | Stage 2 | Date extraction pipeline, regex + dateutil parsing | Zuyan |
 | | | Detection model iteration, mAP optimization | Hao |
 | **6-7** | Stage 3 | VLM integration for full field extraction | Zuyan |
@@ -611,7 +612,7 @@ For co-editing the proposal, tracking tasks, and sharing meeting notes, we recom
 
 This project delivers a **practical, staged system** for reconstructing travel histories from passport scans. The hierarchical milestone design — endorsed by sponsor Alvaro — ensures that every stage reached is a **complete, demonstrable, and defensible** outcome.
 
-The technical approach leverages state-of-the-art pretrained models (YOLOv8, PaddleOCR, VLMs) that can be fine-tuned with limited data and compute, while the modular software architecture enables independent development and testing of each pipeline component.
+The technical approach leverages state-of-the-art pretrained models (YOLOv8, OCR models, VLMs) that can be fine-tuned with limited data and compute, while the modular software architecture enables independent development and testing of each pipeline component.
 
 The team is well-positioned to deliver at minimum through **Stage 3** (full field extraction) and aims to complete through **Stage 4** (timeline reconstruction) with **Stage 5** (multilingual support) as a stretch goal.
 
@@ -620,7 +621,7 @@ The team is well-positioned to deliver at minimum through **Stage 3** (full fiel
 ## Appendix A: References
 
 1. Ultralytics YOLOv8 — https://github.com/ultralytics/ultralytics
-2. PaddleOCR — https://github.com/PaddlePaddle/PaddleOCR
+2. EasyOCR / Tesseract — to be evaluated
 3. MiniCPM-o — https://github.com/OpenBMB/MiniCPM-o
 4. Roboflow Universe (Stamp Detection) — https://universe.roboflow.com
 5. Securiport — https://www.securiport.com

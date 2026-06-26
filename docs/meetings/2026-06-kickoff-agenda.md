@@ -2,7 +2,7 @@
 
 **Project:** Travel History Reconstruction from Travel Documents
 **Meeting Type:** Sprint Kickoff & Coordination Sync
-**Duration:** ~30 min
+**Duration:** 30 min
 **Date/Time:** 7 p.m. PST, June 22
 
 ---
@@ -34,13 +34,13 @@ Walk through our staged milestones and agree on immediate priorities:
 | **Stage 4** — Timeline Reconstruction | Chronological travel history | ⬜ Not Started |
 | **Stage 5** — Multilingual & Production | Stretch goal | ⬜ Not Started |
 
-### Immediate Sprint Focus (Weeks 3–4)
+### Immediate Sprint Focus (June 22- July 10)
 
 The critical blocker right now is **Stage 1 completion**. Discussion points:
 
 1. **Data Annotation** — How many of the 38 pages should we annotate first? What tool (Roboflow vs. CVAT)? Who does what?
 2. **YOLOv8 Fine-Tuning** — Target: get mAP ≥ 0.70 on a held-out test split. Compute plan (local GPU vs. Colab Pro)?
-3. **OCR Integration** — Zuyan can start PaddleOCR integration in parallel (no dependency on detection fine-tuning).
+3. **OCR Integration** — Zuyan can start any OCR integration in parallel (no dependency on detection fine-tuning).
 4. **External Data** — Should we supplement with Roboflow Universe stamp datasets to boost training volume?
 
 ---
@@ -52,7 +52,7 @@ Review and confirm the role assignments from the proposal:
 | Member | Primary Ownership | Weeks 3–4 Focus |
 |---|---|---|
 | **Hao Zhang** | Preprocessing + Detection | Fine-tune YOLOv8 on annotated stamps; iterate on detection mAP |
-| **Zuyan Tao** | OCR + Backend | Integrate PaddleOCR; build date extraction regex pipeline |
+| **Zuyan Tao** | OCR + Backend | Integrate OCR; build date extraction regex pipeline |
 | **Wilson Tee** | Data + Frontend | Annotate stamp bounding boxes in sample data; curate external datasets |
 
 ### Dependencies to Discuss
@@ -79,13 +79,13 @@ Agree on how we work together going forward:
 
 | Meeting | Cadence | Duration | Purpose |
 |---|---|---|---|
-| **Team standup** | Weekly (Monday?) | 30 min | Progress sync, blockers, next steps |
-| **Sponsor check-in** | Bi-weekly | 30 min | Demo progress to Alvaro |
+| **Team standup** | Weekly (Monday) | 15 min | Progress sync, blockers, next steps |
+| **Sponsor check-in** | Bi-weekly (Monday)| 30 min | Demo progress to Alvaro |
 
 ### Git Workflow
 
 - **Branching:** Feature branches off `master` → PR → review → merge
-- **Naming:** `feat/stamp-annotation`, `feat/paddleocr-integration`, etc.
+- **Naming:** `feat/stamp-annotation`, `feat/ocr-integration`, etc.
 - **Commits:** Conventional commits (`feat:`, `fix:`, `docs:`, `test:`)
 
 ### Notion Setup
@@ -102,12 +102,12 @@ Wrap up with concrete takeaways. Template:
 
 | # | Action Item | Owner | Due |
 |---|---|---|---|
-| 1 | Set up annotation tool (Roboflow) and annotate first 10 pages | Wilson | Week 3 |
-| 2 | Source and merge Roboflow Universe stamp datasets | Wilson | Week 3 |
-| 3 | Start YOLOv8 fine-tuning once ≥20 annotated images ready | Hao | Week 3–4 |
-| 4 | Set up PaddleOCR and test on sample stamp crops (manual crops for now) | Zuyan | Week 3 |
-| 5 | Create Notion sprint board with Week 3–4 task cards | Hao | This week |
-| 6 | Schedule first sponsor check-in with Alvaro | Hao | This week |
+| 1 | Schedule first sponsor check-in with Alvaro | Hao | June 22 |
+| 2 | Create Notion sprint board with Week 3–4 task cards | Hao | June 26 |
+| 3 | Set up annotation tool (Roboflow) and annotate first 10 pages | Wilson | July 1 |
+| 4 | Set up OCR and test on sample stamp crops (manual crops for now) | Zuyan | July 3 |
+| 5 | Source and merge Roboflow Universe stamp datasets | Wilson | July 3 |
+| 6 | Start YOLOv8 fine-tuning once ≥20 annotated images ready | Hao | July 7|
 | 7 | Everyone: clone repo, run `pip install -r requirements.txt`, run `test_pipeline.py` | All | Before next standup |
 
 ---
