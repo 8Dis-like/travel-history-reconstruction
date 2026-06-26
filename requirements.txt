@@ -8,9 +8,10 @@ transformers>=4.40.0        # Hugging Face models (VLMs)
 accelerate>=0.27.0          # Efficient model loading
 
 # ==============================
-# OCR
+# OCR / VLM
 # ==============================
-# OCR tool will be determined by Zuyan. Dependencies to be added later.
+anthropic>=0.25.0
+python-dotenv>=1.0.0
 
 # ==============================
 # Image Processing
