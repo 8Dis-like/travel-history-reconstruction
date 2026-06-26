@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import base64
 import json
+import re
 
 import anthropic
 import cv2
@@ -47,7 +48,8 @@ class ClaudeExtractor(BaseExtractor):
                     ],
                 }],
             )
-            data = json.loads(message.content[0].text)
+            raw = re.sub(r"^```(?:json)?\s*|\s*```$", "", message.content[0].text.strip())
+            data = json.loads(raw)
             return ExtractionResult(
                 date=data.get("date"),
                 country=data.get("country"),
