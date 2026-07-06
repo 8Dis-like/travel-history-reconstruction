@@ -26,6 +26,7 @@ export function UploadPanel({ files, onAddFiles, onStartRecognition }: UploadPan
   }
 
   const hasProcessable = files.some((f) => f.status === "pending" || f.status === "error");
+  const isRecognizing = files.some((f) => f.status === "processing");
 
   return (
     <section className="upload-panel">
@@ -55,7 +56,7 @@ export function UploadPanel({ files, onAddFiles, onStartRecognition }: UploadPan
         ))}
       </ul>
 
-      <button type="button" disabled={!hasProcessable} onClick={onStartRecognition}>
+      <button type="button" disabled={!hasProcessable || isRecognizing} onClick={onStartRecognition}>
         开始识别
       </button>
     </section>
