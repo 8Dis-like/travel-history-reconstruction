@@ -28,8 +28,10 @@ export async function extractMockPdf(file: File): Promise<TimelineEntry[]> {
 
   const data: MockPdfExtractionResponse = await response.json();
 
+  const batchToken = Math.random().toString(36).slice(2);
+
   return data.records.map((record, index) => ({
-    id: `${data.source_file}-${index}`,
+    id: `${batchToken}-${index}`,
     sourceFile: data.source_file,
     date: record.date,
     country: record.country,
