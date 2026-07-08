@@ -1,10 +1,14 @@
 import { useState } from "react";
+import { Alert, Button, Layout, Space, Typography } from "antd";
 import type { TimelineEntry, UploadFileItem } from "./types";
 import { extractMockPdf } from "./api";
 import { partitionEntries } from "./partitionEntries";
 import { UploadPanel } from "./components/UploadPanel";
 import { Timeline } from "./components/Timeline";
 import { UnreadableList } from "./components/UnreadableList";
+
+const { Content } = Layout;
+const { Title } = Typography;
 
 function makeId(): string {
   return Math.random().toString(36).slice(2);
@@ -68,17 +72,23 @@ export default function App() {
   const { timeline, unreadable } = partitionEntries(entries);
 
   return (
-    <main>
-      <h1>Travel History Reconstruction</h1>
-      <UploadPanel files={files} onAddFiles={addFiles} onStartRecognition={startRecognition} />
-      <section className="demo-data">
-        <button type="button" onClick={loadDemoData} disabled={demoLoading}>
-          {demoLoading ? "Loading demo data..." : "Load demo data"}
-        </button>
-        {demoError && <p className="demo-error">{demoError}</p>}
-      </section>
-      <Timeline entries={timeline} />
-      <UnreadableList entries={unreadable} />
-    </main>
+    <Layout style={{ minHeight: "100vh" }}>
+      <Content style={{ maxWidth: 720, margin: "0 auto", padding: 24, width: "100%" }}>
+        <Title level={2}>Travel History Reconstruction</Title>
+        <Space direction="vertical" size="large" style={{ width: "100%" }}>
+          <UploadPanel files={files} onAddFiles={addFiles} onStartRecognition={startRecognition} />
+          <div>
+            <Button onClick={loadDemoData} loading={demoLoading}>
+              {demoLoading ? "Loading demo data..." : "Load demo data"}
+            </Button>
+            {demoError && (
+              <Alert type="error" message={demoError} showIcon style={{ marginTop: 8 }} />
+            )}
+          </div>
+          <Timeline entries={timeline} />
+          <UnreadableList entries={unreadable} />
+        </Space>
+      </Content>
+    </Layout>
   );
 }
