@@ -26,6 +26,7 @@ ENV/
 # Data (large files — use Git LFS or DVC)
 data/raw/*
 data/processed/*
+data/synthetic_dataset/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 
@@ -49,6 +50,7 @@ desktop.ini
 # Logs
 logs/
 *.log
+runs/
 
 # Coverage
 htmlcov/
