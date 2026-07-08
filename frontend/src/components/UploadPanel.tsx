@@ -1,6 +1,9 @@
-import { useRef } from "react";
-import type { ChangeEvent, DragEvent } from "react";
-import type { UploadFileItem } from "../types";
+import { InboxOutlined } from "@ant-design/icons";
+import { Button, List, Tag, Upload } from "antd";
+import type { UploadProps } from "antd";
+import type { UploadFileItem, UploadStatus } from "../types";
+
+const { Dragger } = Upload;
 
 interface UploadPanelProps {
   files: UploadFileItem[];
@@ -8,57 +11,55 @@ interface UploadPanelProps {
   onStartRecognition: () => void;
 }
 
+const STATUS_COLOR: Record<UploadStatus, string> = {
+  pending: "default",
+  processing: "processing",
+  done: "success",
+  error: "error",
+};
+
 export function UploadPanel({ files, onAddFiles, onStartRecognition }: UploadPanelProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  function handleFileInputChange(event: ChangeEvent<HTMLInputElement>) {
-    const selected = Array.from(event.target.files ?? []);
-    onAddFiles(selected);
-    if (inputRef.current) {
-      inputRef.current.value = "";
-    }
-  }
-
-  function handleDrop(event: DragEvent<HTMLDivElement>) {
-    event.preventDefault();
-    const dropped = Array.from(event.dataTransfer.files);
-    onAddFiles(dropped);
-  }
-
   const hasProcessable = files.some((f) => f.status === "pending" || f.status === "error");
   const isRecognizing = files.some((f) => f.status === "processing");
 
+  const draggerProps: UploadProps = {
+    multiple: true,
+    accept: "application/pdf",
+    showUploadList: false,
+    beforeUpload: (file) => {
+      onAddFiles([file]);
+      return false;
+    },
+  };
+
   return (
     <section className="upload-panel">
-      <div
-        className="upload-dropzone"
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={handleDrop}
-        onClick={() => inputRef.current?.click()}
+      <Dragger {...draggerProps}>
+        <p className="ant-upload-drag-icon">
+          <InboxOutlined />
+        </p>
+        <p className="ant-upload-text">Drag PDFs here, or click to select files</p>
+      </Dragger>
+
+      <List
+        style={{ margin: "16px 0" }}
+        dataSource={files}
+        renderItem={(item) => (
+          <List.Item key={item.id}>
+            <List.Item.Meta title={item.file.name} />
+            <Tag color={STATUS_COLOR[item.status]}>{item.status}</Tag>
+          </List.Item>
+        )}
+      />
+
+      <Button
+        type="primary"
+        disabled={!hasProcessable || isRecognizing}
+        loading={isRecognizing}
+        onClick={onStartRecognition}
       >
-        <p>Drag PDFs here, or click to select files</p>
-        <input
-          ref={inputRef}
-          type="file"
-          accept="application/pdf"
-          multiple
-          hidden
-          onChange={handleFileInputChange}
-        />
-      </div>
-
-      <ul className="upload-file-list">
-        {files.map((item) => (
-          <li key={item.id}>
-            <span>{item.file.name}</span>
-            <span className={`status status-${item.status}`}>{item.status}</span>
-          </li>
-        ))}
-      </ul>
-
-      <button type="button" disabled={!hasProcessable || isRecognizing} onClick={onStartRecognition}>
         Start recognition
-      </button>
+      </Button>
     </section>
   );
 }
