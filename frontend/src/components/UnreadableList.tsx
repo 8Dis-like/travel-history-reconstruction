@@ -1,3 +1,4 @@
+import { Alert, List } from "antd";
 import type { TimelineEntry } from "../types";
 
 interface UnreadableListProps {
@@ -10,13 +11,14 @@ export function UnreadableList({ entries }: UnreadableListProps) {
   }
 
   return (
-    <section className="unreadable-list">
-      <h2>Unrecognizable</h2>
-      <ul>
-        {entries.map((entry) => (
-          <li key={entry.id}>{entry.sourceFile}: this file could not be recognized</li>
-        ))}
-      </ul>
+    <section>
+      <Alert type="warning" showIcon message="Unrecognizable" style={{ marginBottom: 8 }} />
+      <List
+        dataSource={entries}
+        renderItem={(entry) => (
+          <List.Item key={entry.id}>{entry.sourceFile}: this file could not be recognized</List.Item>
+        )}
+      />
     </section>
   );
 }
