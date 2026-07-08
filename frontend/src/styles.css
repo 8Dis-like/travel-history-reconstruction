@@ -79,3 +79,12 @@ body {
   border-top: 1px solid #ddd;
   padding-top: 16px;
 }
+
+.demo-data {
+  margin-bottom: 16px;
+}
+
+.demo-error {
+  color: #ef4444;
+  margin: 8px 0 0;
+}

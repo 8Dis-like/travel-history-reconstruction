@@ -6,7 +6,7 @@ interface TimelineProps {
 
 export function Timeline({ entries }: TimelineProps) {
   if (entries.length === 0) {
-    return <p className="timeline-empty">还没有识别结果</p>;
+    return <p className="timeline-empty">No results yet</p>;
   }
 
   return (

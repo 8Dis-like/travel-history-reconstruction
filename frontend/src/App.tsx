@@ -10,9 +10,13 @@ function makeId(): string {
   return Math.random().toString(36).slice(2);
 }
 
+const DEMO_FILE_CONTENT = "%PDF-1.4\n%%EOF";
+
 export default function App() {
   const [files, setFiles] = useState<UploadFileItem[]>([]);
   const [entries, setEntries] = useState<TimelineEntry[]>([]);
+  const [demoLoading, setDemoLoading] = useState(false);
+  const [demoError, setDemoError] = useState<string | null>(null);
 
   function addFiles(newFiles: File[]) {
     const pdfFiles = newFiles.filter((f) => f.type === "application/pdf");
@@ -46,12 +50,33 @@ export default function App() {
     }
   }
 
+  async function loadDemoData() {
+    setDemoLoading(true);
+    setDemoError(null);
+
+    try {
+      const demoFile = new File([DEMO_FILE_CONTENT], "demo.pdf", { type: "application/pdf" });
+      const newEntries = await extractMockPdf(demoFile);
+      setEntries((prev) => [...prev, ...newEntries]);
+    } catch {
+      setDemoError("Failed to load demo data.");
+    } finally {
+      setDemoLoading(false);
+    }
+  }
+
   const { timeline, unreadable } = partitionEntries(entries);
 
   return (
     <main>
       <h1>Travel History Reconstruction</h1>
       <UploadPanel files={files} onAddFiles={addFiles} onStartRecognition={startRecognition} />
+      <section className="demo-data">
+        <button type="button" onClick={loadDemoData} disabled={demoLoading}>
+          {demoLoading ? "Loading demo data..." : "Load demo data"}
+        </button>
+        {demoError && <p className="demo-error">{demoError}</p>}
+      </section>
       <Timeline entries={timeline} />
       <UnreadableList entries={unreadable} />
     </main>

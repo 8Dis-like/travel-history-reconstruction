@@ -36,7 +36,7 @@ export function UploadPanel({ files, onAddFiles, onStartRecognition }: UploadPan
         onDrop={handleDrop}
         onClick={() => inputRef.current?.click()}
       >
-        <p>拖拽 PDF 到这里，或点击选择文件</p>
+        <p>Drag PDFs here, or click to select files</p>
         <input
           ref={inputRef}
           type="file"
@@ -57,7 +57,7 @@ export function UploadPanel({ files, onAddFiles, onStartRecognition }: UploadPan
       </ul>
 
       <button type="button" disabled={!hasProcessable || isRecognizing} onClick={onStartRecognition}>
-        开始识别
+        Start recognition
       </button>
     </section>
   );
