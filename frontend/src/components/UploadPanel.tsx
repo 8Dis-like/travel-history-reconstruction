@@ -41,16 +41,18 @@ export function UploadPanel({ files, onAddFiles, onStartRecognition }: UploadPan
         <p className="ant-upload-text">Drag PDFs here, or click to select files</p>
       </Dragger>
 
-      <List
-        style={{ margin: "16px 0" }}
-        dataSource={files}
-        renderItem={(item) => (
-          <List.Item key={item.id}>
-            <List.Item.Meta title={item.file.name} />
-            <Tag color={STATUS_COLOR[item.status]}>{item.status}</Tag>
-          </List.Item>
-        )}
-      />
+      {files.length > 0 && (
+        <List
+          style={{ margin: "16px 0" }}
+          dataSource={files}
+          renderItem={(item) => (
+            <List.Item key={item.id}>
+              <List.Item.Meta title={item.file.name} />
+              <Tag color={STATUS_COLOR[item.status]}>{item.status}</Tag>
+            </List.Item>
+          )}
+        />
+      )}
 
       <Button
         type="primary"
