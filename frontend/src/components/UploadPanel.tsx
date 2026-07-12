@@ -24,7 +24,7 @@ export function UploadPanel({ files, onAddFiles, onStartRecognition }: UploadPan
 
   const draggerProps: UploadProps = {
     multiple: true,
-    accept: "application/pdf",
+    accept: "image/png, image/jpeg, application/pdf",
     showUploadList: false,
     beforeUpload: (file) => {
       onAddFiles([file]);
@@ -38,7 +38,7 @@ export function UploadPanel({ files, onAddFiles, onStartRecognition }: UploadPan
         <p className="ant-upload-drag-icon">
           <InboxOutlined />
         </p>
-        <p className="ant-upload-text">Drag PDFs here, or click to select files</p>
+        <p className="ant-upload-text">Drag passport files (PDF, PNG, JPEG) here</p>
       </Dragger>
 
       {files.length > 0 && (

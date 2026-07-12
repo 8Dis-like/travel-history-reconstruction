@@ -202,9 +202,9 @@ class ImageEnhancer:
         if lines is None:
             return 0.0
 
+        lines = lines.reshape(-1, 4)
         horizontal_count = 0
-        for line in lines:
-            x1, y1, x2, y2 = line[0]
+        for x1, y1, x2, y2 in lines:
             angle = abs(np.degrees(np.arctan2(y2 - y1, x2 - x1)))
             # Count lines within ±15° of horizontal
             if angle < 15 or angle > 165:
@@ -222,10 +222,10 @@ class ImageEnhancer:
         if lines is None:
             return img, 0.0
 
+        lines = lines.reshape(-1, 4)
         # Compute median angle of near-horizontal lines
         angles = []
-        for line in lines:
-            x1, y1, x2, y2 = line[0]
+        for x1, y1, x2, y2 in lines:
             angle = np.degrees(np.arctan2(y2 - y1, x2 - x1))
             # Only consider near-horizontal lines for deskew
             if abs(angle) < 30:
@@ -252,7 +252,7 @@ class ImageEnhancer:
 
     def _denoise(self, img: np.ndarray) -> np.ndarray:
         """Apply non-local means denoising."""
-        return cv2.fastNlMeansDenoisingColored(img, None, h=6, hForColorComponents=6)
+        return cv2.fastNlMeansDenoisingColored(img, None, h=6, hColor=6)
 
     def _enhance_contrast(self, img: np.ndarray) -> np.ndarray:
         """Apply CLAHE (Contrast Limited Adaptive Histogram Equalization)."""
