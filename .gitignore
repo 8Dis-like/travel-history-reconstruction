@@ -56,3 +56,6 @@ runs/
 htmlcov/
 .coverage
 .coverage.*
+
+# Brainstorming visual companion
+.superpowers/
