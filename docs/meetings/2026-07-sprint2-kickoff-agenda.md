@@ -9,7 +9,7 @@
 
 What we shipped as a team:
 
-- **Wilson:** Generated and annotated 1,000 synthetic passport scenes for detection training; curated external datasets from Roboflow Universe and Kaggle
+- **Wilson:** Generated and annotated 1,000 synthetic passport scenes for detection training; curated external datasets via automated program
 - **Zuyan:** Built the React/AntD frontend (upload, timeline, unreadable handling); implemented Claude VLM extractor and mock endpoints for parallel development
 - **Hao:** Built preprocessing pipeline (auto-orient, deskew, denoise, CLAHE); fine-tuned YOLOv8 on Colab A100; integrated all stages into FastAPI backend
 
@@ -67,7 +67,7 @@ We need more data to bridge the real-world detection gap. Topics to discuss:
 - **Environment:** Everyone must use the `securiport` Conda env (Python 3.11). Verify you can run both backend and frontend locally.
 - **Git:** Feature branches → PR → review → merge. No direct pushes to `master`.
 - **Large files:** Weights and datasets stay gitignored. Share via Google Drive.
-- **VLM keys:** Each person gets their own free API key from [Google AI Studio](https://aistudio.google.com/app/apikey). Key goes in `.env` (gitignored).
+- **VLM keys:** (For your information) Each person gets their own free API key from [Google AI Studio](https://aistudio.google.com/app/apikey). Key goes in `.env` (gitignored).
 
 ### Sprint 2 Cadence
 - Weekly standup (Monday, 15 min)
@@ -81,11 +81,10 @@ We need more data to bridge the real-world detection gap. Topics to discuss:
 | # | Action Item | Owner | Due |
 |---|---|---|---|
 | 1 | Run formal model validation, record mAP/Precision/Recall | Hao | July 15 |
-| 2 | Reach out to Alvaro re: additional data | Hao | July 15 |
-| 3 | Draft timeline reconstruction data structures | Zuyan | July 18 |
-| 4 | Begin annotating real passport pages | Wilson + All | Ongoing |
-| 5 | Evaluate 2–3 VLM providers for accuracy comparison | Hao | July 20 |
-| 6 | Everyone: verify `securiport` env runs locally | All | Before next standup |
+| 2 | Implement timeline reconstruction data structures | Zuyan | July 18 |
+| 3 | Design and develop frontend feature completeness | Wilson | July 20 |
+| 4 | Evaluate 2–3 VLM providers for accuracy comparison | Hao | July 20 |
+| 5 | Everyone: verify `securiport` env runs locally | All | Before next standup |
 
 ---
 
