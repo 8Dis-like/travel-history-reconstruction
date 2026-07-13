@@ -1,117 +1,96 @@
 **Project:** Travel History Reconstruction from Travel Documents
-**Meeting Type:** Sprint 2 Kickoff & Pivot Sync
-**Duration:** 30 min
+**Meeting Type:** Sprint 2 Kickoff & Direction Sync
+**Duration:** 30 min (+ open discussion as needed)
 **Date/Time:** 7 p.m. PST, July 13, 2026
 
 ---
 
-## 1. Sprint 1 Recap & Demo (5 min) — Hao
+## 1. Sprint 1 Recap (5 min) — Hao
 
-Quick demo of what we shipped in Sprint 1:
+What we shipped as a team:
 
-- ✅ **Preprocessing pipeline** production-ready: auto-orientation (90°/180°/270°), deskewing, CLAHE contrast, NLM denoising
-- ✅ **YOLOv8 stamp detector** fine-tuned on 1,000 synthetic scenes (Colab A100), weights at `runs/best_stamp_model.pt`
-- ✅ **VLM extraction** integrated via Google Gemini 3.5 Flash (free tier, 15 RPM) — extracts date, country, direction as structured JSON
-- ✅ **Full-stack wiring** complete: React/AntD frontend → FastAPI backend → live pipeline → interactive timeline
-- ✅ **Multi-format support**: PNG, JPEG, and PDF uploads all functional
+- **Wilson:** Generated and annotated 1,000 synthetic passport scenes for detection training; curated external datasets from Roboflow Universe and Kaggle
+- **Zuyan:** Built the React/AntD frontend (upload, timeline, unreadable handling); implemented Claude VLM extractor and mock endpoints for parallel development
+- **Hao:** Built preprocessing pipeline (auto-orient, deskew, denoise, CLAHE); fine-tuned YOLOv8 on Colab A100; integrated all stages into FastAPI backend
 
-**Live demo:** Upload `data/raw/page_002.png` and `synthetic_dataset/val/scene_04000.jpg` → show detection + timeline output side-by-side.
-
-**Key finding from Sprint 1:**
-The model detects **6/6 stamps on synthetic images** but only **2/8 on real scans**. This domain gap is the #1 priority for Sprint 2.
+**Where we landed:**
+- End-to-end prototype works: upload image → detect stamps → VLM extraction → timeline display
+- Model works well on synthetic data (~6/6 stamps detected) but struggles on real scans (~2/8)
+- VLM provider and prompting strategy still under evaluation — current setup works but accuracy needs improvement
 
 ---
 
-## 2. Gap Analysis & Pivot Discussion (10 min) — All
+## 2. The Road Ahead (10 min) — All
 
-### The Problem
+### Updated Stage Map
 
-Our detector was trained exclusively on synthetic data. Real passport scans differ in:
-- Background texture (paper grain, scanner artifacts)
-- Ink quality (faded, smudged, partially stamped)
-- Stamp overlap (multiple stamps sharing the same region)
-- Rotation and scale variation
+Based on Sprint 1 experience, stages 2–4 from the original proposal naturally blend together in practice. Proposed simplification:
 
-### Proposed Pivot: Real-Data-First Strategy
-
-| Priority | Gap | Sprint 2 Fix | Owner |
-|---|---|---|---|
-| 🔴 P0 | Detection misses on real scans | Annotate 50+ real pages → retrain YOLOv8 | Wilson + Hao |
-| 🔴 P0 | No formal model evaluation metrics | Run `verify_model.py`, record mAP/Precision/Recall | Hao |
-| 🟡 P1 | VLM date hallucination | Add `python-dateutil` validation + confidence thresholds | Zuyan |
-| 🟡 P1 | No stamp gallery in frontend | Add cropped stamp visualization with bounding boxes | Wilson |
-| 🟡 P1 | Gemini rate limit (15 RPM) | Implement request batching with exponential backoff | Zuyan |
-| 🟢 P2 | No export (CSV/Google Sheets) | Implement export per proposal spec (Section 7.3) | Wilson |
-| 🟢 P2 | "Load demo data" button broken | Remove or rewire to a real sample image | Zuyan |
-
-**Discussion questions:**
-1. Wilson — How many of the 38 raw pages have you annotated so far? What tool are you using (Roboflow/CVAT)?
-2. Zuyan — Should we evaluate Claude Haiku as a backup VLM? It has better accuracy but costs ~$0.00025/stamp.
-3. All — Should we target 1280px inference for small stamp detection, or stick with 640px for speed?
-
----
-
-## 3. Sprint 2 Role Assignments (5 min) — All
-
-Review and confirm updated responsibilities for the next two weeks:
-
-| Member | Primary Focus | Sprint 2 Deliverables |
+| Stage | Goal | Status |
 |---|---|---|
-| **Hao Zhang** | Detection Quality | Retrain YOLOv8 on real+synthetic mix; run formal eval; optimize preprocessing for real scans |
-| **Zuyan Tao** | VLM & Backend Hardening | Add date validation; implement retry/backoff for Gemini; evaluate Claude as fallback |
-| **Wilson Tee** | Data & Frontend | Annotate ≥50 real pages; add stamp gallery view; implement CSV export |
+| **Stage 1** — Stamp Detection & Isolation | Detect all stamp regions, output crops | ✅ MVP Done |
+| **Stage 2-3-4** — Extraction & Timeline | Extract fields (date, country, direction) + reconstruct chronological timeline | 🟡 In Progress |
+| **Stage 5** — Multilingual & Production | Non-English support, hardening | ⬜ Not Started |
 
-**Critical dependency chain:**
-```
-Wilson's annotations → Hao's retraining → Zuyan's VLM tuning → End-to-end quality
-```
+The combined stage reflects reality: once detection crops exist, extraction, validation, and timeline assembly are tightly interleaved — not sequential. We should work on them as one continuous effort.
 
-Wilson's annotations are on the critical path — we need them by **July 17** to unblock retraining.
+### Proposed Work Split (System Responsibility)
 
----
+Rather than splitting by pipeline stage, split by **system concern** to minimize cross-dependencies:
 
-## 4. Workflow & Standards Check (5 min) — All
+| Member | Responsibility | Scope |
+|---|---|---|
+| **Hao (Zagho)** | Quality Assurance | Model evaluation & benchmarking; detection retraining on real data; VLM model selection & prompt optimization |
+| **Zuyan** | Core Function | Timeline reconstruction data structures; chronological ordering logic; entry-exit pairing; conflict resolution |
+| **Wilson** | Appearance & Completeness | Frontend feature completeness (stamp gallery, export, data quality dashboard); end-user experience |
 
-### Git Workflow Reminder
-- **Branching:** Feature branches off `master` → PR → ≥1 review → merge
-- **Naming:** `feat/real-data-retrain`, `feat/stamp-gallery`, `fix/date-validation`
-- **Commits:** Conventional commits (`feat:`, `fix:`, `docs:`, `test:`)
-- **Large files:** Model weights and datasets stay in `.gitignore` — share via Google Drive
-
-### Environment Setup (New!)
-Sprint 1 revealed that a **dedicated Conda environment** is required:
-```bash
-conda create -n securiport python=3.11 -y && conda activate securiport
-pip install -r requirements.txt && pip install openai google-generativeai pymupdf
-```
-Everyone must verify they can run the backend (`uvicorn src.api.main:app --reload`) and frontend (`cd frontend && npm run dev`) before next standup.
-
-### Notion Updates
-- Move Sprint 1 cards to **Done** column
-- Create Sprint 2 task cards per the deliverables above
-- Update the [Sprint 1 Milestone Report](../reports/pipeline_integration_report.md) with formal eval metrics once available
+**Discussion:** Does this split feel right to everyone? Any concerns about scope or overlap?
 
 ---
 
-## 5. Action Items & Next Steps (5 min) — Hao
+## 3. Data Discussion (Open) — All
+
+We need more data to bridge the real-world detection gap. Topics to discuss:
+
+- **From Alvaro:** Can Securiport provide additional passport scan samples? What format? Any restrictions?
+- **Annotation effort:** How many real pages can we realistically annotate in Sprint 2? What tool works best?
+- **Data diversity:** Do we need stamps from specific regions/languages to be representative?
+- **Ground truth for VLM:** Should we build a small manually-labeled extraction ground truth set to benchmark VLM accuracy?
+
+> This is an open discussion — take as much time as needed. Data quality directly determines our Sprint 2 outcomes.
+
+---
+
+## 4. Sprint 2 Logistics (5 min) — Hao
+
+### Reminders
+- **Environment:** Everyone must use the `securiport` Conda env (Python 3.11). Verify you can run both backend and frontend locally.
+- **Git:** Feature branches → PR → review → merge. No direct pushes to `master`.
+- **Large files:** Weights and datasets stay gitignored. Share via Google Drive.
+- **VLM keys:** Each person gets their own free API key from [Google AI Studio](https://aistudio.google.com/app/apikey). Key goes in `.env` (gitignored).
+
+### Sprint 2 Cadence
+- Weekly standup (Monday, 15 min)
+- Bi-weekly sponsor check-in with Alvaro
+- Sprint 2 review: ~July 27
+
+---
+
+## 5. Action Items (5 min) — Hao
 
 | # | Action Item | Owner | Due |
 |---|---|---|---|
-| 1 | Run formal model validation (`verify_model.py`), record mAP metrics | Hao | July 14 |
-| 2 | Annotate first batch of 20 real passport pages (YOLO format) | Wilson | July 17 |
-| 3 | Add `python-dateutil` post-validation to Gemini extractor output | Zuyan | July 17 |
-| 4 | Retrain YOLOv8 on mixed real+synthetic dataset (Colab A100) | Hao | July 20 |
-| 5 | Add stamp crop gallery view to frontend | Wilson | July 20 |
-| 6 | Evaluate Claude Haiku as backup VLM provider | Zuyan | July 20 |
-| 7 | Implement CSV/Google Sheets export | Wilson | July 24 |
-| 8 | Everyone: verify local environment runs (`securiport` conda env) | All | Before next standup |
+| 1 | Run formal model validation, record mAP/Precision/Recall | Hao | July 15 |
+| 2 | Reach out to Alvaro re: additional data | Hao | July 15 |
+| 3 | Draft timeline reconstruction data structures | Zuyan | July 18 |
+| 4 | Begin annotating real passport pages | Wilson + All | Ongoing |
+| 5 | Evaluate 2–3 VLM providers for accuracy comparison | Hao | July 20 |
+| 6 | Everyone: verify `securiport` env runs locally | All | Before next standup |
 
 ---
 
 ## Pre-Read Materials
 
-Please review these before the meeting:
-
-1. 📊 [Sprint 1 Milestone Report](../reports/pipeline_integration_report.md) — full technical status, gap analysis, and Sprint 2 priorities
-2. 📄 [Project Proposal](../proposal.md) — especially Section 3 (Staged Milestones) and Section 9 (Timeline)
-3. 🔗 [Notion Sprint Board](https://app.notion.com/p/21fd6700a92f4077908ca14f64435908) — current task status
+1. 📊 [Sprint 1 Milestone Report](../reports/pipeline_integration_report.md) — what we built, what works, what doesn't
+2. 📄 [Project Proposal](../proposal.md) — Section 3 (Staged Milestones), Section 9 (Timeline)
+3. 🔗 [Notion Sprint Board](https://app.notion.com/p/21fd6700a92f4077908ca14f64435908)

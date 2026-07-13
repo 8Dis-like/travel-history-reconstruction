@@ -4,241 +4,193 @@
 **Team:** Hao Zhang · Zuyan Tao · Wilson Tee
 **Report Date:** July 12, 2026
 **Sprint:** 1 (June 22 – July 12, 2026)
-**Status:** ✅ End-to-End Pipeline Operational
+**Status:** End-to-End Pipeline Operational (MVP)
 
 ---
 
 ## 1. Executive Summary
 
-Sprint 1 set out to complete **Stage 1 (Stamp Detection & Isolation)** and make meaningful progress toward **Stage 3 (Full Field Extraction via VLM)**. As of this report, we have exceeded Stage 1 and achieved a working end-to-end prototype that spans detection through structured OCR output — effectively reaching a functional **Stage 3 MVP**.
+Sprint 1 aimed to complete **Stage 1 (Stamp Detection & Isolation)** and lay the groundwork for downstream extraction. By the end of the sprint, the team collaboratively delivered a working end-to-end prototype that spans preprocessing, detection, VLM-based extraction, and frontend visualization — reaching a functional proof-of-concept across Stages 1–3.
 
-**Key Achievement:** A user can now upload a passport page image (PNG, JPEG, or PDF) to our web frontend, and the system will automatically detect stamp regions, extract date/country/direction fields via a cloud Vision-Language Model, and render the results as an interactive travel timeline — all in a single click.
+A user can now upload a passport page image (PNG, JPEG, or PDF) to the web frontend, and the system will detect stamp regions, attempt to extract date/country/direction fields via a cloud VLM, and render the results as an interactive travel timeline.
+
+However, significant quality gaps remain — particularly on real-world scans — and the VLM provider and prompt strategy are still subject to optimization in Sprint 2.
 
 ### Sprint 1 Scorecard
 
-| Objective | Target | Actual | Status |
-|---|---|---|---|
-| Stamp detection model trained & validated | mAP@50 ≥ 0.70 | **TBD** (synthetic val pending) | 🟡 Model trained, formal eval needed |
-| Preprocessing pipeline functional | Auto-orient, deskew, denoise, CLAHE | All 4 stages operational | ✅ Complete |
-| OCR/VLM extraction integrated | At least 1 provider working | Gemini 3.5 Flash (free tier) | ✅ Complete |
-| Frontend ↔ Backend connected | Upload → results displayed | Fully wired via Vite proxy | ✅ Complete |
-| API server deployable locally | `uvicorn` starts without errors | Python 3.11 env, all deps resolved | ✅ Complete |
+| Objective | Status | Notes |
+|---|---|---|
+| Preprocessing pipeline functional | ✅ Done | Auto-orient, deskew, denoise, CLAHE — all operational |
+| Stamp detection model trained | ✅ Done | YOLOv8 fine-tuned on Wilson's synthetic dataset |
+| Synthetic dataset created & annotated | ✅ Done | 1,000 synthetic scenes generated and annotated (Wilson) |
+| OCR/VLM extraction integrated | ✅ Done | Cloud VLM wired via factory pattern (Zuyan + Hao) |
+| Frontend ↔ Backend connected | ✅ Done | React/AntD UI wired to live API (Zuyan + Hao) |
+| Formal model evaluation metrics | 🟡 Pending | Validation script ready; formal run needed |
 
 ---
 
-## 2. Stamp Detection Model
+## 2. Work Completed by Member
 
-### 2.1 Training Summary
+### Hao Zhang — Preprocessing & Detection Pipeline
+- Built the image enhancement pipeline (`enhancer.py`): auto-orientation via HoughLinesP analysis (90°/180°/270°), fine deskewing, CLAHE contrast enhancement, non-local means denoising
+- Implemented the YOLOv8 stamp detection wrapper (`stamp_detector.py`) with structured output, crop extraction, and visualization
+- Fine-tuned YOLOv8s on the synthetic dataset using Google Colab A100
+- Integrated all pipeline stages into the FastAPI backend and wired the frontend to the live API
+- Added multi-provider VLM support (factory pattern) and PDF ingestion via PyMuPDF
+
+### Zuyan Tao — OCR/VLM & Frontend UI
+- Designed and implemented the React/AntD frontend: file upload dropzone, timeline visualization, unreadable stamp handling
+- Built the mock extraction endpoints that enabled parallel frontend development before the detector was ready
+- Implemented the Claude VLM extractor module (`claude_extractor.py`) with structured JSON output
+- Defined the API schema design (Pydantic models for stamp records, extraction fields, page responses)
+
+### Wilson Tee — Data Engineering & Annotation
+- Curated and sourced external stamp detection datasets from Roboflow Universe and Kaggle
+- Generated the 1,000-image synthetic training dataset by overlaying stamp templates on passport page backgrounds
+- Annotated bounding boxes in YOLO format for the entire synthetic dataset
+- Collected and organized the team's raw passport scan samples (`data/raw/`)
+
+---
+
+## 3. Stamp Detection Model
+
+### 3.1 Training Summary
 
 | Parameter | Value |
 |---|---|
 | Base model | `yolov8s.pt` (COCO pretrained) |
-| Training data | 1,000 synthetic passport scenes (generated via stamp overlay augmentation) |
-| Compute | Google Colab A100 (40 GB VRAM) |
-| Epochs | 100 (early stopping with patience=20) |
-| Image size | 640×640 |
+| Training data | 1,000 synthetic passport scenes (Wilson) |
+| Compute | Google Colab A100 |
+| Epochs | 100 (early stopping, patience=20) |
 | Output weights | `runs/best_stamp_model.pt` |
 
-### 2.2 Validation Design
+### 3.2 Validation
 
-A held-out validation set of **1,000 synthetic scenes** is available at `data/synthetic_dataset/val`. The evaluation pipeline is implemented in two ways:
+A held-out validation set of 1,000 synthetic scenes is at `data/synthetic_dataset/val`. Evaluation scripts are ready:
 
 ```bash
-# Option A: Dedicated script
 python scripts/verify_model.py
-
-# Option B: YOLO CLI
-yolo val model=runs/best_stamp_model.pt data=dataset.yaml
+# or: yolo val model=runs/best_stamp_model.pt data=dataset.yaml
 ```
 
-**Expected metric thresholds** (based on synthetic data characteristics):
+Formal metrics (mAP, Precision, Recall) have not yet been recorded and are a Sprint 2 priority.
 
-| Metric | Target | Rationale |
-|---|---|---|
-| mAP@50 | ≥ 0.95 | Synthetic stamps have clean borders |
-| mAP@50-95 | ≥ 0.85 | Tight bounding box regression |
-| Recall | ≥ 0.90 | Must catch all stamps for downstream OCR |
+### 3.3 Real-World Observations
 
-**Artifacts generated** by the validation pipeline:
-- `runs/detect/val/confusion_matrix.png`
-- `runs/detect/val/PR_curve.png`
-- `runs/detect/val/val_batch*.jpg` (prediction overlays)
+We tested the pipeline on two categories of input and observed a notable domain gap:
 
-> **⚠️ Action Required:** The formal validation run has not yet been executed on the team's local machines. This is the first task for Sprint 2 kickoff — run the evaluation, record the exact metrics, and update this section.
+**Synthetic images** (e.g., `scene_04000.jpg`):
+- Detected 6 stamps with high confidence (85–98%)
+- VLM extracted plausible countries and directions
+- Some dates appeared to be misread or hallucinated by the VLM
 
-### 2.3 Real-World Performance Observations
+**Raw passport scans** (e.g., `page_002.png`):
+- Detected only ~2 of ~8 visible stamps
+- Detected stamps were correctly localized
+- VLM extraction on detected crops returned reasonable results
 
-We tested the pipeline on two categories of input:
-
-**A. Raw passport scans** (`data/raw/page_002.png`):
-- The model detected **2 out of ~8 visible stamps**
-- Detected stamps were correctly localized with high confidence
-- Gemini VLM successfully extracted: `USA · ENTRY · 1997-06-09 (95%)` and `ARG · ENTRY · 1997-10-07 (95%)`
-- **Gap:** Many stamps were missed — likely due to domain shift between synthetic training data and real scanned documents (different backgrounds, ink fading, overlapping stamps)
-
-**B. Synthetic validation images** (`synthetic_dataset/val/scene_04000.jpg`):
-- The model detected **6 stamps** with high confidence (85-98%)
-- Gemini VLM correctly extracted countries (TTO, MLT, ZAF, RUS, LBN, PAN) and directions
-- **Gap:** Some dates were hallucinated or incorrectly read (e.g., misreading "17 MAR 2019" as "2024-03-17")
-
-**Key Insight:** The model generalizes well on synthetic data but struggles with real-world scans. This confirms that **real-data fine-tuning is the critical next step**.
+**Takeaway:** The model generalizes well within synthetic data but struggles with real scans. Bridging this gap — through real-data annotation and retraining — is the top priority going forward.
 
 ---
 
-## 3. Pipeline Architecture (As-Built)
+## 4. Pipeline Architecture (As-Built)
 
-### 3.1 System Flow
+### 4.1 System Flow
 
 ```
-┌─────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌────────────┐
-│ Upload File  │────▶│ Preprocessing│────▶│  Detection   │────▶│  VLM / OCR   │────▶│  Timeline   │
-│ (PNG/JPG/PDF)│     │ (enhancer.py)│     │  (YOLOv8)    │     │  (Gemini)    │     │  (Frontend) │
-└─────────────┘     └──────────────┘     └──────────────┘     └──────────────┘     └────────────┘
-                     Auto-orient          Bounding boxes       Structured JSON      Interactive
-                     Deskew + CLAHE       + Crop extraction    per stamp            timeline UI
-                     Denoise (NLM)        best_stamp_model.pt  date/country/dir     + confidence
+Upload (PNG/JPG/PDF) → Preprocessing → YOLOv8 Detection → VLM Extraction → Timeline UI
+                       (enhancer.py)   (stamp_detector)   (factory.py)     (React/AntD)
 ```
 
-### 3.2 Technology Stack (Implemented)
+### 4.2 VLM Provider Architecture
 
-| Layer | Technology | Status |
-|---|---|---|
-| **Frontend** | React 18 + Ant Design 5 + Vite | ✅ Operational |
-| **Backend API** | FastAPI + Uvicorn | ✅ Operational |
-| **Preprocessing** | OpenCV (CLAHE, NLM denoise, HoughLinesP deskew) | ✅ Operational |
-| **Detection** | YOLOv8s (Ultralytics) + fine-tuned weights | ✅ Operational |
-| **OCR / VLM** | Google Gemini 3.5 Flash (free tier, 15 RPM) | ✅ Operational |
-| **Environment** | Python 3.11 (Conda: `securiport`) | ✅ Configured |
+The extraction layer uses a factory pattern (`src/ocr/factory.py`) supporting hot-swappable providers. The optimal VLM model and prompting strategy are still under evaluation:
 
-### 3.3 OCR Provider Architecture
+| Provider | Vision | Cost | Current Status |
+|---|---|---|---|
+| Google Gemini | ✅ | Free tier available | Currently active for testing |
+| Anthropic Claude | ✅ | ~$0.00025/stamp | Implemented, key needed |
+| DeepSeek | ❌ Text only | Cheap | Incompatible (no vision) |
+| Local VLM | ✅ | Free (GPU required) | Not yet tested |
 
-The extraction layer uses a **factory pattern** (`src/ocr/factory.py`) that supports hot-swapping between providers:
+Switching providers requires only a `.env` change — no code modifications. The team will evaluate and compare providers in Sprint 2 to determine the best accuracy/cost tradeoff.
 
-| Provider | Config Value | Vision Support | Cost | Status |
-|---|---|---|---|---|
-| **Gemini** | `OCR_PROVIDER=gemini` | ✅ Native | Free (15 RPM) | ✅ Active |
-| Claude | `OCR_PROVIDER=claude` | ✅ Native | ~$0.00025/stamp | ⬜ Key needed |
-| DeepSeek | `OCR_PROVIDER=deepseek` | ❌ Text only | Cheap | ❌ Incompatible |
-| Local VLM | `OCR_PROVIDER=local` | ✅ Native | Free (GPU req) | ⬜ Not tested |
+### 4.3 Key Technical Decisions
 
-Switching providers requires only a `.env` change + server restart — no code modifications.
+| Decision | Rationale |
+|---|---|
+| Python 3.11 dedicated Conda environment | Pydantic type syntax (`str \| None`) requires ≥3.10; isolates from system Python |
+| PyMuPDF for PDF support | Rasterizes PDF pages at 300 DPI; lightweight, no system deps |
+| Factory pattern for VLM providers | Enables rapid A/B testing of different models without touching pipeline code |
+| Graceful degradation on missing API keys | Server stays up; returns empty fields instead of crashing |
 
 ---
 
-## 4. Integration Work Completed
-
-### 4.1 Git Synchronization
-- Merged Zuyan's AntD frontend UI revamp and mock extraction endpoints from `master`
-- Resolved merge conflicts between preprocessing and API route modules
-
-### 4.2 Bug Fixes & Refactoring
+## 5. Bug Fixes & Integration Work
 
 | Issue | File | Fix |
 |---|---|---|
-| OpenCV `hForColorComponents` crash | `enhancer.py` | Mapped to correct Python keyword `hColor` |
-| Hardcoded model path ignored `model_path` arg | `stamp_detector.py` | Restored dynamic path resolution |
-| `line[0]` unpacking crash (numpy int32) | `enhancer.py` | Reshaped HoughLinesP output to `(-1, 4)` |
-| Pydantic `str | None` syntax crash on Python 3.9 | `mock_routes.py` | Migrated to Python 3.11 environment |
-| Frontend rejected non-PDF uploads | `App.tsx`, `UploadPanel.tsx` | Expanded accept filter to PNG/JPEG/PDF |
-| Frontend hit mock endpoint instead of live API | `api.ts` | Rewired to `/api/extract/page` via Vite proxy |
-| Missing API key crashed entire server | `claude_extractor.py` | Added graceful degradation (return `None`) |
-
-### 4.3 New Modules Created
-
-| Module | Purpose |
-|---|---|
-| `src/ocr/deepseek_extractor.py` | DeepSeek API integration (text-only — unsuitable for our use case) |
-| `src/ocr/gemini_extractor.py` | Google Gemini 3.5 Flash VLM integration (currently active) |
-| `scripts/test_integration.py` | End-to-end pipeline sanity check (CLI, no frontend needed) |
-
-### 4.4 PDF Support
-- Installed **PyMuPDF** (`pymupdf`) for native PDF parsing
-- Backend now rasterizes each PDF page at 300 DPI and processes every page through the full detection → OCR pipeline
-- Frontend dropzone accepts `application/pdf`, `image/png`, and `image/jpeg`
+| OpenCV `hForColorComponents` crash | `enhancer.py` | Mapped to correct keyword `hColor` |
+| Hardcoded model path ignored argument | `stamp_detector.py` | Restored dynamic `model_path` resolution |
+| HoughLinesP unpacking crash (numpy int32) | `enhancer.py` | Reshaped output to `(-1, 4)` |
+| Pydantic crash on Python 3.9 | Environment | Migrated to Python 3.11 Conda env |
+| Frontend rejected non-PDF uploads | `UploadPanel.tsx`, `App.tsx` | Expanded accept filter to PNG/JPEG/PDF |
+| Frontend hit mock endpoint | `api.ts` | Rewired to live `/extract/page` |
+| Missing API key crashed server | `claude_extractor.py` | Graceful degradation |
 
 ---
 
-## 5. Environment Setup (Reproducibility)
-
-For any team member to run the full system locally:
+## 6. Environment Setup (For Teammates)
 
 ```bash
-# 1. Create the conda environment
-conda create -n securiport python=3.11 -y
-conda activate securiport
+# 1. Create environment
+conda create -n securiport python=3.11 -y && conda activate securiport
 
 # 2. Install dependencies
 pip install -r requirements.txt
 pip install openai google-generativeai pymupdf
 
-# 3. Configure API credentials
-# Create .env in project root:
-#   GEMINI_API_KEY=your_key_here
+# 3. Configure .env (project root)
 #   OCR_PROVIDER=gemini
+#   GEMINI_API_KEY=your_key_from_aistudio.google.com
 
-# 4. Start the backend
+# 4. Run backend
 uvicorn src.api.main:app --reload
 
-# 5. Start the frontend (separate terminal)
+# 5. Run frontend (separate terminal)
 cd frontend && npm install && npm run dev
 ```
 
-Navigate to `http://localhost:5173` and upload a passport image.
+---
+
+## 7. Known Gaps & Open Questions
+
+| Area | Gap | Severity |
+|---|---|---|
+| Detection | Low recall on real passport scans (~25%) | 🔴 High |
+| Detection | Overlapping stamps not separated | 🟡 Medium |
+| VLM | Date hallucination on unclear stamps | 🟡 Medium |
+| VLM | Optimal model/provider not yet determined | 🟡 Medium |
+| Frontend | No stamp crop visualization | 🟡 Medium |
+| Frontend | No export functionality (CSV/Sheets) | 🟡 Medium |
+| Data | Limited real-world annotated data | 🔴 High |
 
 ---
 
-## 6. Gap Analysis & Sprint 2 Priorities
-
-### 6.1 Detection Gaps
-
-| Gap | Severity | Root Cause | Proposed Fix |
-|---|---|---|---|
-| Misses stamps on real scans | 🔴 High | Model trained only on synthetic data | Fine-tune on Wilson's annotated real data |
-| Overlapping stamps not separated | 🟡 Medium | No overlap-aware augmentation | Add overlap augmentation to training pipeline |
-| Small/faded stamps missed | 🟡 Medium | Training at 640px may lose detail | Experiment with 1280px input + multi-scale inference |
-
-### 6.2 OCR/VLM Gaps
-
-| Gap | Severity | Root Cause | Proposed Fix |
-|---|---|---|---|
-| Date hallucination on unclear stamps | 🟡 Medium | VLM fills in blanks creatively | Add confidence thresholds; reject low-confidence dates |
-| Gemini rate limit (15 RPM) | 🟡 Medium | Free tier constraint | Batch processing with backoff; or switch to Claude for bulk |
-| No date format validation | 🟢 Low | Raw VLM output accepted as-is | Add `python-dateutil` post-processing to validate ISO dates |
-
-### 6.3 Frontend Gaps
-
-| Gap | Severity | Root Cause | Proposed Fix |
-|---|---|---|---|
-| "Load demo data" button broken | 🟢 Low | Still hits deprecated mock endpoint | Remove or rewire to a real sample image |
-| No stamp crop visualization | 🟡 Medium | Frontend only shows text fields | Add a stamp gallery view with bounding box overlays |
-| No export functionality | 🟡 Medium | Not yet implemented | Add CSV/Google Sheets export per proposal spec |
-
----
-
-## 7. File Reference
+## 8. File Reference
 
 | Path | Description |
 |---|---|
-| `runs/best_stamp_model.pt` | Fine-tuned YOLOv8 weights (synthetic data) |
+| `runs/best_stamp_model.pt` | Fine-tuned YOLOv8 weights |
 | `src/preprocessing/enhancer.py` | Image enhancement pipeline |
 | `src/detection/stamp_detector.py` | YOLOv8 inference wrapper |
-| `src/ocr/gemini_extractor.py` | Active VLM extractor (Gemini 3.5 Flash) |
-| `src/ocr/factory.py` | Provider factory (gemini / claude / deepseek / local) |
-| `src/api/routes.py` | FastAPI endpoints (`/extract/page`, `/extract/stamp`) |
-| `src/api/main.py` | Application entry point |
-| `frontend/src/api.ts` | Frontend API client (wired to live backend) |
-| `scripts/test_integration.py` | CLI integration test |
+| `src/ocr/factory.py` | VLM provider factory |
+| `src/api/routes.py` | FastAPI endpoints |
+| `frontend/src/api.ts` | Frontend API client |
 | `scripts/verify_model.py` | Model evaluation script |
-| `dataset.yaml` | YOLO dataset configuration |
+| `scripts/test_integration.py` | CLI integration test |
 
 ---
 
-## 8. Conclusion
-
-Sprint 1 has delivered a **functional end-to-end prototype** that demonstrates the full vision of the project — from raw passport upload to structured travel timeline. While the detection model requires significant improvement on real-world data, the architectural foundation is solid: the preprocessing, detection, VLM extraction, API, and frontend layers are all operational and modularly designed for rapid iteration.
-
-The team is well-positioned to pivot Sprint 2 toward **real-data quality** — annotating real passport scans, retraining the detector, and hardening the VLM extraction pipeline to produce production-grade results.
-
----
-
-*Report prepared by Hao Zhang. For questions, refer to the [project repository](https://github.com/8Dis-like/travel-history-reconstruction) or the [Notion workspace](https://app.notion.com/p/21fd6700a92f4077908ca14f64435908).*
+*Report prepared by Hao Zhang on behalf of the team.*
+*Repository: [travel-history-reconstruction](https://github.com/8Dis-like/travel-history-reconstruction)*
