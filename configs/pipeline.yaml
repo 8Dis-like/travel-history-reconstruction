@@ -18,17 +18,12 @@ detection:
   input_size: 640
 
 ocr:
-  engine: "paddleocr"         # Options: paddleocr, vlm
-  languages: ["en"]           # Start with English, expand later
-  paddleocr:
-    det_model_dir: null       # Use default if null
-    rec_model_dir: null
-    use_angle_cls: true
-    use_gpu: true
-  vlm:
-    model_name: "openbmb/MiniCPM-o-2_6"
-    max_tokens: 512
-    temperature: 0.1
+  engine: "claude"            # Options: claude (implemented), local (stub)
+  claude:
+    model: "claude-sonnet-5"  # Any Claude model id; drives ClaudeExtractor
+    max_tokens: 256
+  local:                      # LocalVLMExtractor (MiniCPM-o / Qwen-VL) — not yet implemented
+    {}
 
 reconstruction:
   date_formats:

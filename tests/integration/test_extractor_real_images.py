@@ -24,8 +24,8 @@ skip_if_no_key = pytest.mark.skipif(
 
 @pytest.fixture(scope="module")
 def extractor():
-    from src.ocr.factory import create_extractor
-    return create_extractor("claude")
+    from src.ocr.factory import create_extractor_from_config
+    return create_extractor_from_config()
 
 
 def _load(filename: str):

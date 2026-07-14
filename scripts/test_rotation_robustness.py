@@ -1,11 +1,17 @@
 from __future__ import annotations
 
-"""Diagnostic: how much does ClaudeExtractor's accuracy degrade on rotated stamp crops?
+"""Benchmark: ClaudeExtractor accuracy on the real stamp fixtures across rotation angles.
 
-Rotates in-memory copies of the real stamp fixtures by several angles and checks
-whether date/country/direction still extract correctly, to decide whether a
-crop-level deskew step (cv2.minAreaRect + warpAffine) is actually needed before
-wiring per-stamp rotation correction into the detection -> extraction pipeline.
+Rotates in-memory copies of each fixture by several angles and checks whether
+date/country/direction still extract correctly. Useful for comparing models
+(swap the model in src/ocr/claude_extractor.py) or spot-checking extraction
+quality after prompt/pipeline changes. Uses whatever model create_extractor
+returns by default.
+
+Findings so far: claude-haiku-4-5 scored 15/20 (failures were mostly misread
+date digits, worst at 45deg); claude-sonnet-5 scored 20/20 on the same set —
+i.e. accuracy was model-limited, not a rotation problem, so no CV deskew step
+is used.
 
 Does not modify the fixture files on disk — only rotates copies in memory.
 
@@ -25,7 +31,7 @@ load_dotenv()
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.ocr.factory import create_extractor  # noqa: E402
+from src.ocr.factory import create_extractor_from_config  # noqa: E402
 
 FIXTURES_DIR = Path(__file__).resolve().parent.parent / "tests" / "fixtures" / "stamps"
 
@@ -59,7 +65,7 @@ def rotate_image(image: np.ndarray, angle_deg: float) -> np.ndarray:
 
 
 def main() -> None:
-    extractor = create_extractor("claude")
+    extractor = create_extractor_from_config()
 
     results: dict[float, list[bool]] = {angle: [] for angle in ANGLES_DEG}
     confidences: dict[float, list[float]] = {angle: [] for angle in ANGLES_DEG}

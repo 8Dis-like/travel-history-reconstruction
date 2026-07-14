@@ -6,8 +6,15 @@ import pytest
 def test_creates_claude_extractor():
     from src.ocr.claude_extractor import ClaudeExtractor
     from src.ocr.factory import create_extractor
-    extractor = create_extractor("claude", api_key="test-key")
+    extractor = create_extractor("claude", api_key="test-key", model="claude-sonnet-5")
     assert isinstance(extractor, ClaudeExtractor)
+
+
+def test_claude_requires_explicit_model():
+    from src.ocr.factory import create_extractor
+    # model is required — no hardcoded default; it must come from config/caller
+    with pytest.raises(TypeError):
+        create_extractor("claude", api_key="test-key")
 
 
 def test_creates_local_extractor():

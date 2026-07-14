@@ -12,7 +12,7 @@ from src.ocr.claude_extractor import ClaudeExtractor
 
 @pytest.fixture
 def extractor():
-    return ClaudeExtractor(api_key="test-key")
+    return ClaudeExtractor(api_key="test-key", model="claude-sonnet-5")
 
 
 @pytest.fixture

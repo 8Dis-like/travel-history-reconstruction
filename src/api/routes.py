@@ -16,14 +16,14 @@ from src.api.schemas import (
     StampRecord,
 )
 from src.detection.mock_detector import MockStampDetector
-from src.ocr.factory import create_extractor
+from src.ocr.factory import create_extractor_from_config
 from src.preprocessing.enhancer import ImageEnhancer
 
 router = APIRouter()
 
 _enhancer = ImageEnhancer()
 _detector = MockStampDetector()
-_extractor = create_extractor("claude")
+_extractor = create_extractor_from_config()
 
 
 def _decode_upload(data: bytes) -> np.ndarray:
