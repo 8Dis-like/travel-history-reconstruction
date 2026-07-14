@@ -27,7 +27,7 @@ Hao led the kickoff meeting for the second stage of the project, reviewing the c
 - **VLM Models:** Benjamin discussed the potential of using Claude 3.5 Sonnet and Claude 3.5 Haiku, noting that higher-tier models perform better and reduce text extraction discrepancies.
 - **Debugging Branch:** Hao suggested creating a dedicated Git branch to isolate and pinpoint these quality/integration issues.
 - **Communication:** Hao proposed that Hao and Zuyan (Benjamin) communicate in Chinese via WeChat for daily convenience to jointly coordinate and improve the reliability of the system integration.
-- **Seminar & Schedule:** The team noted the upcoming Capstone Seminar on **Thursday, July 16, 6:00 PM – 7:30 PM PT** (Zoom: https://ucla.zoom.us/my/prof.brucehuang) regarding "Writing Your Final Capstone Report". The seminar will begin with the first team check-in to discuss project progress. Every team must be represented, so at least one member (Hao aims to attend) must participate and share the materials afterward. The team acknowledged the successful completion of Sprint 1, with plans to officially kick off Sprint 2 execution heading into August.
+- **Seminar & Schedule:** The team noted the upcoming Capstone Seminar on **Thursday, July 16, 6:00 PM – 7:30 PM PT** (Zoom: https://ucla.zoom.us/my/prof.brucehuang) regarding "Writing Your Final Capstone Report". The seminar will begin with the first team check-in to discuss project progress. Every team must be represented, so at least one member must participate and share the materials afterward. The team acknowledged the successful completion of Sprint 1, with plans to officially kick off Sprint 2 execution heading into August.
 
 ---
 
