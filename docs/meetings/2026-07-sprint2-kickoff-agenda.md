@@ -1,69 +1,68 @@
-**Project:** Travel History Reconstruction from Travel Documents
-**Meeting Type:** Sprint 2 Kickoff & Direction Sync
-**Duration:** 30 min (+ open discussion as needed)
-**Date/Time:** 7 p.m. PST, July 13, 2026
+# Sprint 2 Kickoff & Direction Sync (Agenda & Minutes)
+
+**Project:** Travel History Reconstruction from Travel Documents  
+**Meeting Type:** Sprint Kickoff & Sync  
+**Duration:** 30 min (Actual: extended for discussion)  
+**Date/Time:** 7 p.m. PST, July 13, 2026  
+**Participants:** Hao Zhang (Zagho), Zuyan Tao (Benjamin), Wilson Tee  
 
 ---
 
-## 1. Sprint 1 Recap (5 min) — Hao
+## 1. Meeting Summary & Minutes (Zoom AI Recap)
 
-What we shipped as a team:
+### 1.1 Executive Summary
+Hao led the kickoff meeting for the second stage of the project, reviewing the completed work from Stage 1 (generating synthetic passport scenes, building the React frontend, and implementing the preprocessing pipeline with YOLOv8 model integration). Hao demonstrated the end-to-end prototype (image upload, stamp detection, VLM extraction, and timeline display). The prototype runs well on synthetic data but struggles with real-world raw images. The team discussed the current pipeline and identified a critical need to pinpoint which specific components are causing reliability issues on real data. 
 
-- **Wilson:** Generated and annotated 1,000 synthetic passport scenes for detection training; curated external datasets via automated program
-- **Zuyan:** Built the React/AntD frontend (upload, timeline, unreadable handling); implemented Claude VLM extractor and mock endpoints for parallel development
-- **Hao:** Built preprocessing pipeline (auto-orient, deskew, denoise, CLAHE); fine-tuned YOLOv8 on Colab A100; integrated all stages into FastAPI backend
+### 1.2 Data Structure & Testing Discussion
+- **Data Structure:** Benjamin and Hao discussed the data structure requirements for the timeline. Hao suggested using a simple linked list approach to order the travel events.
+- **Frontend Integration:** Wilson was assigned to handle the frontend appearance design, focusing on making it feel production-ready, and will coordinate closely with Benjamin for backend integration.
+- **Testing Status:** Hao presented the fine-tuning results based on synthetic data (including the confusion matrix), but noted that testing on real passport data is incomplete, making the real-world results unreliable at this stage.
 
-**Where we landed:**
-- End-to-end prototype works: upload image → detect stamps → VLM extraction → timeline display
-- Model works well on synthetic data (~6/6 stamps detected) but struggles on real scans (~2/8)
-- VLM provider and prompting strategy still under evaluation — current setup works but accuracy needs improvement
+### 1.3 Pipeline Reliability & Image Rotations
+- **Bottleneck Search:** The team discussed reliability issues in the stamp detection and VLM extraction chain. Wilson suggested testing the YOLO model directly on raw images from Alvaro to isolate whether the failures stem from detection or VLM extraction.
+- **Rotation Handling:** Benjamin noted that incorrectly rotated images negatively impact VLM extraction performance.
+- **Multi-Rotation Testing:** Hao explained that the current image processing pipeline performs boundary cutting, rotation, and YOLO detection before passing data to Benjamin's VLM module without writing intermediate data to disk. To improve detection/extraction accuracy, Benjamin suggested testing four different rotated versions of the images (0, 90, 180, and 270 degrees). Wilson suggested starting with a subset of two rotations and scaling up to four if needed. The team agreed to implement a testing method to pinpoint this bottleneck.
+
+### 1.4 Model Performance & Project Updates
+- **VLM Models:** Benjamin discussed the potential of using Claude 3.5 Sonnet and Claude 3.5 Haiku, noting that higher-tier models perform better and reduce text extraction discrepancies.
+- **Debugging Branch:** Hao suggested creating a dedicated Git branch to isolate and pinpoint these quality/integration issues.
+- **Communication & Schedule:** Hao proposed communicating in Chinese via WeChat for daily convenience. The team confirmed their next meeting for **Thursday at 6 PM** to follow up on these points. The team acknowledged the successful completion of Sprint 1, with plans to officially kick off Sprint 2 execution heading into August.
 
 ---
 
-## 2. The Road Ahead (10 min) — All
+## 2. Updated Stage Map & Road Ahead
 
-### Updated Stage Map
-
-Based on Sprint 1 experience, stages 2–4 from the original proposal naturally blend together in practice. Proposed simplification:
+Based on Sprint 1 testing, Stages 2, 3, and 4 from our original proposal naturally merge in practice since extraction, validation, and timeline assembly are tightly coupled. 
 
 | Stage | Goal | Status |
 |---|---|---|
 | **Stage 1** — Stamp Detection & Isolation | Detect all stamp regions, output crops | ✅ MVP Done |
 | **Stage 2-3-4** — Extraction & Timeline | Extract fields (date, country, direction) + reconstruct chronological timeline | 🟡 In Progress |
-| **Stage 5** — Multilingual & Production | Non-English support, hardening | ⬜ Not Started |
-
-The combined stage reflects reality: once detection crops exist, extraction, validation, and timeline assembly are tightly interleaved — not sequential. We should work on them as one continuous effort.
-
-### Proposed Work Split (System Responsibility)
-
-Rather than splitting by pipeline stage, split by **system concern** to minimize cross-dependencies:
-
-| Member | Responsibility | Scope |
-|---|---|---|
-| **Hao (Zagho)** | Quality Assurance | Model evaluation & benchmarking; detection retraining on real data; VLM model selection & prompt optimization |
-| **Zuyan** | Core Function | Timeline reconstruction data structures; chronological ordering logic; entry-exit pairing; conflict resolution |
-| **Wilson** | Appearance & Completeness | Frontend feature completeness (stamp gallery, export, data quality dashboard); end-user experience |
-
-**Discussion:** Does this split feel right to everyone? Any concerns about scope or overlap?
+| **Stage 5** — Multilingual & Production | Non-English support, system hardening | ⬜ Not Started |
 
 ---
 
-## 3. Data Discussion (Open) — All
+## 3. Work Split (System Responsibility)
 
-We need more data to bridge the real-world detection gap. Topics to discuss:
+To minimize mutual dependencies, responsibilities are split by system concerns:
 
-- **From Alvaro:** Can Securiport provide additional passport scan samples? What format? Any restrictions?
-- **Annotation effort:** How many real pages can we realistically annotate in Sprint 2? What tool works best?
-- **Data diversity:** Do we need stamps from specific regions/languages to be representative?
-- **Ground truth for VLM:** Should we build a small manually-labeled extraction ground truth set to benchmark VLM accuracy?
-
-> This is an open discussion — take as much time as needed. Data quality directly determines our Sprint 2 outcomes.
+*   **Hao Zhang (Zagho) — Quality Assurance (QA):**
+    *   Pinpointing pipeline quality and reliability bottlenecks.
+    *   Model testing, fine-tuning, and evaluation.
+    *   VLM model selection and prompt optimization.
+*   **Zuyan Tao (Benjamin) — Core Function:**
+    *   Backend data structures (e.g., linked list for travel history).
+    *   Core timeline reconstruction logic.
+    *   VLM extraction integration.
+*   **Wilson Tee — Appearance & Completeness:**
+    *   Frontend design, completeness, and user experience.
+    *   Timeline presentation and stamp visualization.
+    *   Coordinating with Benjamin for API integration.
 
 ---
 
-## 4. Sprint 2 Logistics (5 min) — Hao
+## 4. Sprint 2 Logistics & Reminders
 
-### Reminders
 - **Environment:** Everyone must use the `securiport` Conda env (Python 3.11). Verify you can run both backend and frontend locally.
 - **Git:** Feature branches → PR → review → merge. No direct pushes to `master`.
 - **Large files:** Weights and datasets stay gitignored. Share via Google Drive.
@@ -76,20 +75,19 @@ We need more data to bridge the real-world detection gap. Topics to discuss:
 
 ---
 
-## 5. Action Items (5 min) — Hao
+## 5. Action Items & Next Steps
 
 | # | Action Item | Owner | Due |
 |---|---|---|---|
-| 1 | Run formal model validation, record mAP/Precision/Recall | Hao | July 15 |
-| 2 | Implement timeline reconstruction data structures | Zuyan | July 18 |
-| 3 | Design and develop frontend feature completeness | Wilson | July 20 |
-| 4 | Evaluate 2–3 VLM providers for accuracy comparison | Hao | July 20 |
-| 5 | Everyone: verify `securiport` env runs locally | All | Before next standup |
+| 1 | Redo evaluations to pinpoint the broken part of the pipeline (model performance on real data vs. VLM) | Hao | July 15 |
+| 2 | Create a debug branch to isolate and analyze quality issues | Hao | July 15 |
+| 3 | Propose and implement backend improvements (VLM extraction, linked list data structures) | Benjamin | July 18 |
+| 4 | Coordinate with Benjamin and take ownership of frontend design/experience | Wilson | July 20 |
+| 5 | Test 2–4 rotation versions of crops to improve VLM robustness | Hao + Benjamin | July 20 |
+| 6 | Attend the next team sync | All | Thursday, July 16 @ 6 PM |
+| 7 | Ask Alvaro for additional passport scan data for testing | Hao | July 17 |
+| 8 | Ensure local Conda environment (`securiport`) is working | All | Before next meeting |
 
 ---
 
-## Pre-Read Materials
-
-1. 📊 [Sprint 1 Milestone Report](../reports/pipeline_integration_report.md) — what we built, what works, what doesn't
-2. 📄 [Project Proposal](../proposal.md) — Section 3 (Staged Milestones), Section 9 (Timeline)
-3. 🔗 [Notion Sprint Board](https://app.notion.com/p/21fd6700a92f4077908ca14f64435908)
+*Minutes compiled by Hao Zhang. Agenda and notes archived in `docs/meetings/`.*
