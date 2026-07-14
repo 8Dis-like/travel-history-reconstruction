@@ -26,7 +26,8 @@ Hao led the kickoff meeting for the second stage of the project, reviewing the c
 ### 1.4 Model Performance & Project Updates
 - **VLM Models:** Benjamin discussed the potential of using Claude 3.5 Sonnet and Claude 3.5 Haiku, noting that higher-tier models perform better and reduce text extraction discrepancies.
 - **Debugging Branch:** Hao suggested creating a dedicated Git branch to isolate and pinpoint these quality/integration issues.
-- **Communication & Schedule:** Hao proposed communicating in Chinese via WeChat for daily convenience. The team confirmed their next meeting for **Thursday at 6 PM** to follow up on these points. The team acknowledged the successful completion of Sprint 1, with plans to officially kick off Sprint 2 execution heading into August.
+- **Communication:** Hao proposed that Hao and Zuyan (Benjamin) communicate in Chinese via WeChat for daily convenience to jointly coordinate and improve the reliability of the system integration.
+- **Seminar & Schedule:** The team noted the upcoming Capstone Seminar on **Thursday, July 16, 6:00 PM – 7:30 PM PT** (Zoom: https://ucla.zoom.us/my/prof.brucehuang) regarding "Writing Your Final Capstone Report". The seminar will begin with the first team check-in to discuss project progress. Every team must be represented, so at least one member (Hao aims to attend) must participate and share the materials afterward. The team acknowledged the successful completion of Sprint 1, with plans to officially kick off Sprint 2 execution heading into August.
 
 ---
 
@@ -84,7 +85,7 @@ To minimize mutual dependencies, responsibilities are split by system concerns:
 | 3 | Propose and implement backend improvements (VLM extraction, linked list data structures) | Benjamin | July 18 |
 | 4 | Coordinate with Benjamin and take ownership of frontend design/experience | Wilson | July 20 |
 | 5 | Test 2–4 rotation versions of crops to improve VLM robustness | Hao + Benjamin | July 20 |
-| 6 | Attend the next team sync | All | Thursday, July 16 @ 6 PM |
+| 6 | Represent the team at the Capstone Seminar check-in (Zoom: https://ucla.zoom.us/my/prof.brucehuang) | Hao (or designated member) | Thursday, July 16 @ 6 PM |
 | 7 | Ask Alvaro for additional passport scan data for testing | Hao | July 17 |
 | 8 | Ensure local Conda environment (`securiport`) is working | All | Before next meeting |
 
