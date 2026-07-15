@@ -15,22 +15,22 @@ from src.api.schemas import (
     PageExtractionResponse,
     StampRecord,
 )
-from src.detection.stamp_detector import StampDetector
-from src.ocr.factory import create_extractor
+from src.detection.mock_detector import MockStampDetector
+from src.ocr.factory import create_extractor_from_config
 from src.preprocessing.enhancer import ImageEnhancer
 
 router = APIRouter()
 
 _enhancer = ImageEnhancer()
-_detector = StampDetector(model_path="runs/best_stamp_model.pt")
-import os
-_extractor = create_extractor(os.getenv("OCR_PROVIDER", "deepseek"))
-
-
-import fitz  # PyMuPDF
+_detector = MockStampDetector()
+_extractor = create_extractor_from_config()
 
 def _decode_uploads(data: bytes, filename: str) -> list[tuple[str, np.ndarray]]:
     if filename.lower().endswith(".pdf"):
+        try:
+            import fitz  # PyMuPDF
+        except ModuleNotFoundError as e:
+            raise HTTPException(status_code=400, detail="PDF upload support requires PyMuPDF (fitz).") from e
         try:
             doc = fitz.open("pdf", data)
             images = []

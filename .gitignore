@@ -59,3 +59,5 @@ htmlcov/
 
 # Brainstorming visual companion
 .superpowers/
+
+synthetic_dataset.zip

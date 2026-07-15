@@ -132,11 +132,10 @@ graph TD
 
 | Component | Implementation |
 |---|---|
-| OCR Engine | To be determined by Zuyan |
-| Date Parser | `python-dateutil` + custom regex patterns |
+| Extraction Engine | **Implemented:** `ClaudeExtractor` (Anthropic Claude Vision, `claude-haiku-4-5`) — returns date, country, direction, raw text, and confidence in a single call; date field is evaluated in isolation for this milestone's gate criteria |
 | Validation | Cross-check parsed dates against plausible travel date ranges |
 
-**Supported date formats:** `DD MMM YYYY`, `DD/MM/YYYY`, `YYYY-MM-DD`, `MM/DD/YYYY`
+**Note:** No traditional OCR layer is used — regex/`dateutil` date parsing was superseded by direct VLM extraction, since a VLM handles varied date formats and degraded stamp quality without per-format rules (see [Section 6.2](#62-ocrfield-extraction--anthropic-claude-vision-implemented)).
 
 **Deliverable:** Each stamp crop → extracted date(s) with confidence score.
 
@@ -146,9 +145,9 @@ graph TD
 
 | Component | Implementation |
 |---|---|
-| VLM Integration | MiniCPM-o or Qwen-VL for structured extraction |
-| Field Schema | `{date, country, direction, confidence, raw_text}` |
-| Classification | Entry vs. Exit based on textual cues + stamp shape/color heuristics |
+| VLM Integration | **Implemented:** `ClaudeExtractor` (Anthropic Claude Vision) as the primary provider; `LocalVLMExtractor` stubbed for a future locally-hosted model (MiniCPM-o/Qwen-VL), selected via `create_extractor(provider)` factory so downstream code never depends on which provider is active |
+| Field Schema | `{date, country, direction, confidence, raw_text}` — implemented as the `ExtractionResult` dataclass in `src/ocr/base.py` |
+| Classification | Entry vs. Exit returned directly by the VLM from textual cues in the stamp; no separate rule-based classifier needed |
 
 **Deliverable:** Each stamp → structured JSON record with all extracted fields.
 
@@ -185,7 +184,7 @@ graph TD
 ```
 ┌─────────────┐     ┌──────────────┐     ┌─────────────┐     ┌───────────────┐     ┌────────────┐
 │ Input Image │────▶│ Preprocessing│────▶│  Detection   │────▶│  Extraction   │────▶│ Reconstruct│
-│ (Passport)  │     │ Enhancement  │     │  YOLOv8      │     │ OCR tool (TBD) + Qwen-VL / MiniCPM-oe│     │ Timeline   │
+│ (Passport)  │     │ Enhancement  │     │  YOLOv8      │     │ Claude Vision (VLM)   │     │ Timeline   │
 └─────────────┘     └──────────────┘     └─────────────┘     └───────────────┘     └────────────┘
                           │                     │                     │                    │
                      Deskew, CLAHE         Bounding boxes       Structured fields     Chronological
@@ -198,10 +197,10 @@ graph TD
 |---|---|---|
 | **Language** | Python 3.11+ | ML ecosystem, team expertise |
 | **Detection** | YOLOv8 (Ultralytics) | SOTA speed/accuracy, easy fine-tuning |
-| **OCR** | To be determined | Evaluated by Zuyan |
-| **VLM** | MiniCPM-o / Qwen-VL | Multimodal understanding without cloud APIs |
+| **OCR / Extraction** | Anthropic Claude Vision (`claude-haiku-4-5`) — **implemented** | VLM-only extraction, no separate OCR layer: handles varied date formats, faded ink, and multilingual text without per-language rules; pluggable via factory |
+| **VLM (future/local)** | MiniCPM-o / Qwen-VL — stubbed (`LocalVLMExtractor`) | Swap-in path for on-prem/offline inference once model weights are available, without cloud API dependency |
 | **Image Processing** | OpenCV, scikit-image | Industry standard |
-| **API** | FastAPI + Uvicorn | Async, auto-docs, production-ready |
+| **API** | FastAPI + Uvicorn — **implemented** (`/health`, `/extract/stamp`, `/extract/page`) | Async, auto-docs, production-ready |
 | **Experiment Tracking** | Weights & Biases | Free for academics, excellent visualization |
 | **Config** | YAML + Pydantic | Type-safe, human-readable |
 | **Testing** | pytest | Standard Python testing |
@@ -218,23 +217,34 @@ src/
 │   ├── stamp_detector.py    # YOLOv8 inference wrapper
 │   ├── trainer.py           # Fine-tuning script
 │   └── postprocess.py       # NMS, crop extraction
-├── ocr/
-│   ├── ocr_engine.py        # OCR wrapper (tool TBD)
-│   ├── vlm_engine.py        # VLM-based extraction
-│   └── field_parser.py      # Date/country/direction parsing
+├── ocr/                     # implemented
+│   ├── base.py              # BaseExtractor ABC + ExtractionResult dataclass
+│   ├── claude_extractor.py  # ClaudeExtractor — Anthropic Claude Vision API
+│   ├── local_extractor.py   # LocalVLMExtractor stub (MiniCPM-o/Qwen-VL, not yet implemented)
+│   └── factory.py           # create_extractor(provider) → BaseExtractor
 ├── reconstruction/
 │   ├── timeline_builder.py  # Chronological assembly
 │   ├── validator.py         # Entry-exit pairing, plausibility
 │   └── reporter.py          # JSON/PDF/HTML output
-├── api/
-│   ├── main.py              # FastAPI app + CLI entry
-│   ├── routes.py            # API endpoints
+├── api/                     # implemented
+│   ├── main.py              # FastAPI app entry point
+│   ├── routes.py            # /health, /extract/stamp, /extract/page
 │   └── schemas.py           # Pydantic request/response models
 └── utils/
     ├── config.py            # YAML config loader
     ├── logger.py            # Loguru setup
     └── io.py                # Image I/O helpers
 ```
+
+### 4.4 API Endpoints *(Implemented)*
+
+| Endpoint | Method | Description |
+|---|---|---|
+| `/health` | GET | Liveness check |
+| `/extract/stamp` | POST | Upload a single pre-cropped stamp image → returns extracted fields (date, country, direction, raw text, confidence) |
+| `/extract/page` | POST | Upload a full passport page → runs preprocessing + detection + extraction end-to-end, returns all detected stamps with their extracted fields |
+
+`/extract/page` currently runs against a `MockStampDetector` (bounding boxes without a fine-tuned model) so the extraction pipeline can be developed and tested in parallel with YOLOv8 fine-tuning; it will be swapped for the trained detector once Stage 1 weights are ready.
 
 ---
 
@@ -292,34 +302,51 @@ results = model.train(
 
 **Compute:** Single GPU (NVIDIA RTX 3060+ or Colab Pro) — training ~2-4 hours.
 
-### 6.2 OCR — To be determined
+### 6.2 OCR/Field Extraction — Anthropic Claude (Vision) *(Implemented)*
 
-No fine-tuning needed initially. Zuyan will evaluate and integrate an appropriate OCR tool. (e.g., EasyOCR, Tesseract, etc.)
+No fine-tuning needed. Zuyan evaluated traditional OCR (EasyOCR/Tesseract) against a VLM-only approach and chose **VLM-only extraction — no separate OCR layer**: traditional OCR requires per-language configuration and degrades on faded/overlapping stamps, while a VLM handles multilingual text and degraded images directly and returns all fields (not just raw text) in one call.
+
+The extractor sits behind a common interface so the provider can be swapped without touching pipeline code:
+
 ```python
-# Example using hypothetical OCR
-# import ocr_tool
-# ocr = ocr_tool.load('en')
-# result = ocr.extract(stamp_crop_image)
+# src/ocr/base.py
+@dataclass(frozen=True)
+class ExtractionResult:
+    date: str | None
+    country: str | None
+    direction: str | None
+    raw_text: str | None
+    confidence: float
+
+class BaseExtractor(ABC):
+    @abstractmethod
+    def extract(self, image: np.ndarray) -> ExtractionResult: ...
+
+# src/ocr/factory.py
+def create_extractor(provider: str, **kwargs) -> BaseExtractor:
+    """provider: "claude" (implemented) or "local" (stub)"""
 ```
+
+`ClaudeExtractor` (`src/ocr/claude_extractor.py`) implements `BaseExtractor` using `claude-haiku-4-5-20251001`: it base64-encodes the stamp crop to PNG in memory, sends it with a structured-JSON prompt, and parses the response into an `ExtractionResult`. Any API error or malformed response returns an all-`None`/`confidence=0.0` result rather than raising, so a single unreadable stamp never breaks the pipeline.
 
 ### 6.3 VLM — Structured Extraction (Stage 3)
 
-Use a vision-language model for complex stamps where rule-based parsing fails:
-```python
-# Prompt template for VLM
-EXTRACTION_PROMPT = """
-Analyze this passport stamp image and extract:
-1. Date (in ISO 8601 format YYYY-MM-DD)
-2. Country name or code
-3. Direction: ENTRY or EXIT
-4. Any other visible text
+`ClaudeExtractor` is the primary, working implementation of Stage 3's structured extraction — one call returns date, country, direction, raw text, and confidence together, so no separate rule-based ENTRY/EXIT classifier is needed:
 
-Return as JSON: {"date": "...", "country": "...", "direction": "...", "raw_text": "..."}
-If a field is unreadable, set it to null.
+```python
+_PROMPT = """
+Analyze this passport stamp image and extract the following fields:
+- date: ISO 8601 format YYYY-MM-DD
+- country: ISO-3166 alpha-3 code (e.g. GBR, USA, FRA, COL, HKG)
+- direction: exactly "ENTRY" or "EXIT"
+- raw_text: all visible text in the stamp exactly as it appears
+- confidence: your confidence as a float 0.0-1.0
+
+Return ONLY a JSON object with these exact keys. Set any unreadable field to null.
 """
 ```
 
-**Model options (ranked by compute requirement):**
+**`LocalVLMExtractor`** (`src/ocr/local_extractor.py`) is a stub for a future locally-hosted model, so the factory/config system works end-to-end before local weights are available:
 1. **MiniCPM-o 2.6** (~8B params) — Best quality/size ratio, runs on single GPU
 2. **InternVL2** — Strong multilingual capability
 3. **Qwen-VL** — Good for CJK text
@@ -495,15 +522,15 @@ def export_to_google_sheets(timeline_data: dict, spreadsheet_name: str):
 | **3-4** | Stage 1 | YOLOv8 fine-tuning, stamp detection baseline, evaluation | Hao |
 | | | Preprocessing pipeline, augmentation | Hao |
 | | | Data collection, annotation, dataset curation | Wilson |
-| | | OCR engine integration (Tool TBD) | Zuyan |
-| **5** | Stage 2 | Date extraction pipeline, regex + dateutil parsing | Zuyan |
+| | | VLM extraction engine (`ClaudeExtractor`, `BaseExtractor`/`ExtractionResult`, factory) — **done, ahead of schedule** | Zuyan |
+| **5** | Stage 2 | Date accuracy evaluation against `ClaudeExtractor` output (no separate regex/dateutil parser — superseded by VLM extraction) | Zuyan |
 | | | Detection model iteration, mAP optimization | Hao |
-| **6-7** | Stage 3 | VLM integration for full field extraction | Zuyan |
+| **6-7** | Stage 3 | VLM integration for full field extraction — **done** (`ClaudeExtractor` returns date/country/direction together); FastAPI endpoints (`/health`, `/extract/stamp`, `/extract/page`) — **done** | Zuyan |
 | | | Country code database, direction classification | Hao |
 | | | Evaluation framework, test suite | Wilson |
 | **8** | Stage 4 | Timeline reconstruction logic, conflict resolution | Zuyan + Hao |
 | | | Report generation (JSON/PDF) | Wilson |
-| **9** | Stage 5 | Multilingual OCR (stretch), API endpoints | All |
+| **9** | Stage 5 | Multilingual OCR (stretch); local-VLM extractor (`LocalVLMExtractor`) if time allows | All |
 | **10** | Polish | Final report, demo preparation, sponsor presentation | All |
 
 ### Key Milestones
@@ -621,8 +648,8 @@ The team is well-positioned to deliver at minimum through **Stage 3** (full fiel
 ## Appendix A: References
 
 1. Ultralytics YOLOv8 — https://github.com/ultralytics/ultralytics
-2. EasyOCR / Tesseract — to be evaluated
-3. MiniCPM-o — https://github.com/OpenBMB/MiniCPM-o
+2. Anthropic Claude API (Vision) — https://docs.anthropic.com — implemented extraction provider (`claude-haiku-4-5`)
+3. MiniCPM-o — https://github.com/OpenBMB/MiniCPM-o (future local-VLM option)
 4. Roboflow Universe (Stamp Detection) — https://universe.roboflow.com
 5. Securiport — https://www.securiport.com
 6. Ooredoo Stamp Detection Model — https://huggingface.co/Ooredoo-Group/ooredoo-stamp-detection

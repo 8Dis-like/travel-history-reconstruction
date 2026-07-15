@@ -25,9 +25,18 @@ Example: {"date": "2024-03-15", "country": "GBR", "direction": "ENTRY", "raw_tex
 
 
 class ClaudeExtractor(BaseExtractor):
-    def __init__(self, api_key: str | None = None, model: str = "claude-haiku-4-5-20251001"):
+    def __init__(
+        self,
+        model: str,
+        api_key: str | None = None,
+        max_tokens: int = 256,
+    ):
+        """model is required — the pipeline supplies it from configs/pipeline.yaml
+        (ocr.claude.model) via create_extractor_from_config; there is no hardcoded
+        default model."""
         self._client = anthropic.Anthropic(api_key=api_key)
         self._model = model
+        self._max_tokens = max_tokens
 
     def extract(self, image: np.ndarray) -> ExtractionResult:
         try:
@@ -36,7 +45,7 @@ class ClaudeExtractor(BaseExtractor):
 
             message = self._client.messages.create(
                 model=self._model,
-                max_tokens=256,
+                max_tokens=self._max_tokens,
                 messages=[{
                     "role": "user",
                     "content": [
