@@ -12,16 +12,6 @@ The results from the pipeline run are as follows:
 
 To quickly verify that the auto-orientation, deskew, and contrast enhancement logic works exactly as expected, I generated side-by-side comparisons of the `raw` vs `enhanced` images.
 
-**Instructions:** Click through the carousel below to see how the system automatically righted the rotated passports and improved their contrast.
-
-````carousel
-![Page 001 - Corrected 90-degree rotation and improved contrast](C:/Users/LENOVO-PC/.gemini/antigravity/brain/1befe8fb-1e61-40b7-b3de-9eff0e6aded7/artifacts/compare_page_001.png)
-<!-- slide -->
-![Page 003 - Corrected 90-degree rotation and enhanced stamp visibility](C:/Users/LENOVO-PC/.gemini/antigravity/brain/1befe8fb-1e61-40b7-b3de-9eff0e6aded7/artifacts/compare_page_003.png)
-<!-- slide -->
-![Page 042 - Corrected 90-degree rotation and deskewed](C:/Users/LENOVO-PC/.gemini/antigravity/brain/1befe8fb-1e61-40b7-b3de-9eff0e6aded7/artifacts/compare_page_042.png)
-````
-
 ## 3. Specific Steps to Verify the Logic Locally
 
 Here are the concrete steps you and your team can take to systematically verify that the pipeline functions correctly:

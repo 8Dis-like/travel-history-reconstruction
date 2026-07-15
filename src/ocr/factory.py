@@ -26,7 +26,13 @@ def create_extractor(provider: str, **kwargs) -> BaseExtractor:
     if provider == "local":
         from src.ocr.local_extractor import LocalVLMExtractor
         return LocalVLMExtractor(**kwargs)
-    raise ValueError(f"unknown provider '{provider}' — choose 'claude' or 'local'")
+    if provider == "deepseek":
+        from src.ocr.deepseek_extractor import DeepseekExtractor
+        return DeepseekExtractor(**kwargs)
+    if provider == "gemini":
+        from src.ocr.gemini_extractor import GeminiExtractor
+        return GeminiExtractor(**kwargs)
+    raise ValueError(f"unknown provider '{provider}' — choose 'claude', 'local', 'deepseek', or 'gemini'")
 
 
 def create_extractor_from_config(

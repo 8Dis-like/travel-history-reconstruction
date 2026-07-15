@@ -1,42 +1,54 @@
 import type { TimelineEntry } from "./types";
 
-interface MockExtractedRecord {
+interface ExtractedFields {
   date: string | null;
   country: string | null;
   direction: "ENTRY" | "EXIT" | null;
   raw_text: string | null;
-  confidence: number;
+  extraction_confidence: number;
 }
 
-interface MockPdfExtractionResponse {
-  source_file: string;
-  records: MockExtractedRecord[];
+interface StampRecord {
+  stamp_id: string;
+  source_image: string;
+  bounding_box: number[];
+  detection_confidence: number;
+  extracted_fields: ExtractedFields;
+  extraction_timestamp: string;
+}
+
+interface PageExtractionResponse {
+  source_image: string;
+  total_stamps_detected: number;
+  total_stamps_parsed: number;
+  unreadable_stamps: number;
+  stamps: StampRecord[];
 }
 
 export async function extractMockPdf(file: File): Promise<TimelineEntry[]> {
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await fetch("/api/extract/mock/pdf", {
+  // Calling the REAL backend pipeline instead of the mock endpoint
+  const response = await fetch("/api/extract/page", {
     method: "POST",
     body: formData,
   });
 
   if (!response.ok) {
-    throw new Error(`extractMockPdf failed with status ${response.status}`);
+    throw new Error(`extract failed with status ${response.status}`);
   }
 
-  const data: MockPdfExtractionResponse = await response.json();
-
+  const data: PageExtractionResponse = await response.json();
   const batchToken = Math.random().toString(36).slice(2);
 
-  return data.records.map((record, index) => ({
+  return data.stamps.map((stamp, index) => ({
     id: `${batchToken}-${index}`,
-    sourceFile: data.source_file,
-    date: record.date,
-    country: record.country,
-    direction: record.direction,
-    rawText: record.raw_text,
-    confidence: record.confidence,
+    sourceFile: data.source_image,
+    date: stamp.extracted_fields.date,
+    country: stamp.extracted_fields.country,
+    direction: stamp.extracted_fields.direction,
+    rawText: stamp.extracted_fields.raw_text,
+    confidence: stamp.extracted_fields.extraction_confidence,
   }));
 }

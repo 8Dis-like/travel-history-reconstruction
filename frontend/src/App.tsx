@@ -23,8 +23,10 @@ export default function App() {
   const [demoError, setDemoError] = useState<string | null>(null);
 
   function addFiles(newFiles: File[]) {
-    const pdfFiles = newFiles.filter((f) => f.type === "application/pdf");
-    const items: UploadFileItem[] = pdfFiles.map((file) => ({
+    const validFiles = newFiles.filter((f) => 
+      f.type === "application/pdf" || f.type === "image/png" || f.type === "image/jpeg"
+    );
+    const items: UploadFileItem[] = validFiles.map((file) => ({
       id: makeId(),
       file,
       status: "pending",
