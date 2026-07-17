@@ -159,13 +159,13 @@ def test_detection_pretrained(args):
         return []
 
     print(f"\n{'='*70}")
-    print(f"  DETECTION PIPELINE TEST (pretrained COCO — baseline)")
+    print(f"  DETECTION PIPELINE TEST (Fine-tuned YOLOv8)")
     print(f"  Source: {source_dir.name}/ | Images: {len(image_files)}")
-    print(f"  NOTE: COCO model has no 'stamp' class — this is a smoke test")
+    print(f"  NOTE: Using best_stamp_model.pt")
     print(f"{'='*70}\n")
 
     detector = StampDetector(
-        model_path="yolov8s.pt",
+        model_path="runs/best_stamp_model.pt",
         confidence_threshold=0.25,  # Low threshold for baseline
     )
 
