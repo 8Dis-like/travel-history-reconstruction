@@ -24,7 +24,6 @@ import sys
 from pathlib import Path
 
 import cv2
-import numpy as np
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -32,6 +31,7 @@ load_dotenv()
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.ocr.factory import create_extractor_from_config  # noqa: E402
+from src.utils.rotation import rotate_image  # noqa: E402
 
 FIXTURES_DIR = Path(__file__).resolve().parent.parent / "tests" / "fixtures" / "stamps"
 
@@ -43,25 +43,6 @@ GROUND_TRUTH = {
     "hongkong_entry_1999.png": {"date": "1999-04-21", "country": "HKG", "direction": "ENTRY"},
     "colombia_entry_1997.png": {"date": "1997-06-01", "country": "COL", "direction": "ENTRY"},
 }
-
-
-def rotate_image(image: np.ndarray, angle_deg: float) -> np.ndarray:
-    """Rotate around center, expanding the canvas so nothing gets cropped."""
-    h, w = image.shape[:2]
-    center = (w / 2, h / 2)
-    matrix = cv2.getRotationMatrix2D(center, angle_deg, 1.0)
-
-    cos = abs(matrix[0, 0])
-    sin = abs(matrix[0, 1])
-    new_w = int(h * sin + w * cos)
-    new_h = int(h * cos + w * sin)
-
-    matrix[0, 2] += (new_w - w) / 2
-    matrix[1, 2] += (new_h - h) / 2
-
-    return cv2.warpAffine(
-        image, matrix, (new_w, new_h), borderMode=cv2.BORDER_CONSTANT, borderValue=(255, 255, 255)
-    )
 
 
 def main() -> None:

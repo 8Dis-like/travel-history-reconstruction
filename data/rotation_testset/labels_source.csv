@@ -1,0 +1,31 @@
+stamp_id,source_file,date,country,direction,label_confidence,note
+stamp12,clean_stamps_cropped/stamp12.png,1970-11-09,AUS,ENTRY,high,PERMITTED TO ENTER AUSTRALIA - Melbourne Airport
+stamp1252,clean_stamps_cropped/stamp1252.png,2000-03-17,JAM,ENTRY,med,Jamaica Immigration LANDED (faint)
+stamp135,clean_stamps_cropped/stamp135.png,2018-01-07,TUR,,med,Turkey HABUR land border; direction arrow unclear
+stamp1362,clean_stamps_cropped/stamp1362.png,2022-06-20,SSD,ENTRY,high,South Sudan Juba Intl - IMMIGRATION ENTRY
+stamp1408,clean_stamps_cropped/stamp1408.png,2023-09-27,ESP,ENTRY,high,Spain Madrid-Barajas - arrow in
+stamp1479,clean_stamps_cropped/stamp1479.png,2016-04-06,THA,ENTRY,high,Thailand Krabi - ADMITTED
+stamp171,clean_stamps_cropped/stamp171.png,2017-09-29,PRY,ENTRY,high,Paraguay Silvio Pettirossi - ENTRADA
+stamp21,clean_stamps_cropped/stamp21.png,2024-12-14,ETH,ENTRY,high,Ethiopia Bole - Arrival
+stamp240,clean_stamps_cropped/stamp240.png,2019-11-09,MAR,EXIT,high,Morocco Marrakech Menara - SORTIE (Arabic+French)
+stamp264,clean_stamps_cropped/stamp264.png,2003-05-21,CYM,ENTRY,high,Cayman Islands - ENTER
+stamp29,clean_stamps_cropped/stamp29.png,2024-09-23,DEU,EXIT,med,Germany Dusseldorf - arrow out
+stamp342,clean_stamps_cropped/stamp342.png,2006-05-11,SVK,ENTRY,high,Slovakia Sturovo - arrow in
+stamp416,clean_stamps_cropped/stamp416.png,1988-11-17,MYS,EXIT,high,Malaysia Padang Besar - KELUAR
+stamp479,clean_stamps_cropped/stamp479.png,2018-02-06,ARG,EXIT,high,Argentina - SALIDA
+stamp493,clean_stamps_cropped/stamp493.png,2019-05-14,MDV,ENTRY,high,Maldives Immigration - permitted to stay
+stamp522,clean_stamps_cropped/stamp522.png,2009-07-10,CHE,ENTRY,high,Switzerland Zurich - arrow in
+stamp544,clean_stamps_cropped/stamp544.png,1991-05-23,BLZ,EXIT,med,Belize Western Border - DEPARTURE (handwritten date)
+stamp550,clean_stamps_cropped/stamp550.png,2019-09-09,SGP,ENTRY,high,Singapore Visit Pass - permitted to enter
+stamp583,clean_stamps_cropped/stamp583.png,2024-01-02,PHL,EXIT,high,Philippines - DEPARTURE
+stamp617,clean_stamps_cropped/stamp617.png,2013-05-13,SOM,EXIT,high,Somalia Aden Adde Intl - EXIT (Arabic+English)
+stamp687,clean_stamps_cropped/stamp687.png,2022-10-05,IND,ENTRY,med,India Mumbai CSMI - ARRIVAL (faint)
+stamp730,clean_stamps_cropped/stamp730.png,2006-10-05,HRV,EXIT,high,Croatia Bregana - iz (izlaz=exit)
+stamp747,clean_stamps_cropped/stamp747.png,2008-07-10,CAN,,high,Canada Sud Ontario South; no entry/exit printed
+stamp861,clean_stamps_cropped/stamp861.png,2019-06-01,BHS,,high,Bahamas Prince George Dock; no entry/exit printed
+stamp911,clean_stamps_cropped/stamp911.png,2012-12-24,PAN,ENTRY,high,Panama Tocumen - ENTRADA
+stamp93,clean_stamps_cropped/stamp93.png,2019-03-23,FIN,,high,Finland Helsinki-Vantaa; direction icon unclear
+stamp940,clean_stamps_cropped/stamp940.png,2014-01-25,QAT,,high,Qatar Doha; no entry/exit printed
+stamp960,clean_stamps_cropped/stamp960.png,2016-07-14,KOR,EXIT,high,South Korea Incheon - DEPARTED
+stamp991,clean_stamps_cropped/stamp991.png,2017-07-09,TWN,EXIT,high,Taiwan TPE - DEPARTED (Chinese)
+stamp999,clean_stamps_cropped/stamp999.png,2004-12-20,CHE,ENTRY,med,Switzerland Rheinfelden - E=Einreise(entry)

@@ -30,6 +30,12 @@ data/synthetic_dataset/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 
+# Rotation robustness test set — large image binaries are ignored;
+# the labels_source.csv / labels.csv (the actual label assets) are tracked.
+data/rotation_testset/_candidates/
+data/rotation_testset/_candidates_preview/
+data/rotation_testset/images/
+
 # Model weights (large files)
 models/pretrained/*
 models/finetuned/*
