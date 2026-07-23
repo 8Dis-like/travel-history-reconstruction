@@ -14,10 +14,12 @@ from src.api.schemas import (
     HealthResponse,
     PageExtractionResponse,
     StampRecord,
+    timeline_to_out,
 )
 from src.detection.mock_detector import MockStampDetector
 from src.ocr.factory import create_extractor_from_config
 from src.preprocessing.enhancer import ImageEnhancer
+from src.reconstruction.timeline import TimelineEvent, build_timeline
 
 router = APIRouter()
 
@@ -124,10 +126,22 @@ async def extract_page(file: UploadFile = File(...)):
                 extraction_timestamp=datetime.now(timezone.utc),
             ))
 
+    timeline = build_timeline(
+        TimelineEvent(
+            date=s.extracted_fields.date,
+            country=s.extracted_fields.country,
+            direction=s.extracted_fields.direction,
+            stamp_id=s.stamp_id,
+            source_image=s.source_image,
+        )
+        for s in all_stamps
+    )
+
     return PageExtractionResponse(
         source_image=filename,
         total_stamps_detected=total_detected,
         total_stamps_parsed=len(all_stamps) - total_unreadable,
         unreadable_stamps=total_unreadable,
         stamps=all_stamps,
+        timeline=timeline_to_out(timeline),
     )
