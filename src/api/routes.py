@@ -18,6 +18,7 @@ from src.api.schemas import (
 from src.detection.mock_detector import MockStampDetector
 from src.ocr.factory import create_extractor_from_config
 from src.preprocessing.enhancer import ImageEnhancer
+from src.utils.rotation import rotate_image
 
 router = APIRouter()
 
@@ -94,12 +95,31 @@ async def extract_page(file: UploadFile = File(...)):
     total_unreadable = 0
 
     for page_name, raw_img in images:
-        enhanced, _ = _enhancer.process(raw_img)
-        detection_result = _detector.detect(enhanced, extract_crops=True, source_name=page_name)
+        best_count = -1
+        best_det = None
         
-        total_detected += len(detection_result.detections)
+        for angle in [0, 90, 180, 270]:
+            rot_img = rotate_image(raw_img, angle)
+            enhanced, _ = _enhancer.process(rot_img)
+            detection_result = _detector.detect(enhanced, extract_crops=True, source_name=page_name)
+            
+            if len(detection_result.detections) > best_count:
+                best_count = len(detection_result.detections)
+                best_det = detection_result
+            elif len(detection_result.detections) == best_count and best_count > 0:
+                avg_conf_cur = sum(d.confidence for d in best_det.detections) / best_count
+                avg_conf_new = sum(d.confidence for d in detection_result.detections) / best_count
+                if avg_conf_new > avg_conf_cur:
+                    best_det = detection_result
 
-        for det in detection_result.detections:
+        # Fallback if no stamps detected
+        if best_det is None:
+            enhanced, _ = _enhancer.process(raw_img)
+            best_det = _detector.detect(enhanced, extract_crops=True, source_name=page_name)
+
+        total_detected += len(best_det.detections)
+
+        for det in best_det.detections:
             if det.crop is None:
                 continue
 

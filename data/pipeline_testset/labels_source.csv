@@ -1,0 +1,2 @@
+image_file,expected_stamp_count,expected_dates,expected_countries
+# e.g., page_001.png,2,"2023-05-12|2023-05-20","GBR|FRA"

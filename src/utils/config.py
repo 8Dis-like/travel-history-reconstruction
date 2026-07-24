@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Configuration loader — reads YAML configs and provides typed access.
 """
