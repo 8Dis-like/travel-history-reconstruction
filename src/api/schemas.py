@@ -25,12 +25,43 @@ class StampRecord(BaseModel):
     extraction_timestamp: datetime
 
 
+class TimelineEventOut(BaseModel):
+    date: Optional[str]
+    country: Optional[str]
+    direction: Optional[str]
+    stamp_id: Optional[str] = None
+    source_image: Optional[str] = None
+
+
+class TimelineOut(BaseModel):
+    events: List[TimelineEventOut]   # placeable events, ascending by date
+    undated: List[TimelineEventOut]  # missing / invalid date, order preserved
+
+
+def timeline_to_out(timeline) -> TimelineOut:
+    """Convert a reconstruction.Timeline into its API response schema."""
+    def conv(e) -> TimelineEventOut:
+        return TimelineEventOut(
+            date=e.date,
+            country=e.country,
+            direction=e.direction,
+            stamp_id=e.stamp_id,
+            source_image=e.source_image,
+        )
+
+    return TimelineOut(
+        events=[conv(e) for e in timeline.events],
+        undated=[conv(e) for e in timeline.undated],
+    )
+
+
 class PageExtractionResponse(BaseModel):
     source_image: str
     total_stamps_detected: int
     total_stamps_parsed: int
     unreadable_stamps: int
     stamps: List[StampRecord]
+    timeline: TimelineOut
 
 
 class HealthResponse(BaseModel):
