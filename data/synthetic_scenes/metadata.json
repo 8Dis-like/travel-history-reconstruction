@@ -1,0 +1,2013 @@
+[
+ {
+  "image": "scene_00000.jpg",
+  "background": "page_339.png",
+  "width": 1476,
+  "height": 1982,
+  "stamps": [
+   {
+    "stamp_id": "stamp12",
+    "date": "1970-11-09",
+    "country": "AUS",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     766,
+     1123,
+     1276,
+     1616
+    ],
+    "position": [
+     758,
+     1116
+    ],
+    "size": [
+     524,
+     517
+    ],
+    "rotation": -18.02,
+    "scale": 0.284,
+    "opacity": 0.776
+   }
+  ]
+ },
+ {
+  "image": "scene_00001.jpg",
+  "background": "page_044.png",
+  "width": 1047,
+  "height": 1478,
+  "stamps": [
+   {
+    "stamp_id": "stamp1252",
+    "date": "2000-03-17",
+    "country": "JAM",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     733,
+     1331,
+     954,
+     1470
+    ],
+    "position": [
+     733,
+     1330
+    ],
+    "size": [
+     222,
+     141
+    ],
+    "rotation": 0.0,
+    "scale": 0.213,
+    "opacity": 0.89
+   },
+   {
+    "stamp_id": "stamp12",
+    "date": "1970-11-09",
+    "country": "AUS",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     8,
+     327,
+     308,
+     617
+    ],
+    "position": [
+     6,
+     326
+    ],
+    "size": [
+     305,
+     297
+    ],
+    "rotation": -2.54,
+    "scale": 0.278,
+    "opacity": 0.82
+   },
+   {
+    "stamp_id": "stamp135",
+    "date": "2018-01-07",
+    "country": "TUR",
+    "direction": null,
+    "bbox_xyxy": [
+     346,
+     214,
+     667,
+     461
+    ],
+    "position": [
+     344,
+     209
+    ],
+    "size": [
+     330,
+     254
+    ],
+    "rotation": -17.23,
+    "scale": 0.278,
+    "opacity": 0.989
+   },
+   {
+    "stamp_id": "stamp171",
+    "date": "2017-09-29",
+    "country": "PRY",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     67,
+     962,
+     268,
+     1149
+    ],
+    "position": [
+     44,
+     940
+    ],
+    "size": [
+     248,
+     235
+    ],
+    "rotation": 17.37,
+    "scale": 0.193,
+    "opacity": 0.901
+   }
+  ]
+ },
+ {
+  "image": "scene_00002.jpg",
+  "background": "page_284.png",
+  "width": 511,
+  "height": 698,
+  "stamps": [
+   {
+    "stamp_id": "stamp999",
+    "date": "2004-12-20",
+    "country": "CHE",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     316,
+     371,
+     434,
+     434
+    ],
+    "position": [
+     316,
+     370
+    ],
+    "size": [
+     119,
+     65
+    ],
+    "rotation": 0.0,
+    "scale": 0.233,
+    "opacity": 0.957
+   }
+  ]
+ },
+ {
+  "image": "scene_00003.jpg",
+  "background": "page_305.png",
+  "width": 496,
+  "height": 703,
+  "stamps": [
+   {
+    "stamp_id": "stamp747",
+    "date": "2008-07-10",
+    "country": "CAN",
+    "direction": null,
+    "bbox_xyxy": [
+     120,
+     104,
+     219,
+     175
+    ],
+    "position": [
+     119,
+     103
+    ],
+    "size": [
+     102,
+     73
+    ],
+    "rotation": -10.53,
+    "scale": 0.186,
+    "opacity": 0.77
+   },
+   {
+    "stamp_id": "stamp135",
+    "date": "2018-01-07",
+    "country": "TUR",
+    "direction": null,
+    "bbox_xyxy": [
+     183,
+     216,
+     310,
+     313
+    ],
+    "position": [
+     181,
+     214
+    ],
+    "size": [
+     131,
+     101
+    ],
+    "rotation": 16.71,
+    "scale": 0.233,
+    "opacity": 0.791
+   }
+  ]
+ },
+ {
+  "image": "scene_00004.jpg",
+  "background": "page_355.png",
+  "width": 1658,
+  "height": 2016,
+  "stamps": [
+   {
+    "stamp_id": "stamp747",
+    "date": "2008-07-10",
+    "country": "CAN",
+    "direction": null,
+    "bbox_xyxy": [
+     501,
+     334,
+     948,
+     615
+    ],
+    "position": [
+     501,
+     334
+    ],
+    "size": [
+     448,
+     282
+    ],
+    "rotation": 0.0,
+    "scale": 0.271,
+    "opacity": 0.793
+   },
+   {
+    "stamp_id": "stamp999",
+    "date": "2004-12-20",
+    "country": "CHE",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     463,
+     1414,
+     895,
+     1745
+    ],
+    "position": [
+     449,
+     1402
+    ],
+    "size": [
+     459,
+     355
+    ],
+    "rotation": 21.27,
+    "scale": 0.245,
+    "opacity": 0.922
+   },
+   {
+    "stamp_id": "stamp730",
+    "date": "2006-10-05",
+    "country": "HRV",
+    "direction": "EXIT",
+    "bbox_xyxy": [
+     65,
+     1648,
+     437,
+     1849
+    ],
+    "position": [
+     65,
+     1648
+    ],
+    "size": [
+     373,
+     202
+    ],
+    "rotation": 0.0,
+    "scale": 0.225,
+    "opacity": 0.764
+   }
+  ]
+ },
+ {
+  "image": "scene_00005.jpg",
+  "background": "page_163.png",
+  "width": 316,
+  "height": 469,
+  "stamps": [
+   {
+    "stamp_id": "stamp240",
+    "date": "2019-11-09",
+    "country": "MAR",
+    "direction": "EXIT",
+    "bbox_xyxy": [
+     167,
+     255,
+     264,
+     322
+    ],
+    "position": [
+     167,
+     255
+    ],
+    "size": [
+     98,
+     68
+    ],
+    "rotation": 0.0,
+    "scale": 0.312,
+    "opacity": 0.829
+   },
+   {
+    "stamp_id": "stamp135",
+    "date": "2018-01-07",
+    "country": "TUR",
+    "direction": null,
+    "bbox_xyxy": [
+     67,
+     71,
+     140,
+     114
+    ],
+    "position": [
+     67,
+     71
+    ],
+    "size": [
+     74,
+     44
+    ],
+    "rotation": 0.0,
+    "scale": 0.235,
+    "opacity": 0.865
+   },
+   {
+    "stamp_id": "stamp171",
+    "date": "2017-09-29",
+    "country": "PRY",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     149,
+     219,
+     215,
+     278
+    ],
+    "position": [
+     149,
+     219
+    ],
+    "size": [
+     67,
+     60
+    ],
+    "rotation": 0.0,
+    "scale": 0.215,
+    "opacity": 0.816
+   },
+   {
+    "stamp_id": "stamp999",
+    "date": "2004-12-20",
+    "country": "CHE",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     25,
+     391,
+     126,
+     457
+    ],
+    "position": [
+     23,
+     386
+    ],
+    "size": [
+     106,
+     74
+    ],
+    "rotation": -14.03,
+    "scale": 0.306,
+    "opacity": 0.999
+   }
+  ]
+ },
+ {
+  "image": "scene_00006.jpg",
+  "background": "page_024.png",
+  "width": 1005,
+  "height": 1474,
+  "stamps": [
+   {
+    "stamp_id": "stamp1408",
+    "date": "2023-09-27",
+    "country": "ESP",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     65,
+     788,
+     333,
+     969
+    ],
+    "position": [
+     65,
+     788
+    ],
+    "size": [
+     269,
+     182
+    ],
+    "rotation": 0.0,
+    "scale": 0.268,
+    "opacity": 0.856
+   }
+  ]
+ },
+ {
+  "image": "scene_00007.jpg",
+  "background": "page_202.png",
+  "width": 1900,
+  "height": 2700,
+  "stamps": [
+   {
+    "stamp_id": "stamp544",
+    "date": "1991-05-23",
+    "country": "BLZ",
+    "direction": "EXIT",
+    "bbox_xyxy": [
+     1099,
+     1092,
+     1690,
+     1621
+    ],
+    "position": [
+     1099,
+     1092
+    ],
+    "size": [
+     592,
+     535
+    ],
+    "rotation": 0.0,
+    "scale": 0.312,
+    "opacity": 0.779
+   },
+   {
+    "stamp_id": "stamp240",
+    "date": "2019-11-09",
+    "country": "MAR",
+    "direction": "EXIT",
+    "bbox_xyxy": [
+     11,
+     1101,
+     606,
+     1549
+    ],
+    "position": [
+     6,
+     1078
+    ],
+    "size": [
+     606,
+     474
+    ],
+    "rotation": -10.32,
+    "scale": 0.288,
+    "opacity": 0.79
+   },
+   {
+    "stamp_id": "stamp550",
+    "date": "2019-09-09",
+    "country": "SGP",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     313,
+     1531,
+     912,
+     2040
+    ],
+    "position": [
+     313,
+     1531
+    ],
+    "size": [
+     600,
+     510
+    ],
+    "rotation": 0.0,
+    "scale": 0.316,
+    "opacity": 0.877
+   },
+   {
+    "stamp_id": "stamp960",
+    "date": "2016-07-14",
+    "country": "KOR",
+    "direction": "EXIT",
+    "bbox_xyxy": [
+     1086,
+     2,
+     1629,
+     533
+    ],
+    "position": [
+     1086,
+     2
+    ],
+    "size": [
+     544,
+     532
+    ],
+    "rotation": 0.0,
+    "scale": 0.287,
+    "opacity": 0.945
+   }
+  ]
+ },
+ {
+  "image": "scene_00008.jpg",
+  "background": "page_316.png",
+  "width": 1496,
+  "height": 1933,
+  "stamps": [
+   {
+    "stamp_id": "stamp522",
+    "date": "2009-07-10",
+    "country": "CHE",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     629,
+     490,
+     1091,
+     816
+    ],
+    "position": [
+     629,
+     490
+    ],
+    "size": [
+     463,
+     327
+    ],
+    "rotation": 0.0,
+    "scale": 0.31,
+    "opacity": 0.958
+   },
+   {
+    "stamp_id": "stamp12",
+    "date": "1970-11-09",
+    "country": "AUS",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     175,
+     1498,
+     455,
+     1770
+    ],
+    "position": [
+     175,
+     1498
+    ],
+    "size": [
+     281,
+     273
+    ],
+    "rotation": 0.0,
+    "scale": 0.188,
+    "opacity": 0.987
+   },
+   {
+    "stamp_id": "stamp1362",
+    "date": "2022-06-20",
+    "country": "SSD",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     292,
+     1378,
+     645,
+     1630
+    ],
+    "position": [
+     262,
+     1351
+    ],
+    "size": [
+     413,
+     306
+    ],
+    "rotation": 13.03,
+    "scale": 0.248,
+    "opacity": 0.941
+   }
+  ]
+ },
+ {
+  "image": "scene_00009.jpg",
+  "background": "page_253.png",
+  "width": 968,
+  "height": 1398,
+  "stamps": [
+   {
+    "stamp_id": "stamp240",
+    "date": "2019-11-09",
+    "country": "MAR",
+    "direction": "EXIT",
+    "bbox_xyxy": [
+     213,
+     651,
+     534,
+     907
+    ],
+    "position": [
+     205,
+     638
+    ],
+    "size": [
+     334,
+     272
+    ],
+    "rotation": -14.41,
+    "scale": 0.302,
+    "opacity": 0.885
+   },
+   {
+    "stamp_id": "stamp544",
+    "date": "1991-05-23",
+    "country": "BLZ",
+    "direction": "EXIT",
+    "bbox_xyxy": [
+     529,
+     924,
+     756,
+     1127
+    ],
+    "position": [
+     529,
+     924
+    ],
+    "size": [
+     228,
+     206
+    ],
+    "rotation": 0.0,
+    "scale": 0.236,
+    "opacity": 0.843
+   }
+  ]
+ },
+ {
+  "image": "scene_00010.jpg",
+  "background": "page_061.png",
+  "width": 1019,
+  "height": 1478,
+  "stamps": [
+   {
+    "stamp_id": "stamp21",
+    "date": "2024-12-14",
+    "country": "ETH",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     225,
+     14,
+     455,
+     159
+    ],
+    "position": [
+     225,
+     14
+    ],
+    "size": [
+     231,
+     146
+    ],
+    "rotation": 0.0,
+    "scale": 0.227,
+    "opacity": 0.808
+   },
+   {
+    "stamp_id": "stamp135",
+    "date": "2018-01-07",
+    "country": "TUR",
+    "direction": null,
+    "bbox_xyxy": [
+     32,
+     676,
+     224,
+     790
+    ],
+    "position": [
+     32,
+     676
+    ],
+    "size": [
+     193,
+     115
+    ],
+    "rotation": 0.0,
+    "scale": 0.19,
+    "opacity": 0.807
+   }
+  ]
+ },
+ {
+  "image": "scene_00011.jpg",
+  "background": "page_036.png",
+  "width": 1016,
+  "height": 1479,
+  "stamps": [
+   {
+    "stamp_id": "stamp240",
+    "date": "2019-11-09",
+    "country": "MAR",
+    "direction": "EXIT",
+    "bbox_xyxy": [
+     585,
+     1180,
+     834,
+     1354
+    ],
+    "position": [
+     584,
+     1180
+    ],
+    "size": [
+     251,
+     175
+    ],
+    "rotation": 0.0,
+    "scale": 0.248,
+    "opacity": 0.931
+   },
+   {
+    "stamp_id": "stamp730",
+    "date": "2006-10-05",
+    "country": "HRV",
+    "direction": "EXIT",
+    "bbox_xyxy": [
+     194,
+     193,
+     443,
+     327
+    ],
+    "position": [
+     194,
+     193
+    ],
+    "size": [
+     250,
+     135
+    ],
+    "rotation": 0.0,
+    "scale": 0.246,
+    "opacity": 0.952
+   }
+  ]
+ },
+ {
+  "image": "scene_00012.jpg",
+  "background": "page_049.png",
+  "width": 1022,
+  "height": 1480,
+  "stamps": [
+   {
+    "stamp_id": "stamp342",
+    "date": "2006-05-11",
+    "country": "SVK",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     100,
+     124,
+     387,
+     331
+    ],
+    "position": [
+     100,
+     124
+    ],
+    "size": [
+     288,
+     208
+    ],
+    "rotation": 0.0,
+    "scale": 0.282,
+    "opacity": 0.996
+   },
+   {
+    "stamp_id": "stamp479",
+    "date": "2018-02-06",
+    "country": "ARG",
+    "direction": "EXIT",
+    "bbox_xyxy": [
+     222,
+     1154,
+     454,
+     1299
+    ],
+    "position": [
+     194,
+     1098
+    ],
+    "size": [
+     289,
+     258
+    ],
+    "rotation": 18.08,
+    "scale": 0.236,
+    "opacity": 0.812
+   },
+   {
+    "stamp_id": "stamp493",
+    "date": "2019-05-14",
+    "country": "MDV",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     95,
+     935,
+     344,
+     1140
+    ],
+    "position": [
+     77,
+     907
+    ],
+    "size": [
+     284,
+     255
+    ],
+    "rotation": -11.07,
+    "scale": 0.243,
+    "opacity": 0.812
+   },
+   {
+    "stamp_id": "stamp960",
+    "date": "2016-07-14",
+    "country": "KOR",
+    "direction": "EXIT",
+    "bbox_xyxy": [
+     667,
+     1107,
+     965,
+     1398
+    ],
+    "position": [
+     667,
+     1107
+    ],
+    "size": [
+     299,
+     292
+    ],
+    "rotation": 0.0,
+    "scale": 0.293,
+    "opacity": 0.774
+   }
+  ]
+ },
+ {
+  "image": "scene_00013.jpg",
+  "background": "page_007.png",
+  "width": 1007,
+  "height": 1473,
+  "stamps": [
+   {
+    "stamp_id": "stamp999",
+    "date": "2004-12-20",
+    "country": "CHE",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     415,
+     133,
+     704,
+     295
+    ],
+    "position": [
+     410,
+     120
+    ],
+    "size": [
+     299,
+     182
+    ],
+    "rotation": -4.68,
+    "scale": 0.285,
+    "opacity": 0.87
+   }
+  ]
+ },
+ {
+  "image": "scene_00014.jpg",
+  "background": "page_084.png",
+  "width": 991,
+  "height": 1485,
+  "stamps": [
+   {
+    "stamp_id": "stamp12",
+    "date": "1970-11-09",
+    "country": "AUS",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     572,
+     998,
+     873,
+     1287
+    ],
+    "position": [
+     569,
+     996
+    ],
+    "size": [
+     307,
+     299
+    ],
+    "rotation": -3.85,
+    "scale": 0.29,
+    "opacity": 0.989
+   },
+   {
+    "stamp_id": "stamp416",
+    "date": "1988-11-17",
+    "country": "MYS",
+    "direction": "EXIT",
+    "bbox_xyxy": [
+     589,
+     151,
+     772,
+     302
+    ],
+    "position": [
+     555,
+     124
+    ],
+    "size": [
+     233,
+     193
+    ],
+    "rotation": 23.44,
+    "scale": 0.202,
+    "opacity": 0.895
+   },
+   {
+    "stamp_id": "stamp240",
+    "date": "2019-11-09",
+    "country": "MAR",
+    "direction": "EXIT",
+    "bbox_xyxy": [
+     547,
+     327,
+     835,
+     538
+    ],
+    "position": [
+     543,
+     322
+    ],
+    "size": [
+     296,
+     219
+    ],
+    "rotation": 4.21,
+    "scale": 0.285,
+    "opacity": 0.876
+   },
+   {
+    "stamp_id": "stamp999",
+    "date": "2004-12-20",
+    "country": "CHE",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     70,
+     1218,
+     255,
+     1319
+    ],
+    "position": [
+     70,
+     1218
+    ],
+    "size": [
+     186,
+     102
+    ],
+    "rotation": 0.0,
+    "scale": 0.188,
+    "opacity": 0.963
+   }
+  ]
+ },
+ {
+  "image": "scene_00015.jpg",
+  "background": "page_034.png",
+  "width": 1017,
+  "height": 1482,
+  "stamps": [
+   {
+    "stamp_id": "stamp416",
+    "date": "1988-11-17",
+    "country": "MYS",
+    "direction": "EXIT",
+    "bbox_xyxy": [
+     40,
+     1268,
+     356,
+     1463
+    ],
+    "position": [
+     40,
+     1268
+    ],
+    "size": [
+     317,
+     197
+    ],
+    "rotation": 0.0,
+    "scale": 0.312,
+    "opacity": 0.895
+   },
+   {
+    "stamp_id": "stamp1362",
+    "date": "2022-06-20",
+    "country": "SSD",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     323,
+     534,
+     516,
+     652
+    ],
+    "position": [
+     323,
+     534
+    ],
+    "size": [
+     194,
+     119
+    ],
+    "rotation": 0.0,
+    "scale": 0.191,
+    "opacity": 0.891
+   }
+  ]
+ },
+ {
+  "image": "scene_00016.jpg",
+  "background": "page_104.png",
+  "width": 1041,
+  "height": 1475,
+  "stamps": [
+   {
+    "stamp_id": "stamp21",
+    "date": "2024-12-14",
+    "country": "ETH",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     769,
+     148,
+     974,
+     277
+    ],
+    "position": [
+     769,
+     148
+    ],
+    "size": [
+     206,
+     130
+    ],
+    "rotation": 0.0,
+    "scale": 0.198,
+    "opacity": 0.864
+   },
+   {
+    "stamp_id": "stamp240",
+    "date": "2019-11-09",
+    "country": "MAR",
+    "direction": "EXIT",
+    "bbox_xyxy": [
+     103,
+     151,
+     289,
+     280
+    ],
+    "position": [
+     102,
+     150
+    ],
+    "size": [
+     188,
+     131
+    ],
+    "rotation": 0.0,
+    "scale": 0.181,
+    "opacity": 0.891
+   },
+   {
+    "stamp_id": "stamp416",
+    "date": "1988-11-17",
+    "country": "MYS",
+    "direction": "EXIT",
+    "bbox_xyxy": [
+     357,
+     140,
+     621,
+     302
+    ],
+    "position": [
+     357,
+     140
+    ],
+    "size": [
+     265,
+     164
+    ],
+    "rotation": 0.0,
+    "scale": 0.255,
+    "opacity": 0.783
+   }
+  ]
+ },
+ {
+  "image": "scene_00017.jpg",
+  "background": "page_125.png",
+  "width": 1002,
+  "height": 1472,
+  "stamps": [
+   {
+    "stamp_id": "stamp264",
+    "date": "2003-05-21",
+    "country": "CYM",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     669,
+     1083,
+     965,
+     1287
+    ],
+    "position": [
+     669,
+     1083
+    ],
+    "size": [
+     297,
+     205
+    ],
+    "rotation": 0.0,
+    "scale": 0.297,
+    "opacity": 0.903
+   },
+   {
+    "stamp_id": "stamp1479",
+    "date": "2016-04-06",
+    "country": "THA",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     679,
+     212,
+     859,
+     324
+    ],
+    "position": [
+     679,
+     212
+    ],
+    "size": [
+     181,
+     113
+    ],
+    "rotation": 0.0,
+    "scale": 0.181,
+    "opacity": 0.825
+   },
+   {
+    "stamp_id": "stamp493",
+    "date": "2019-05-14",
+    "country": "MDV",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     603,
+     378,
+     916,
+     629
+    ],
+    "position": [
+     566,
+     318
+    ],
+    "size": [
+     384,
+     354
+    ],
+    "rotation": -19.23,
+    "scale": 0.311,
+    "opacity": 0.777
+   }
+  ]
+ },
+ {
+  "image": "scene_00018.jpg",
+  "background": "page_139.png",
+  "width": 998,
+  "height": 1476,
+  "stamps": [
+   {
+    "stamp_id": "stamp617",
+    "date": "2013-05-13",
+    "country": "SOM",
+    "direction": "EXIT",
+    "bbox_xyxy": [
+     517,
+     1000,
+     743,
+     1146
+    ],
+    "position": [
+     517,
+     1000
+    ],
+    "size": [
+     227,
+     147
+    ],
+    "rotation": 0.0,
+    "scale": 0.228,
+    "opacity": 0.963
+   },
+   {
+    "stamp_id": "stamp171",
+    "date": "2017-09-29",
+    "country": "PRY",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     649,
+     867,
+     862,
+     1058
+    ],
+    "position": [
+     649,
+     867
+    ],
+    "size": [
+     214,
+     192
+    ],
+    "rotation": 0.0,
+    "scale": 0.215,
+    "opacity": 0.763
+   },
+   {
+    "stamp_id": "stamp747",
+    "date": "2008-07-10",
+    "country": "CAN",
+    "direction": null,
+    "bbox_xyxy": [
+     268,
+     333,
+     583,
+     555
+    ],
+    "position": [
+     268,
+     330
+    ],
+    "size": [
+     319,
+     227
+    ],
+    "rotation": -8.32,
+    "scale": 0.296,
+    "opacity": 0.783
+   }
+  ]
+ },
+ {
+  "image": "scene_00019.jpg",
+  "background": "page_391.png",
+  "width": 459,
+  "height": 616,
+  "stamps": [
+   {
+    "stamp_id": "stamp550",
+    "date": "2019-09-09",
+    "country": "SGP",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     76,
+     36,
+     164,
+     110
+    ],
+    "position": [
+     76,
+     36
+    ],
+    "size": [
+     89,
+     75
+    ],
+    "rotation": 0.0,
+    "scale": 0.196,
+    "opacity": 0.923
+   },
+   {
+    "stamp_id": "stamp747",
+    "date": "2008-07-10",
+    "country": "CAN",
+    "direction": null,
+    "bbox_xyxy": [
+     157,
+     373,
+     292,
+     457
+    ],
+    "position": [
+     157,
+     373
+    ],
+    "size": [
+     136,
+     85
+    ],
+    "rotation": 0.0,
+    "scale": 0.297,
+    "opacity": 0.787
+   },
+   {
+    "stamp_id": "stamp479",
+    "date": "2018-02-06",
+    "country": "ARG",
+    "direction": "EXIT",
+    "bbox_xyxy": [
+     183,
+     107,
+     322,
+     217
+    ],
+    "position": [
+     183,
+     107
+    ],
+    "size": [
+     140,
+     111
+    ],
+    "rotation": 0.0,
+    "scale": 0.306,
+    "opacity": 0.965
+   },
+   {
+    "stamp_id": "stamp12",
+    "date": "1970-11-09",
+    "country": "AUS",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     286,
+     452,
+     411,
+     573
+    ],
+    "position": [
+     286,
+     452
+    ],
+    "size": [
+     126,
+     122
+    ],
+    "rotation": 0.0,
+    "scale": 0.275,
+    "opacity": 0.838
+   }
+  ]
+ },
+ {
+  "image": "scene_00020.jpg",
+  "background": "page_217.png",
+  "width": 527,
+  "height": 765,
+  "stamps": [
+   {
+    "stamp_id": "stamp999",
+    "date": "2004-12-20",
+    "country": "CHE",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     211,
+     26,
+     368,
+     111
+    ],
+    "position": [
+     211,
+     25
+    ],
+    "size": [
+     158,
+     87
+    ],
+    "rotation": 0.0,
+    "scale": 0.301,
+    "opacity": 0.953
+   },
+   {
+    "stamp_id": "stamp21",
+    "date": "2024-12-14",
+    "country": "ETH",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     210,
+     685,
+     317,
+     752
+    ],
+    "position": [
+     210,
+     685
+    ],
+    "size": [
+     108,
+     68
+    ],
+    "rotation": 0.0,
+    "scale": 0.205,
+    "opacity": 0.946
+   }
+  ]
+ },
+ {
+  "image": "scene_00021.jpg",
+  "background": "page_388.png",
+  "width": 458,
+  "height": 605,
+  "stamps": [
+   {
+    "stamp_id": "stamp240",
+    "date": "2019-11-09",
+    "country": "MAR",
+    "direction": "EXIT",
+    "bbox_xyxy": [
+     117,
+     106,
+     266,
+     229
+    ],
+    "position": [
+     113,
+     102
+    ],
+    "size": [
+     156,
+     130
+    ],
+    "rotation": 18.61,
+    "scale": 0.29,
+    "opacity": 0.965
+   },
+   {
+    "stamp_id": "stamp1479",
+    "date": "2016-04-06",
+    "country": "THA",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     13,
+     338,
+     158,
+     442
+    ],
+    "position": [
+     12,
+     337
+    ],
+    "size": [
+     148,
+     106
+    ],
+    "rotation": -9.74,
+    "scale": 0.294,
+    "opacity": 0.949
+   }
+  ]
+ },
+ {
+  "image": "scene_00022.jpg",
+  "background": "page_098.png",
+  "width": 989,
+  "height": 1472,
+  "stamps": [
+   {
+    "stamp_id": "stamp29",
+    "date": "2024-09-23",
+    "country": "DEU",
+    "direction": "EXIT",
+    "bbox_xyxy": [
+     554,
+     684,
+     876,
+     924
+    ],
+    "position": [
+     549,
+     678
+    ],
+    "size": [
+     337,
+     253
+    ],
+    "rotation": 7.07,
+    "scale": 0.315,
+    "opacity": 0.85
+   },
+   {
+    "stamp_id": "stamp240",
+    "date": "2019-11-09",
+    "country": "MAR",
+    "direction": "EXIT",
+    "bbox_xyxy": [
+     282,
+     89,
+     635,
+     393
+    ],
+    "position": [
+     271,
+     78
+    ],
+    "size": [
+     370,
+     321
+    ],
+    "rotation": 23.52,
+    "scale": 0.311,
+    "opacity": 0.795
+   },
+   {
+    "stamp_id": "stamp960",
+    "date": "2016-07-14",
+    "country": "KOR",
+    "direction": "EXIT",
+    "bbox_xyxy": [
+     635,
+     1065,
+     831,
+     1253
+    ],
+    "position": [
+     620,
+     1047
+    ],
+    "size": [
+     227,
+     224
+    ],
+    "rotation": 11.43,
+    "scale": 0.195,
+    "opacity": 0.828
+   },
+   {
+    "stamp_id": "stamp135",
+    "date": "2018-01-07",
+    "country": "TUR",
+    "direction": null,
+    "bbox_xyxy": [
+     45,
+     893,
+     238,
+     1008
+    ],
+    "position": [
+     45,
+     893
+    ],
+    "size": [
+     194,
+     116
+    ],
+    "rotation": 0.0,
+    "scale": 0.196,
+    "opacity": 0.798
+   }
+  ]
+ },
+ {
+  "image": "scene_00023.jpg",
+  "background": "page_000.png",
+  "width": 1005,
+  "height": 1471,
+  "stamps": [
+   {
+    "stamp_id": "stamp342",
+    "date": "2006-05-11",
+    "country": "SVK",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     321,
+     255,
+     510,
+     391
+    ],
+    "position": [
+     321,
+     255
+    ],
+    "size": [
+     190,
+     137
+    ],
+    "rotation": 0.0,
+    "scale": 0.19,
+    "opacity": 0.833
+   },
+   {
+    "stamp_id": "stamp479",
+    "date": "2018-02-06",
+    "country": "ARG",
+    "direction": "EXIT",
+    "bbox_xyxy": [
+     431,
+     615,
+     709,
+     863
+    ],
+    "position": [
+     412,
+     605
+    ],
+    "size": [
+     316,
+     269
+    ],
+    "rotation": -9.54,
+    "scale": 0.281,
+    "opacity": 0.852
+   }
+  ]
+ },
+ {
+  "image": "scene_00024.jpg",
+  "background": "page_293.png",
+  "width": 496,
+  "height": 716,
+  "stamps": [
+   {
+    "stamp_id": "stamp171",
+    "date": "2017-09-29",
+    "country": "PRY",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     303,
+     319,
+     438,
+     443
+    ],
+    "position": [
+     291,
+     308
+    ],
+    "size": [
+     159,
+     149
+    ],
+    "rotation": 12.41,
+    "scale": 0.273,
+    "opacity": 0.794
+   },
+   {
+    "stamp_id": "stamp479",
+    "date": "2018-02-06",
+    "country": "ARG",
+    "direction": "EXIT",
+    "bbox_xyxy": [
+     107,
+     440,
+     223,
+     532
+    ],
+    "position": [
+     107,
+     440
+    ],
+    "size": [
+     117,
+     93
+    ],
+    "rotation": 0.0,
+    "scale": 0.237,
+    "opacity": 0.826
+   }
+  ]
+ },
+ {
+  "image": "scene_00025.jpg",
+  "background": "page_414.png",
+  "width": 462,
+  "height": 618,
+  "stamps": [
+   {
+    "stamp_id": "stamp493",
+    "date": "2019-05-14",
+    "country": "MDV",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     86,
+     86,
+     201,
+     184
+    ],
+    "position": [
+     86,
+     86
+    ],
+    "size": [
+     116,
+     99
+    ],
+    "rotation": 0.0,
+    "scale": 0.252,
+    "opacity": 0.99
+   },
+   {
+    "stamp_id": "stamp730",
+    "date": "2006-10-05",
+    "country": "HRV",
+    "direction": "EXIT",
+    "bbox_xyxy": [
+     47,
+     240,
+     147,
+     293
+    ],
+    "position": [
+     47,
+     240
+    ],
+    "size": [
+     101,
+     54
+    ],
+    "rotation": 0.0,
+    "scale": 0.22,
+    "opacity": 0.905
+   },
+   {
+    "stamp_id": "stamp171",
+    "date": "2017-09-29",
+    "country": "PRY",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     137,
+     254,
+     263,
+     371
+    ],
+    "position": [
+     125,
+     243
+    ],
+    "size": [
+     152,
+     143
+    ],
+    "rotation": -15.04,
+    "scale": 0.274,
+    "opacity": 0.756
+   }
+  ]
+ },
+ {
+  "image": "scene_00026.jpg",
+  "background": "page_322.png",
+  "width": 1398,
+  "height": 1813,
+  "stamps": [
+   {
+    "stamp_id": "stamp493",
+    "date": "2019-05-14",
+    "country": "MDV",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     786,
+     1012,
+     1117,
+     1294
+    ],
+    "position": [
+     786,
+     1012
+    ],
+    "size": [
+     332,
+     283
+    ],
+    "rotation": 0.0,
+    "scale": 0.238,
+    "opacity": 0.799
+   }
+  ]
+ },
+ {
+  "image": "scene_00027.jpg",
+  "background": "page_211.png",
+  "width": 1900,
+  "height": 2700,
+  "stamps": [
+   {
+    "stamp_id": "stamp1408",
+    "date": "2023-09-27",
+    "country": "ESP",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     218,
+     1741,
+     741,
+     2096
+    ],
+    "position": [
+     218,
+     1741
+    ],
+    "size": [
+     524,
+     356
+    ],
+    "rotation": 0.0,
+    "scale": 0.276,
+    "opacity": 0.965
+   },
+   {
+    "stamp_id": "stamp687",
+    "date": "2022-10-05",
+    "country": "IND",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     951,
+     205,
+     1350,
+     439
+    ],
+    "position": [
+     951,
+     205
+    ],
+    "size": [
+     400,
+     235
+    ],
+    "rotation": 0.0,
+    "scale": 0.211,
+    "opacity": 0.924
+   }
+  ]
+ },
+ {
+  "image": "scene_00028.jpg",
+  "background": "page_295.png",
+  "width": 478,
+  "height": 692,
+  "stamps": [
+   {
+    "stamp_id": "stamp999",
+    "date": "2004-12-20",
+    "country": "CHE",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     287,
+     612,
+     380,
+     662
+    ],
+    "position": [
+     286,
+     609
+    ],
+    "size": [
+     96,
+     55
+    ],
+    "rotation": -1.77,
+    "scale": 0.197,
+    "opacity": 0.883
+   },
+   {
+    "stamp_id": "stamp960",
+    "date": "2016-07-14",
+    "country": "KOR",
+    "direction": "EXIT",
+    "bbox_xyxy": [
+     368,
+     516,
+     474,
+     619
+    ],
+    "position": [
+     368,
+     516
+    ],
+    "size": [
+     107,
+     104
+    ],
+    "rotation": 0.0,
+    "scale": 0.224,
+    "opacity": 0.861
+   }
+  ]
+ },
+ {
+  "image": "scene_00029.jpg",
+  "background": "page_227.png",
+  "width": 526,
+  "height": 769,
+  "stamps": [
+   {
+    "stamp_id": "stamp991",
+    "date": "2017-07-09",
+    "country": "TWN",
+    "direction": "EXIT",
+    "bbox_xyxy": [
+     277,
+     497,
+     403,
+     628
+    ],
+    "position": [
+     266,
+     496
+    ],
+    "size": [
+     153,
+     145
+    ],
+    "rotation": -12.64,
+    "scale": 0.246,
+    "opacity": 0.909
+   },
+   {
+    "stamp_id": "stamp1479",
+    "date": "2016-04-06",
+    "country": "THA",
+    "direction": "ENTRY",
+    "bbox_xyxy": [
+     140,
+     344,
+     299,
+     474
+    ],
+    "position": [
+     139,
+     343
+    ],
+    "size": [
+     162,
+     133
+    ],
+    "rotation": -21.13,
+    "scale": 0.268,
+    "opacity": 0.821
+   },
+   {
+    "stamp_id": "stamp861",
+    "date": "2019-06-01",
+    "country": "BHS",
+    "direction": null,
+    "bbox_xyxy": [
+     355,
+     156,
+     472,
+     222
+    ],
+    "position": [
+     355,
+     156
+    ],
+    "size": [
+     118,
+     67
+    ],
+    "rotation": 0.0,
+    "scale": 0.225,
+    "opacity": 0.785
+   },
+   {
+    "stamp_id": "stamp960",
+    "date": "2016-07-14",
+    "country": "KOR",
+    "direction": "EXIT",
+    "bbox_xyxy": [
+     217,
+     69,
+     363,
+     211
+    ],
+    "position": [
+     212,
+     63
+    ],
+    "size": [
+     158,
+     154
+    ],
+    "rotation": -4.62,
+    "scale": 0.279,
+    "opacity": 0.886
+   }
+  ]
+ }
+]

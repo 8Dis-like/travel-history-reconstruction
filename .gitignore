@@ -36,6 +36,10 @@ data/rotation_testset/_candidates/
 data/rotation_testset/_candidates_preview/
 data/rotation_testset/images/
 
+# Synthetic scene test set — composited page images are ignored;
+# metadata.json + yolo_detect labels (the ground-truth assets) are tracked.
+data/synthetic_scenes/images/
+
 # Model weights (large files)
 models/pretrained/*
 models/finetuned/*
