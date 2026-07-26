@@ -18,9 +18,9 @@ detection:
   input_size: 640
 
 ocr:
-  engine: "claude"            # Options: claude (implemented), local (stub)
-  claude:
-    model: "claude-sonnet-5"  # Any Claude model id; drives ClaudeExtractor
+  engine: "gemini"            # Options: claude (implemented), local (stub)
+  gemini:
+    model: "gemini-3.5-flash"  # Valid Gemini multimodal model
     max_tokens: 256
   local:                      # LocalVLMExtractor (MiniCPM-o / Qwen-VL) — not yet implemented
     {}

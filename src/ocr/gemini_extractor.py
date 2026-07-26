@@ -26,7 +26,7 @@ Return ONLY a JSON object with these exact keys. Set any unreadable field to nul
 Example: {"date": "2024-03-15", "country": "GBR", "direction": "ENTRY", "raw_text": "HEATHROW 15 MAR 2024", "confidence": 0.85}"""
 
 class GeminiExtractor(BaseExtractor):
-    def __init__(self, api_key: str | None = None, model: str = "gemini-3.5-flash"):
+    def __init__(self, api_key: str | None = None, model: str = "gemini-3.5-flash", **kwargs):
         import os
         if genai is None:
             print("Warning: 'google-generativeai' package is required for GeminiExtractor. Run `pip install google-generativeai`.")
