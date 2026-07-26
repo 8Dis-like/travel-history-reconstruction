@@ -19,6 +19,7 @@ import sys
 from pathlib import Path
 
 import cv2
+import numpy as np
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -50,16 +51,35 @@ def compute_iou(box1: list[float], box2: list[float]) -> float:
     return intersection_area / float(box1_area + box2_area - intersection_area)
 
 def unrotate_box(box: list[float], angle: int, orig_w: int, orig_h: int) -> list[float]:
-    x1, y1, x2, y2 = box
     if angle == 0:
-        return [x1, y1, x2, y2]
-    elif angle == 90:
-        return [y1, orig_h - x2, y2, orig_h - x1]
-    elif angle == 180:
-        return [orig_w - x2, orig_h - y2, orig_w - x1, orig_h - y1]
-    elif angle == 270:
-        return [orig_w - y2, x1, orig_w - y1, x2]
-    return box
+        return box
+        
+    center = (orig_w / 2, orig_h / 2)
+    matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
+    
+    cos = abs(matrix[0, 0])
+    sin = abs(matrix[0, 1])
+    new_w = int(orig_h * sin + orig_w * cos)
+    new_h = int(orig_h * cos + orig_w * sin)
+    
+    matrix[0, 2] += (new_w - orig_w) / 2
+    matrix[1, 2] += (new_h - orig_h) / 2
+    
+    inv_matrix = cv2.invertAffineTransform(matrix)
+    
+    x1, y1, x2, y2 = box
+    pts = np.array([
+        [x1, y1], [x2, y1], [x2, y2], [x1, y2]
+    ], dtype=np.float32).reshape(-1, 1, 2)
+    
+    unrotated_pts = cv2.transform(pts, inv_matrix).reshape(-1, 2)
+    
+    nx1 = min(unrotated_pts[:, 0])
+    ny1 = min(unrotated_pts[:, 1])
+    nx2 = max(unrotated_pts[:, 0])
+    ny2 = max(unrotated_pts[:, 1])
+    
+    return [float(nx1), float(ny1), float(nx2), float(ny2)]
 
 def _norm(v: str | None) -> str | None:
     return (v or "").strip().upper() or None
@@ -81,7 +101,7 @@ def main():
     if args.limit:
         metadata = metadata[:args.limit]
 
-    enhancer = ImageEnhancer()
+    enhancer = ImageEnhancer(auto_orient=False, deskew=False)
     detector = StampDetector("runs/best_stamp_model.pt")
     extractor = create_extractor_from_config()
 
