@@ -87,25 +87,16 @@ npm run dev
 - **Mode B (Multi-Rotation Strategy):** By proactively forcing the raw image through 4 rotations (0, 90, 180, 270 degrees) and selecting the angle yielding the highest YOLO confidence, detection recall jumped from 0 to 100%.
 **Status:** **RESOLVED.** This multi-rotation strategy has been successfully integrated into all main pipelines (`src/api/routes.py` and `scripts/test_integration.py`).
 
-### 4.3 Timeline Reconstruction
-**Methodology:** Benjamin's new chronological timeline logic evaluates synthetic scenes using the `src/reconstruction/scene_eval.py` tools.
-**Result:** Integrated successfully into the `master` branch. The backend data structures successfully order the extracted VLM fields by date.
+### 4.3 VLM Pipeline Approaches & Comparison
+**Methodology:** We integrated and benchmarked a fully local offline VLM (Qwen2-VL-2B-Instruct) against the cloud-based Gemini-1.5-Flash API using the end-to-end evaluation script on 5 synthetic scenes (11 True Positive stamps).
 
----
+**Approach A: Cloud API (Gemini-1.5-Flash)**
+- **Pros:** Excellent extraction accuracy (100% Date, Country, and Direction extraction on True Positives). Minimal local hardware requirements.
+- **Cons:** Dependent on network connectivity. Prone to API rate limits (frequently hit `429 Resource Exhausted` errors on free tiers), which completely halts the pipeline. Requires API key management.
 
-## 5. Branch Structure & Proposed Reorganization
+**Approach B: Local Offline (Qwen2-VL-2B-Instruct)**
+- **Pros:** Completely offline execution with zero network dependency. No API keys or rate limits.
+- **Cons:** Extremely heavy memory footprint (~4.5GB VRAM), which caused `System.OutOfMemoryException` on lower-end hardware during initial testing. Poor extraction accuracy on noisy/skewed synthetic stamps (Date: 18.2%, Country: 45.5%, Direction: 85.7%).
+- **Result:** While the local pipeline architecture is now fully integrated and operational, the 2-Billion parameter local model struggles significantly with the OCR quality required to build an accurate travel timeline (Timeline Accuracy dropped to 21.6%). 
 
-### 5.1 Current Messy State
-The remote repository currently contains several merged or abandoned branches:
-- `master` (Up to date with all recent fixes)
-- `synthetic-scenes` (Active/Merged)
-- `timeline-reconstruction` (Merged into master/synthetic-scenes)
-- `wilsontee` (Personal dev branch)
-- `zuyantao` (Personal dev branch)
-
-### 5.2 Next Steps for Repository Management
-To keep the Git graph clean as the team collaborates:
-1. **Delete Stale Branches:** `wilsontee` and `zuyantao` should be deleted from GitHub since their work has been merged into `master`.
-2. **Adopt Feature Branching:** Use descriptive names for new work (e.g., `feat/multilingual-support`, `fix/fastapi-timeout`).
-3. **Pull Request Workflow:** Always open a PR against `master`, ensuring code is reviewed before clicking "Squash and Merge" (which prevents thousands of small commits from cluttering the `master` graph).
-4. **.gitignore Adherence:** Ensure all data, especially `/data/` and `__MACOSX/` directories, are strictly ignored to prevent large binary blobs from entering the version history.
+**Conclusion:** For production, a cloud-based API (Gemini/Claude) remains vastly superior in accuracy and reliability unless a much larger local model (e.g., Llama-3-Vision or Qwen2-VL-7B) is deployed on dedicated GPU hardware.

@@ -233,30 +233,30 @@ def main():
     recall = tp_count / (tp_count + fn_count) if (tp_count + fn_count) > 0 else 0.0
     f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
 
-    print("\n==============================================")
-    print("   END-TO-END PIPELINE EVALUATION REPORT")
+    print("4.2 Results")
+    print("END-TO-END PIPELINE EVALUATION REPORT")
     print("==============================================\n")
     
-    print("1. DETECTION PERFORMANCE (Confusion Matrix)")
-    print(f"   True Positives (TP)  : {tp_count}")
-    print(f"   False Positives (FP) : {fp_count}")
-    print(f"   False Negatives (FN) : {fn_count}")
-    print(f"   ----------------------------------")
-    print(f"   Precision : {precision:.1%}")
-    print(f"   Recall    : {recall:.1%}")
-    print(f"   F1-Score  : {f1:.1%}\n")
+    print("1. DETECTION PERFORMANCE (Confusion Matrix)\n")
+    print(f"True Positives (TP)  : {tp_count}\n")
+    print(f"False Positives (FP) : {fp_count}\n")
+    print(f"False Negatives (FN) : {fn_count}\n")
+    print(f"----------------------------------\n")
+    print(f"Precision : {precision:.1%}\n")
+    print(f"Recall    : {recall:.1%}\n")
+    print(f"F1-Score  : {f1:.1%}\n\n")
 
-    print("2. OCR EXTRACTION ACCURACY (On True Positives)")
+    print("2. Qwen EXTRACTION ACCURACY (Demo On True Positives)\n")
     for field, metrics in ocr_eval.items():
         correct = metrics["correct"]
         tot = metrics["total"]
         pct = correct / tot if tot > 0 else 0.0
-        print(f"   {field.capitalize():<10}: {pct:>6.1%} ({correct}/{tot})")
+        print(f"{field.capitalize():<10}: {pct:>5.1%} ({correct}/{tot})\n")
     print()
 
-    print("3. TIMELINE RECONSTRUCTION")
+    print("3. TIMELINE RECONSTRUCTION\n")
     timeline_acc = pairwise_order_accuracy(all_pairs)
-    print(f"   Pairwise Order Accuracy: {timeline_acc:.1%}")
+    print(f"Pairwise Order Accuracy: {timeline_acc:.1%}\n")
     print("==============================================\n")
 
 if __name__ == "__main__":
