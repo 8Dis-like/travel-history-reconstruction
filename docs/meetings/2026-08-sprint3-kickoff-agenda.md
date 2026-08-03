@@ -2,7 +2,7 @@
 
 **Project:** Travel History Reconstruction from Travel Documents  
 **Meeting Type:** Sprint Kickoff & Sync  
-**Duration:** 45 min  
+**Duration:** 30 min  
 **Date/Time:** August 3, 2026, 7:00 p.m. PST 
 **Participants:** Hao Zhang (Zagho), Zuyan Tao (Benjamin), Wilson Tee  
 
@@ -34,6 +34,9 @@ As we enter Sprint 3, our primary focus shifts from **core technical development
 - **The Final Report:** A comprehensive documentation of our methodology, architecture, and testing results.
 - **The Capstone Presentation:** Slides detailing the problem, our solution, and our engineering journey.
 - **The Live Demo:** A polished, fully functional web application reconstructing a travel history in real-time.
+
+### 2.3 Open Issues & Discussion Points
+- **Final Analytical Report Output:** According to the initial proposal, the final system must output a "Detailed analytical report with extracted data, timeline reconstruction, unreadable or uncertain items, and data quality observations". We need to discuss how this will be presented to the end-user (e.g., downloadable PDF vs. interactive dashboard) and how to best flag "unreadable or uncertain items".
 
 ---
 
@@ -69,9 +72,9 @@ To ensure all final deliverables are completed efficiently, responsibilities are
 | 1 | Upgrade frontend UI for the final demo (interactive timeline) | Wilson | Aug 9 |
 | 2 | Clean up backend API and ensure it runs flawlessly on demo data | Benjamin | Aug 9 |
 | 3 | Secure API keys/quota to prevent rate limits during the live demo | Benjamin | Aug 9 |
-| 4 | Draft assigned sections for the Final Capstone Report | All | Aug 10 |
-| 5 | Compile initial draft of the Capstone Presentation Slides | Wilson | Aug 12 |
-| 6 | Schedule the Presentation Drill | Hao | Aug 12 |
+| 4 | Finished sections for the Final Capstone Report | Hao | Aug 16 |
+| 5 | Compile initial draft of the Capstone Presentation Slides | Wilson | Aug 20 |
+| 6 | Lead Presentation Drill | Hao | Aug 23 |
 
 ---
 
