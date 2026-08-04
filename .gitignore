@@ -1,63 +1,31 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-*.egg-info/
-dist/
-build/
-eggs/
-*.egg
+# ===== Frontend (React) =====
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+**/.env
+**/.env.local
+**/.env.*.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.eslintcache
+**/coverage/
 
-# Virtual environments
-.venv/
-venv/
-ENV/
+# ===== Backend (Python/FastAPI) =====
+backend/.venv/
+**/__pycache__/
+**/*.py[cod]
+**/*$py.class
+**/*.egg-info/
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/htmlcov/
+**/.coverage
 
-# IDE
+# ===== Editor / OS =====
 .vscode/
 .idea/
-*.swp
-*.swo
-
-# Jupyter
-.ipynb_checkpoints/
-
-# Data (large files — use Git LFS or DVC)
-data/raw/*
-data/processed/*
-data/synthetic_dataset/*
-!data/raw/.gitkeep
-!data/processed/.gitkeep
-
-# Model weights (large files)
-models/pretrained/*
-models/finetuned/*
-*.pt
-*.onnx
-!models/pretrained/.gitkeep
-!models/finetuned/.gitkeep
-
-# OS
 .DS_Store
 Thumbs.db
-desktop.ini
-
-# Environment variables
-.env
-.env.local
-
-# Logs
-logs/
-*.log
-runs/
-
-# Coverage
-htmlcov/
-.coverage
-.coverage.*
-
-# Brainstorming visual companion
-.superpowers/
-
-synthetic_dataset.zip
+.ipynb_checkpoints/
