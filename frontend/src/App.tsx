@@ -1,96 +1,77 @@
-import { useState } from "react";
-import { Alert, Button, Layout, Space, Typography } from "antd";
-import type { TimelineEntry, UploadFileItem } from "./types";
-import { extractMockPdf } from "./api";
-import { partitionEntries } from "./partitionEntries";
-import { UploadPanel } from "./components/UploadPanel";
-import { Timeline } from "./components/Timeline";
-import { UnreadableList } from "./components/UnreadableList";
+import { useEffect, useState } from 'react'
+import { Layout, Typography, Segmented } from "antd"
+import './App.css'
 
-const { Content } = Layout;
+import UploadPanel from "./components/UploadPanel"
+import ProcessingView from './components/ProcessingView'
+import { TableView, TimelineTable, PageCarousel, StampCarousel, CustomPageCarousel } from './components/TableView'
+import type { AnalysisStatus, TravelHistoryResponse, AnalysisResponse } from './types/types'
+import { mockAnalyze, analyze } from './api/analyzePassport'
+import TimelineView from './components/TimelineView'
+
 const { Title } = Typography;
+const { Content } = Layout
 
-function makeId(): string {
-  return Math.random().toString(36).slice(2);
-}
 
-const DEMO_FILE_CONTENT = "%PDF-1.4\n%%EOF";
+function App() {
+  const [sessionId] = useState<string>(() => crypto.randomUUID())
+  const [analysisStatus, setAnalysisStatus] = useState<AnalysisStatus>("idle")// ("idle")
+  const [analysisResponse, setAnalysisResponse] = useState<AnalysisResponse | null>(null)
+  const [resultView, setResultView] = useState<"table" | "timeline">("table")
 
-export default function App() {
-  const [files, setFiles] = useState<UploadFileItem[]>([]);
-  const [entries, setEntries] = useState<TimelineEntry[]>([]);
-  const [demoLoading, setDemoLoading] = useState(false);
-  const [demoError, setDemoError] = useState<string | null>(null);
+/*   useEffect(() => {
+    console.log(analysisStatus)
+  }, [analysisStatus]) */
 
-  function addFiles(newFiles: File[]) {
-    const validFiles = newFiles.filter((f) => 
-      f.type === "application/pdf" || f.type === "image/png" || f.type === "image/jpeg"
-    );
-    const items: UploadFileItem[] = validFiles.map((file) => ({
-      id: makeId(),
-      file,
-      status: "pending",
-    }));
-    setFiles((prev) => [...prev, ...items]);
-  }
-
-  async function startRecognition() {
-    const toProcess = files.filter((f) => f.status === "pending" || f.status === "error");
-
-    for (const item of toProcess) {
-      setFiles((prev) =>
-        prev.map((f) => (f.id === item.id ? { ...f, status: "processing" } : f))
-      );
-
-      try {
-        const newEntries = await extractMockPdf(item.file);
-        setEntries((prev) => [...prev, ...newEntries]);
-        setFiles((prev) =>
-          prev.map((f) => (f.id === item.id ? { ...f, status: "done" } : f))
-        );
-      } catch {
-        setFiles((prev) =>
-          prev.map((f) => (f.id === item.id ? { ...f, status: "error" } : f))
-        );
-      }
+  const handleAnalyze = async () => {
+    if (sessionId === null) {
+      return
     }
+
+    setAnalysisStatus("processing")
+
+    const analysisResult = await analyze(sessionId) // mockAnalyze()
+    setAnalysisResponse(analysisResult)
+
+    console.log(analysisResult)
+
+    console.log(`There are ${analysisResult.stays.length} stays in the result`)
+
+    setAnalysisStatus("done")
   }
-
-  async function loadDemoData() {
-    setDemoLoading(true);
-    setDemoError(null);
-
-    try {
-      const demoFile = new File([DEMO_FILE_CONTENT], "demo.pdf", { type: "application/pdf" });
-      const newEntries = await extractMockPdf(demoFile);
-      setEntries((prev) => [...prev, ...newEntries]);
-    } catch {
-      setDemoError("Failed to load demo data.");
-    } finally {
-      setDemoLoading(false);
-    }
-  }
-
-  const { timeline, unreadable } = partitionEntries(entries);
 
   return (
-    <Layout style={{ minHeight: "100vh" }}>
-      <Content style={{ maxWidth: 720, margin: "0 auto", padding: 24, width: "100%" }}>
-        <Title level={2}>Travel History Reconstruction</Title>
-        <Space direction="vertical" size="large" style={{ width: "100%" }}>
-          <UploadPanel files={files} onAddFiles={addFiles} onStartRecognition={startRecognition} />
-          <div>
-            <Button onClick={loadDemoData} loading={demoLoading}>
-              {demoLoading ? "Loading demo data..." : "Load demo data"}
-            </Button>
-            {demoError && (
-              <Alert type="error" message={demoError} showIcon style={{ marginTop: 8 }} />
-            )}
-          </div>
-          <Timeline entries={timeline} />
-          <UnreadableList entries={unreadable} />
-        </Space>
-      </Content>
-    </Layout>
-  );
+    <>
+      <Layout>
+        <Content style={{ padding: "0 48px"}}>
+          <Title>Travel History Reconstruction</Title>
+          {analysisStatus === "idle" ? (
+            <UploadPanel sessionId={sessionId} handleAnalyze={handleAnalyze}/>
+          ) : analysisStatus === "processing" ? (
+            <ProcessingView />
+          ) : analysisStatus === "done" && analysisResponse && (
+            <>
+              <Segmented 
+                options={["Table", "Timeline"]}
+                value={resultView === "table" ? "Table" : "Timeline"}
+                onChange={(value) => setResultView(value === "Table" ? "table" : "timeline")}
+                style={{ marginBottom: '10px' }}
+              />
+              {resultView === "table" ? (
+                <TableView stays={analysisResponse.stays.stays} pages={analysisResponse.pages}/>
+                // <CustomPageCarousel data={analysisResult} setPageIndex={() => {}}/>
+                // <PageCarousel data={analysisResult}/>
+                // <StampCarousel data={analysisResult.pages[0]}/>
+              ) : (
+                <TimelineView data={analysisResponse} />
+              )}
+            </>
+          )}
+        </Content>
+      </Layout>
+    </>
+  )
+
 }
+
+export default App
