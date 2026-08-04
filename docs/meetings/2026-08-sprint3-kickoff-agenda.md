@@ -69,13 +69,31 @@ To ensure all final deliverables are completed efficiently, responsibilities are
 
 | # | Action Item | Owner | Due |
 |---|---|---|---|
-| 1 | Upgrade frontend UI for the final demo (interactive timeline) | Wilson | Aug 9 |
+| 1 | Upgrade frontend UI for the final demo (interactive timeline visualization) | Wilson | Aug 9 |
 | 2 | Clean up backend API and ensure it runs flawlessly on demo data | Benjamin | Aug 9 |
-| 3 | Secure API keys/quota to prevent rate limits during the live demo | Benjamin | Aug 9 |
+| 3 | Follow up with Prof. Bruce on API token sponsorship in progress report email | Benjamin | Aug 9 |
 | 4 | Finished sections for the Final Capstone Report | Hao | Aug 16 |
 | 5 | Compile initial draft of the Capstone Presentation Slides | Wilson | Aug 20 |
-| 6 | Lead Presentation Drill | Hao | Aug 23 |
+| 6 | Confirm date/time for company practice presentation (Aug 19-21) with Alvaro | Hao, Benjamin, Wilson | Aug 16 |
+| 7 | Lead Presentation Drill / Company Presentation | Hao | Aug 19-21 |
 
 ---
 
-*Agenda drafted for Sprint 3 Kickoff. Minutes to be appended post-meeting.*
+## 6. Meeting Minutes & Outcomes (Post-Meeting Updates)
+
+### 6.1 Model Upgrades & Progress
+- **YOLOv6 Demo:** Wilson demonstrated a new machine learning model for passport stamp detection using YOLOv6, which outperforms the previous YOLOv8 version. 
+- **Frontend Status:** The system currently successfully extracts and organizes data chronologically in a table format. The timeline visualization feature is still in active development.
+
+### 6.2 API Token Funding
+- **Budget Constraints:** The team discussed the costs of hitting VLM API limits (Gemini/Claude). 
+- **Sponsorship:** Alvaro generously offered to personally sponsor $50 for API tokens if funding through Prof. Bruce Huang falls through. Benjamin will formally request the tokens from Bruce in the next progress report email.
+
+### 6.3 Presentation Scheduling & Logistics
+- **School Presentation:** The official capstone school presentation is confirmed for **August 25-26**.
+- **Company Practice Presentation:** The team will present to Securiport (Alvaro) as a practice run between **August 19-21 (afternoon ET)**. The exact date needs to be set and confirmed.
+- **Absences:** Hao noted he might be on vacation next Monday.
+
+---
+
+*Agenda and Minutes drafted for Sprint 3 Kickoff.*
