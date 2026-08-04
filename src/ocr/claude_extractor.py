@@ -22,8 +22,6 @@ Analyze this passport stamp image and extract the following fields:
 
 Return ONLY a JSON object with these exact keys. Set any unreadable field to null.
 Example: {"date": "2024-03-15", "country": "GBR", "direction": "ENTRY", "raw_text": "HEATHROW 15 MAR 2024", "confidence": 0.85}"""
-
-
 class ClaudeExtractor(BaseExtractor):
     def __init__(
         self,
@@ -34,11 +32,17 @@ class ClaudeExtractor(BaseExtractor):
         """model is required — the pipeline supplies it from configs/pipeline.yaml
         (ocr.claude.model) via create_extractor_from_config; there is no hardcoded
         default model."""
-        self._client = anthropic.Anthropic(api_key=api_key)
+        try:
+            self._client = anthropic.Anthropic(api_key=api_key)
+        except Exception as e:
+            print(f"Warning: Failed to initialize Anthropic client (Missing API Key?). OCR will return None. Details: {e}")
+            self._client = None
         self._model = model
         self._max_tokens = max_tokens
 
     def extract(self, image: np.ndarray) -> ExtractionResult:
+        if self._client is None:
+            return ExtractionResult(date=None, country=None, direction=None, raw_text=None, confidence=0.0)
         try:
             _, buf = cv2.imencode(".png", image)
             image_b64 = base64.standard_b64encode(buf.tobytes()).decode("utf-8")

@@ -4,7 +4,7 @@
 
 ---
 
-**University of California, Los Angeles — Master of Science in Engineering**
+**University of California, Los Angeles — Master of Engineering**
 **Sponsor:** Securiport (Alvaro, Sponsor Contact)
 **Date:** June 2, 2026
 

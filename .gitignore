@@ -1,4 +1,4 @@
-# ===== Frontend (React) =====
+# Frontend (React)
 frontend/node_modules/
 frontend/dist/
 frontend/build/
@@ -11,7 +11,7 @@ frontend/yarn-error.log*
 frontend/.eslintcache
 **/coverage/
 
-# ===== Backend (Python/FastAPI) =====
+# Backend (Python/FastAPI)
 backend/.venv/
 **/__pycache__/
 **/*.py[cod]
@@ -23,9 +23,40 @@ backend/.venv/
 **/htmlcov/
 **/.coverage
 
-# ===== Editor / OS =====
+# Editor / OS
 .vscode/
 .idea/
+*.swp
+*.swo
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data (large files — use Git LFS or DVC)
+data/raw/*
+data/processed/*
+data/synthetic_dataset/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Rotation robustness test set — large image binaries are ignored;
+# the labels_source.csv / labels.csv (the actual label assets) are tracked.
+data/rotation_testset/_candidates/
+data/rotation_testset/_candidates_preview/
+data/rotation_testset/images/
+
+# Synthetic scene test set — composited page images are ignored;
+# metadata.json + yolo_detect labels (the ground-truth assets) are tracked.
+data/synthetic_scenes/images/
+
+# Model weights (large files)
+models/pretrained/*
+models/finetuned/*
+*.pt
+*.onnx
+!models/pretrained/.gitkeep
+!models/finetuned/.gitkeep
+
+# OS
 .DS_Store
 Thumbs.db
-.ipynb_checkpoints/

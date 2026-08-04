@@ -110,8 +110,7 @@ The extraction layer uses a factory pattern (`src/ocr/factory.py`) supporting ho
 |---|---|---|---|
 | Google Gemini | ✅ | Free tier available | Currently active for testing |
 | Anthropic Claude | ✅ | ~$0.00025/stamp | Implemented, key needed |
-| DeepSeek | ❌ Text only | Cheap | Incompatible (no vision) |
-| Local VLM | ✅ | Free (GPU required) | Not yet tested |
+| Local VLM        | ✅      | Free (GPU required) | Not yet tested               |
 
 Switching providers requires only a `.env` change — no code modifications. The team will evaluate and compare providers in Sprint 2 to determine the best accuracy/cost tradeoff.
 
