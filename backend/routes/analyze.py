@@ -11,6 +11,6 @@ async def analyze(session_id: str = Form(...)):
     pages = get_session_store().sessions[session_id]
 
     page_response: list[PageExtractionResponse] = analyze_passport(pages)
-    stays = build_travel_history([])
+    stays = build_travel_history([]) #([pages_response])
 
     return {"pages": page_response, "stays": stays}
