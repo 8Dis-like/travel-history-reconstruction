@@ -7,29 +7,6 @@ export interface Page {
 
 export type AnalysisStatus = "idle" | "processing" | "done" | "error"
 
-/* export interface StampResult {
-  country: string
-  date: string
-  type: "arrival" | "departure"
-  sourceFilename: string;
-  pageNumber: number;
-  stampImg: string;
-}
-
-export interface PageResult {
-  processedPage: string
-  stamps: StampResult[]
-}
-
-export interface StayResult {
-  id: string
-  country: string
-  arrivalDate: string
-  departureDate: string | null
-  entryStamp: StampResult | null
-  exitStamp: StampResult | null
-} */
-
 
 export interface ExtractedFields {
   date: string | null
