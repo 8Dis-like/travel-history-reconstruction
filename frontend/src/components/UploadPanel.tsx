@@ -1,67 +1,152 @@
-import { InboxOutlined } from "@ant-design/icons";
-import { Button, List, Tag, Upload } from "antd";
-import type { UploadProps } from "antd";
-import type { UploadFileItem, UploadStatus } from "../types";
+import React from 'react';
+import { useState } from 'react';
 
-const { Dragger } = Upload;
+import { InboxOutlined } from '@ant-design/icons';
+import type { UploadProps } from 'antd';
+import { Upload, Typography, message } from 'antd';
+
+import type { Page } from '../types/types';
+import UploadPreviewGrid from './UploadPreviewGrid';
+import AnalyzeButton from './AnalyzeButton';
+import { truncateFilename } from '../utils/formatters';
+
+const { Dragger } = Upload
+const { Title } = Typography
 
 interface UploadPanelProps {
-  files: UploadFileItem[];
-  onAddFiles: (files: File[]) => void;
-  onStartRecognition: () => void;
+  sessionId: string,
+  handleAnalyze: () => void,
 }
 
-const STATUS_COLOR: Record<UploadStatus, string> = {
-  pending: "default",
-  processing: "processing",
-  done: "success",
-  error: "error",
-};
+const UploadPanel: React.FC<UploadPanelProps> = ({ sessionId, handleAnalyze }) => {
+  // const [fileList, setFileList] = useState<UploadFile[]>([])
+  const [pages, setPages] = useState<Page[]>([])
+  const [previewPageId, setPreviewPageId] = useState<string | null>(null)
 
-export function UploadPanel({ files, onAddFiles, onStartRecognition }: UploadPanelProps) {
-  const hasProcessable = files.some((f) => f.status === "pending" || f.status === "error");
-  const isRecognizing = files.some((f) => f.status === "processing");
+  /*const handleChange: UploadProps['onChange'] = ({fileList: newFileList}) => {
+    setFileList(newFileList);
+  }*/
 
-  const draggerProps: UploadProps = {
-    multiple: true,
-    accept: "image/png, image/jpeg, application/pdf",
+  /*  const truncateFilename = (filename: string, maxLength: number = 15) => {
+    if (filename.length <= maxLength) {
+      return filename
+    }   
+
+    const lastDotIndex = filename.lastIndexOf(".")
+    const extension = filename.slice(lastDotIndex)
+    const name = filename.slice(0, lastDotIndex)
+
+    const truncatedName = name.slice(0, maxLength - extension.length - 3)
+    return `${truncatedName}...${extension}`
+  } */
+
+  const handleRemovePage = (id: string) => {
+    setPages(prevPages => prevPages.filter(page => page.id !== id))
+  }
+
+  const processUpload: UploadProps['beforeUpload'] = async (file) => {
+
+    if (file.type === 'application/pdf') {
+      const pageID: string = crypto.randomUUID()
+
+      const newPDF: Page = {
+        id: pageID,
+        status: "converting",
+        sourceFileName: truncateFilename(file.name),
+      }
+
+      setPages(prevPages => [...prevPages, newPDF])
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('session_id', sessionId);
+
+      const response = await fetch("/api/upload-pdf", {
+        method: "POST",
+        body: formData,
+      })
+
+      const data = await response.json()
+      // console.log(data.pages)
+
+      const newPages = data.pages.map((page: {pageNumber: number, imgUrl: string}) => {
+        return {
+          id: crypto.randomUUID(),
+          status: "ready",
+          imageSrc: page.imgUrl,
+          sourceFileName: `${file.name}_pg${page.pageNumber + 1}`,
+        }
+      })
+
+      setPages(prevPages => {
+        const desiredPages = prevPages.filter((page) => page.id !== pageID)
+        const result = [...desiredPages, ...newPages]
+        return result
+      })
+      
+    } else if (file.type === "image/jpeg" || file.type === "image/png") {
+      const reader = new FileReader()
+
+      reader.onload = () => {
+        const newPage: Page = {
+          id: file.uid,
+          status: "ready",
+          imageSrc: reader.result as string,
+          sourceFileName: file.name,
+        }
+        setPages(prevPages => [...prevPages, newPage])
+      }
+
+      reader.readAsDataURL(file)
+
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('session_id', sessionId)
+
+      const response = await fetch("/api/upload-image", {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!response.ok) {
+        console.error(`Failed to upload ${file.name} to backend.`)
+      }
+    } else {
+      message.error(`${file.name} is not a supported file type.`)
+      return Upload.LIST_IGNORE
+    }
+
+    return false;
+  }
+
+  const props: UploadProps = {
+    // listType: "picture-card",
+    // fileList: fileList,
+    // onChange: handleChange,
     showUploadList: false,
-    beforeUpload: (file) => {
-      onAddFiles([file]);
-      return false;
-    },
+    beforeUpload: processUpload,
+    accept: ".pdf,image/jpeg,image/png",
+    multiple: true,
   };
 
   return (
-    <section className="upload-panel">
-      <Dragger {...draggerProps}>
+    <>
+      <Dragger { ...props }> 
         <p className="ant-upload-drag-icon">
           <InboxOutlined />
         </p>
-        <p className="ant-upload-text">Drag passport files (PDF, PNG, JPEG) here</p>
+        <p className="ant-upload-text">Upload passport files (.pdf, .jpeg, .png) by clicking on or dragging into this area</p>
       </Dragger>
-
-      {files.length > 0 && (
-        <List
-          style={{ margin: "16px 0" }}
-          dataSource={files}
-          renderItem={(item) => (
-            <List.Item key={item.id}>
-              <List.Item.Meta title={item.file.name} />
-              <Tag color={STATUS_COLOR[item.status]}>{item.status}</Tag>
-            </List.Item>
-          )}
-        />
-      )}
-
-      <Button
-        type="primary"
-        disabled={!hasProcessable || isRecognizing}
-        loading={isRecognizing}
-        onClick={onStartRecognition}
-      >
-        Start recognition
-      </Button>
-    </section>
+      <Title level={5}>Pages Uploaded: {pages.length}</Title>
+      <UploadPreviewGrid 
+        pages={pages} 
+        onRemove={handleRemovePage} 
+        previewPageId={previewPageId} 
+        onPreviewChange={setPreviewPageId}
+      />
+      <AnalyzeButton pages={pages} handleAnalyze={handleAnalyze}/>
+    </>
   );
-}
+};
+
+export default UploadPanel;

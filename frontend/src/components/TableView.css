@@ -1,0 +1,6 @@
+.processed-page-scroll-container {
+  scrollbar-width: none;
+}
+.processed-page-scroll-container::-webkit-scrollbar {
+  display: none;
+}
