@@ -19,26 +19,8 @@ interface UploadPanelProps {
 }
 
 const UploadPanel: React.FC<UploadPanelProps> = ({ sessionId, handleAnalyze }) => {
-  // const [fileList, setFileList] = useState<UploadFile[]>([])
   const [pages, setPages] = useState<Page[]>([])
   const [previewPageId, setPreviewPageId] = useState<string | null>(null)
-
-  /*const handleChange: UploadProps['onChange'] = ({fileList: newFileList}) => {
-    setFileList(newFileList);
-  }*/
-
-  /*  const truncateFilename = (filename: string, maxLength: number = 15) => {
-    if (filename.length <= maxLength) {
-      return filename
-    }   
-
-    const lastDotIndex = filename.lastIndexOf(".")
-    const extension = filename.slice(lastDotIndex)
-    const name = filename.slice(0, lastDotIndex)
-
-    const truncatedName = name.slice(0, maxLength - extension.length - 3)
-    return `${truncatedName}...${extension}`
-  } */
 
   const handleRemovePage = (id: string) => {
     setPages(prevPages => prevPages.filter(page => page.id !== id))

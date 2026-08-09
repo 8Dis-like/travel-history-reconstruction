@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Table, Carousel, Card } from 'antd'
 import { LeftOutlined, RightOutlined } from '@ant-design/icons'
 
-import type { PageExtractionResponse, StayResponse } from '../types/types'
+import type { PageExtractionResponse, StayResponse, StampRecord } from '../types/types'
 import '../components/TableView.css'
 import { formatDate } from '../utils/formatters'
 
@@ -14,11 +14,15 @@ interface TimelineTableProps {
 
 interface PageCarouselProps {
   pages: PageExtractionResponse[]
-  setPageIndex: (index: number) => void
+  setClickedStamp: (stamp: StampRecord | null) => void
 }
 
 interface StampCarouselProps {
   data: PageExtractionResponse
+}
+
+interface StampDetailViewProps {
+  stamp: StampRecord | null
 }
 
 interface TableViewProps {
@@ -27,12 +31,31 @@ interface TableViewProps {
 }
 
 
-export const CustomPageCarousel: React.FC<PageCarouselProps> = ({ pages, setPageIndex }) => {
-  const [curPageIndex, setCurPageIndex] = useState(0)
+export const CustomPageCarousel: React.FC<PageCarouselProps> = ({ pages, setClickedStamp }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const thumbnailRefs = useRef<(HTMLImageElement | null)[]>([])
-  const goPrev = () => setCurPageIndex((next) => (next - 1 + pages.length) % pages.length)
-  const goNext = () => setCurPageIndex((prev) => (prev + 1) % pages.length)
+  const imgContainerRef = useRef<HTMLImageElement>(null)
+
+  const [curPageIndex, setCurPageIndex] = useState(0)
+  const goPrev = () => {
+    setCurPageIndex((next) => (next - 1 + pages.length) % pages.length)
+    setImageLoaded(false)
+    setClickStampId('')
+    setClickedStamp(null)
+  }
+  const goNext = () => {
+    setCurPageIndex((prev) => (prev + 1) % pages.length)
+    setImageLoaded(false)
+    setClickStampId('')
+    setClickedStamp(null)
+  }
+
+  const [hoverStampId, setHoverStampId] = useState('')
+  const [clickStampId, setClickStampId] = useState('')
+
+  const [imageLoaded, setImageLoaded] = useState<Boolean>(false)
+
+
 
   useEffect(() => {
     const container = scrollContainerRef.current
@@ -46,22 +69,63 @@ export const CustomPageCarousel: React.FC<PageCarouselProps> = ({ pages, setPage
     }
   }, [curPageIndex])
 
+
   return (
-    <div style={{ width: "65%", alignItems: "center" }}>
-      <img 
-        src={pages[curPageIndex].processedImage} 
+    <div style={{ width: "100%", alignItems: "center", textAlign: "center" }}>
+      <div 
         style={{ 
-          height: "65vh",
-          width: "auto",
-          maxWidth: "100%",
-          objectFit: "contain",
-          display: "block",
-          margin: "0 auto"
+          position: "relative", 
+          display: "inline-block", 
+          margin: "0 auto" 
         }}
-      />
+      >
+        <img 
+          src={pages[curPageIndex].origImage} // processedImage} 
+          ref={imgContainerRef}
+          style={{ 
+            height: "65vh",
+            width: "auto",
+            maxWidth: "100%",
+            display: "block",
+            margin: "0 auto"
+          }}
+          onLoad={() => setImageLoaded(true)}
+        />
+        {imageLoaded && (
+          <svg 
+            viewBox={`0 0 ${pages[curPageIndex].imageWidth} ${pages[curPageIndex].imageHeight}`} 
+            preserveAspectRatio="none"
+            style={{ 
+              position: "absolute", 
+              top: 0, 
+              left: 0, 
+              width: "100%", 
+              height: "100%" 
+            }}
+          >
+            {pages[curPageIndex].stamps.map((stamp) => (
+              <polygon 
+                key={stamp.stampId}
+                points={stamp.mask.map(([x, y]) =>`${x},${y}`).join(' ')}
+                fill={clickStampId === stamp.stampId ? "orange" : (hoverStampId === stamp.stampId ? "red" : "transparent")}
+                fillOpacity={0.25}
+                stroke={clickStampId === stamp.stampId ? "orange" : "red"}
+                strokeWidth={pages[curPageIndex].imageHeight * 0.005}
+                onMouseEnter={() => setHoverStampId(stamp.stampId)}
+                onMouseLeave={() => setHoverStampId('')}
+                onClick={() => {
+                  setClickStampId(stamp.stampId)
+                  setClickedStamp(stamp)
+                }}
+                style={{ cursor: "pointer" }}
+                opacity={imageLoaded ? 1 : 0}
+              />
+            ))}
+          </svg>
+        )}
+      </div>
       <div style={{ 
         display: "flex", 
-        // justifyContent: "center", 
         alignItems: "center",
         gap: "2px", 
         width: "100%", 
@@ -86,7 +150,12 @@ export const CustomPageCarousel: React.FC<PageCarouselProps> = ({ pages, setPage
                   border: index === curPageIndex ? "2px solid green" : "2px solid transparent",
                   cursor: "pointer"
                 }}
-                onClick={() => setCurPageIndex(index)}
+                onClick={() => {
+                  setCurPageIndex(index)
+                  setImageLoaded(false)
+                  setClickStampId('')
+                  setClickedStamp(null)
+                }}
               />
             )}
           </div>
@@ -96,6 +165,44 @@ export const CustomPageCarousel: React.FC<PageCarouselProps> = ({ pages, setPage
         </div>
       </div>
     </div>
+  )
+}
+
+
+export const StampDetailView: React.FC<StampDetailViewProps> = ({ stamp }) => {
+  if (stamp === null) {
+    return
+  }
+
+  return (
+    <div>
+      <div 
+        style={{ 
+          display: "flex", 
+          width: "100%", 
+          alignItems: "center", 
+          border: "2px solid black", 
+          borderRadius: "30px",
+          overflow: "hidden",
+        }}>
+        <img 
+          src={stamp.stampImage}
+          style={{
+            height: "30vh",
+            width: "auto",
+            maxWidth: "100%",
+            margin: "0 auto",
+            objectFit: "contain"
+          }}
+        />
+      </div>
+      <div style={{ textAlign: 'center', marginTop: '12px' }}>
+        <div>Country: {stamp.extractedFields.country !== null ? stamp.extractedFields.country : "Unknown"}</div>
+        <div>Date: {stamp.extractedFields.date !== null ? formatDate(stamp.extractedFields.date) : "Unknown"}</div>
+        <div>Entry/Exit: {stamp.extractedFields.direction !== null ? stamp.extractedFields.direction : "Unknown"}</div>
+      </div>
+    </div>
+    
   )
 }
 
@@ -136,32 +243,6 @@ export const StampCarousel: React.FC<StampCarouselProps> = ({ data }) => {
 }
 
 
-export const PageCarousel: React.FC<PageCarouselProps> = ({ pages, setPageIndex }) => {
-  const carouselChildren = pages.map((page, index) => (
-    <div key={index}>
-      <img
-        src={page.processedImage}
-        alt={`Slide ${index + 1}`}
-        style={{
-          width: "100%",
-          maxHeight: "70vh",
-          objectFit: "contain",
-        }}
-      />
-    </div>
-  ))
-
-  return (
-    <div className='carousel-container'>
-      <Carousel 
-        afterChange={(index) => setPageIndex(index)}
-      >
-        {carouselChildren}
-      </Carousel>
-    </div>
-  )
-}
-
 
 export const TimelineTable: React.FC<TimelineTableProps> = ({ stays }) => {
   const columns = [
@@ -196,20 +277,25 @@ export const TimelineTable: React.FC<TimelineTableProps> = ({ stays }) => {
 
 
 export const TableView: React.FC<TableViewProps> = ({ pages, stays }) => {
-  const [pageIndex, setPageIndex] = useState(0)
+  const [clickedStamp, setClickedStamp] = useState<StampRecord | null>(null)
 
   return (
-    <div style={{ display: 'flex', gap: "2%" }}>
+    <div style={{ display: "flex", gap: "2%" }}>
       <div style={{ flex: 1 }}>
         <TimelineTable stays={stays}/>
       </div>
       <div style={{ flex: 2 }}>
         <Card>
-          <CustomPageCarousel pages={pages} setPageIndex={setPageIndex}/>
+          <div style={{ display: "flex", gap: "2%" }}>
+            <div style={{ flex: 13 }}>
+              <CustomPageCarousel pages={pages} setClickedStamp={setClickedStamp}/>
+            </div>
+            <div style={{ flex: 7 }}>
+              <StampDetailView stamp={clickedStamp} />
+            </div>
+          </div>
         </Card>
       </div>
-
-      {/* <StampCarousel data={data.pages[pageIndex]}/> */}
     </div>
   )
 }

@@ -21,7 +21,7 @@ export interface StampRecord {
   stampId: string
   stampImage: string
   boundingBox: number[]
-  mask: number[]
+  mask: [number, number][]
   detectionConfidence: number
   extractedFields: ExtractedFields
   pageSource: string
@@ -33,7 +33,10 @@ export interface StampRecord {
 export interface PageExtractionResponse {
   sourceFilename: string
   pageNumber: number
+  origImage: string
   processedImage: string
+  imageWidth: number
+  imageHeight: number
   totalStampsDetected: number
   totalStampsParsed: number
   unreadableStamps: number
@@ -61,5 +64,5 @@ export interface TravelHistoryResponse {
 
 export interface AnalysisResponse {
   pages: PageExtractionResponse[]
-  stays: TravelHistoryResponse
+  travelHistory: TravelHistoryResponse
 }
