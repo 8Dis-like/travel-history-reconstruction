@@ -265,3 +265,33 @@ class ImageEnhancer:
         lab_enhanced = cv2.merge([l_enhanced, a_channel, b_channel])
         return cv2.cvtColor(lab_enhanced, cv2.COLOR_LAB2BGR)
 
+
+def enhance_crop(bgr: np.ndarray) -> np.ndarray:
+    """Boost faint / faded stamp ink on a single stamp crop before VLM OCR.
+
+    Targets the dominant OCR failure mode on this project's data: stamps whose
+    ink is too faint for the VLM to read (it returns null). On the synthetic-scene
+    ground-truth-box eval this lifted field accuracy by roughly +11 to +15 points
+    (see docs/reports/ocr_enhancement_eval.md).
+
+    Pipeline: 2x upscale of small crops (more pixels for small digits) -> CLAHE on
+    the L channel -> a mild saturation boost so faded coloured ink pops -> a light
+    unsharp mask. The saturation gain is kept moderate (1.2x) to limit
+    over-processing of already-clear stamps.
+    """
+    h, w = bgr.shape[:2]
+    if max(h, w) < 512:
+        bgr = cv2.resize(bgr, (w * 2, h * 2), interpolation=cv2.INTER_CUBIC)
+
+    lab = cv2.cvtColor(bgr, cv2.COLOR_BGR2LAB)
+    l_channel, a_channel, b_channel = cv2.split(lab)
+    l_channel = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8)).apply(l_channel)
+    bgr = cv2.cvtColor(cv2.merge([l_channel, a_channel, b_channel]), cv2.COLOR_LAB2BGR)
+
+    hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV).astype(np.float32)
+    hsv[:, :, 1] = np.clip(hsv[:, :, 1] * 1.2, 0, 255)
+    bgr = cv2.cvtColor(hsv.astype(np.uint8), cv2.COLOR_HSV2BGR)
+
+    blur = cv2.GaussianBlur(bgr, (0, 0), 3)
+    return cv2.addWeighted(bgr, 1.5, blur, -0.5, 0)
+
