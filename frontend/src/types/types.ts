@@ -1,9 +1,17 @@
 export interface Page {
-  id: string,
+  pageId: string,
   status: "ready" | "converting" | "error",
+  sourceFilename: string,
   imageSrc?: string,
-  sourceFileName: string,
 }
+
+
+export interface UploadResponse {
+  pageId: string,
+  sourceFilename: string,
+  imageSrc?: string,
+}
+
 
 export type AnalysisStatus = "idle" | "processing" | "done" | "error"
 
@@ -24,13 +32,15 @@ export interface StampRecord {
   mask: [number, number][]
   detectionConfidence: number
   extractedFields: ExtractedFields
-  pageSource: string
-  pageNumber: number
-  // extractionTimestamp: string
+  originalFields: ExtractedFields
+  isUserEdited: Boolean
+  pageId: string
+  extractionTimestamp: string
 }
 
 
 export interface PageExtractionResponse {
+  pageId: string
   sourceFilename: string
   pageNumber: number
   origImage: string
@@ -65,4 +75,11 @@ export interface TravelHistoryResponse {
 export interface AnalysisResponse {
   pages: PageExtractionResponse[]
   travelHistory: TravelHistoryResponse
+}
+
+
+export interface StampFieldUpdate {
+    date?: string | null
+    country?: string | null
+    direction?: string | null
 }

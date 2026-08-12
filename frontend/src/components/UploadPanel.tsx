@@ -5,7 +5,7 @@ import { InboxOutlined } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
 import { Upload, Typography, message } from 'antd';
 
-import type { Page } from '../types/types';
+import type { UploadResponse, Page } from '../types/types';
 import UploadPreviewGrid from './UploadPreviewGrid';
 import AnalyzeButton from './AnalyzeButton';
 import { truncateFilename } from '../utils/formatters';
@@ -22,59 +22,71 @@ const UploadPanel: React.FC<UploadPanelProps> = ({ sessionId, handleAnalyze }) =
   const [pages, setPages] = useState<Page[]>([])
   const [previewPageId, setPreviewPageId] = useState<string | null>(null)
 
-  const handleRemovePage = (id: string) => {
-    setPages(prevPages => prevPages.filter(page => page.id !== id))
+  const handleRemovePage = async (deletedPage: Page) => {
+    const response = await fetch(`/api/sessions/${sessionId}/delete-page/${deletedPage.pageId}`, {
+      method: "DELETE"
+    })
+    if (response.ok) {
+      setPages(prevPages => prevPages.filter(page => page.pageId !== deletedPage.pageId))
+    } else {
+      console.error(`Failed to delete ${deletedPage.sourceFilename}`)
+    }
   }
 
   const processUpload: UploadProps['beforeUpload'] = async (file) => {
 
     if (file.type === 'application/pdf') {
-      const pageID: string = crypto.randomUUID()
+      const pageId: string = crypto.randomUUID()
 
       const newPDF: Page = {
-        id: pageID,
+        pageId: pageId,
         status: "converting",
-        sourceFileName: truncateFilename(file.name),
+        sourceFilename: truncateFilename(file.name),
       }
 
       setPages(prevPages => [...prevPages, newPDF])
 
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('session_id', sessionId);
 
-      const response = await fetch("/api/upload-pdf", {
+      const response = await fetch(`/api/sessions/${sessionId}/upload-pdf`, {
         method: "POST",
         body: formData,
       })
 
-      const data = await response.json()
-      // console.log(data.pages)
+      if (!response.ok) {
+        console.error(`Failed to upload ${file.name} to backend.`)
+      }
 
-      const newPages = data.pages.map((page: {pageNumber: number, imgUrl: string}) => {
+      // const data = await response.json()
+      // console.log(data.pages)
+      const pages: UploadResponse[] = await response.json()
+
+      const newPages: Page[] = pages.map((page) => {
         return {
-          id: crypto.randomUUID(),
+          pageId: page.pageId,
           status: "ready",
-          imageSrc: page.imgUrl,
-          sourceFileName: `${file.name}_pg${page.pageNumber + 1}`,
+          sourceFilename: page.sourceFilename,
+          imageSrc: page.imageSrc,
         }
       })
 
       setPages(prevPages => {
-        const desiredPages = prevPages.filter((page) => page.id !== pageID)
+        const desiredPages = prevPages.filter((page) => page.pageId !== pageId)
         const result = [...desiredPages, ...newPages]
         return result
       })
       
     } else if (file.type === "image/jpeg" || file.type === "image/png") {
+      const pageId = crypto.randomUUID()
       const reader = new FileReader()
 
       reader.onload = () => {
         const newPage: Page = {
-          id: file.uid,
+          pageId: pageId,
           status: "ready",
+          sourceFilename: file.name,
           imageSrc: reader.result as string,
-          sourceFileName: file.name,
         }
         setPages(prevPages => [...prevPages, newPage])
       }
@@ -83,16 +95,17 @@ const UploadPanel: React.FC<UploadPanelProps> = ({ sessionId, handleAnalyze }) =
 
       const formData = new FormData()
       formData.append('file', file)
-      formData.append('session_id', sessionId)
+      formData.append('page_id', pageId)
 
-      const response = await fetch("/api/upload-image", {
+      const response = await fetch(`/api/sessions/${sessionId}/upload-image`, {
         method: "POST",
         body: formData,
       })
-
       if (!response.ok) {
         console.error(`Failed to upload ${file.name} to backend.`)
       }
+
+
     } else {
       message.error(`${file.name} is not a supported file type.`)
       return Upload.LIST_IGNORE
@@ -102,9 +115,6 @@ const UploadPanel: React.FC<UploadPanelProps> = ({ sessionId, handleAnalyze }) =
   }
 
   const props: UploadProps = {
-    // listType: "picture-card",
-    // fileList: fileList,
-    // onChange: handleChange,
     showUploadList: false,
     beforeUpload: processUpload,
     accept: ".pdf,image/jpeg,image/png",

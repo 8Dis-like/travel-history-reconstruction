@@ -5,32 +5,18 @@ import io
 import base64
 import torch
 from datetime import datetime, timezone
+from typing import Dict
+import uuid
 
-from models import UploadedPageInfo, PageExtractionResponse, ExtractedFields, StampRecord
+from models import UploadedPageInfo, PageExtractionResponse, ExtractedFields, StampRecord, PageExtractionMetadata
 from detection.stamp_detector import StampDetector, PageProcessingResult
 from ocr.factory import create_extractor_from_config
+from helpers import create_base64_url, is_valid_date
 
 
-def create_base64_url(img_array: np.ndarray, format: str = "png") -> str:
-    if img_array.dtype != np.uint8:
-        img_array = np.clip(img_array, 0, 255).astype(np.uint8)
-
-    img_array = cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR)
-    img = Image.fromarray(img_array)
-
-    buffer = io.BytesIO()
-    img.save(buffer, format=format)
-    buffer.seek(0)
-
-    b64_str = base64.b64encode(buffer.read()).decode("utf-8")
-
-    mime = f"image/{format.lower()}"
-    return f"data:{mime};base64,{b64_str}"
-
-
-def analyze_passport(pages: list[UploadedPageInfo]) -> list[PageExtractionResponse]:
-    passport_response = []
-    extract = False # REMOVE REMOVE REMOVE
+def analyze_passport(pages: Dict[str, UploadedPageInfo]) -> tuple[dict[str, StampRecord], dict[str, PageExtractionMetadata]]:
+    pages_metadata = dict()
+    stamps = dict()
 
     if torch.cuda.is_available():
         device = torch.device("cuda")
@@ -41,65 +27,64 @@ def analyze_passport(pages: list[UploadedPageInfo]) -> list[PageExtractionRespon
 
     task = "segment"
 
-    page_images = [page.image for page in pages]
+    page_images = [page.image for page in pages.values()]
     stamp_detector = StampDetector(device=device, task=task)
     stamp_extractor = create_extractor_from_config()
 
     page_detection_results: list[PageProcessingResult] = stamp_detector.detect(page_images)
 
-    for page, page_detection_result in zip(pages, page_detection_results):
-        stamps = []
-        for i, stamp in enumerate(page_detection_result.page_stamps):
-            if extract:
-                extraction = stamp_extractor.extract(stamp.stamp_img)
-                is_parsed = any([extraction.date, extraction.country, extraction.direction])
-                if not is_parsed:
-                    if extraction.confidence <= 0.2:
-                        page_detection_result.total_stamps_detected -= 1
-                        continue
-                    else:
-                        total_unreadable += 1
+    for page_id, page_detection_result in zip(pages.keys(), page_detection_results):
+        unreadable_stamps = 0
 
-                extraction_result = ExtractedFields(
-                    date=extraction.date,
-                    country=extraction.country,
-                    direction=extraction.direction,
-                    raw_text=extraction.raw_text,
-                    extraction_confidence=extraction.confidence,
-                )
+        for i, stamp in enumerate(page_detection_result.page_stamps):
+            b64_stamp = create_base64_url(stamp.stamp_img)
+            extraction = stamp_extractor.extract(b64_stamp)
+            is_parsed = any([extraction.date, extraction.country, extraction.direction])
+            if not is_parsed:
+                unreadable_stamps += 1
+
+            parsed_date = extraction.date
+
+            if parsed_date is not None and is_valid_date(parsed_date):
+                parsed_date = extraction.date
             else:
-                extraction_result = ExtractedFields(
-                    date="",
-                    country="",
-                    direction="",
-                    raw_text="",
-                    extraction_confidence=0.5,
-                )
+                parsed_date = None
+
+            extraction_result = ExtractedFields(
+                date=parsed_date,
+                country=extraction.country,
+                direction=extraction.direction,
+                raw_text= None, # extraction.raw_text,
+                extraction_confidence=extraction.confidence,
+            )
+
+            print(f"Extracted Stamp {i} (Date: {extraction_result.date}, Country: {extraction_result.country}, Direction: {extraction_result.direction})")
+
+            stamp_id = str(uuid.uuid4())
 
             stamp_record = StampRecord(
-                stamp_id=f"{page.source_filename}_stamp{i}",
-                stamp_image=create_base64_url(stamp.stamp_img),
+                stamp_id=stamp_id,
+                stamp_image=b64_stamp,
                 bounding_box=stamp.bounding_box,
                 mask=stamp.mask if task == "segment" else [],
                 detection_confidence=stamp.confidence,
                 extracted_fields=extraction_result,
-                page_source=page.source_filename,
-                page_number=page.page_number,
-                # extraction_timestamp=datetime.now(timezone.utc),
+                original_fields=extraction_result,
+                page_id=page_id,
+                extraction_timestamp=datetime.now(timezone.utc),
             )
 
-            stamps.append(stamp_record)
+            stamps[stamp_id] = stamp_record
 
-        page_response = PageExtractionResponse(
-            source_filename=page.source_filename,
-            page_number=page.page_number,
+        page_metadata = PageExtractionMetadata(
             processed_image=create_base64_url(page_detection_result.processed_img),
+            image_width=page_detection_result.image_width,
+            image_height=page_detection_result.image_height,
             total_stamps_detected=page_detection_result.total_stamps_detected,
-            total_stamps_parsed=0,
-            unreadable_stamps=0,
-            stamps=stamps,
+            total_stamps_parsed=page_detection_result.total_stamps_detected - unreadable_stamps,
+            unreadable_stamps=unreadable_stamps,
         )
 
-        passport_response.append(page_response)
+        pages_metadata[page_id] = page_metadata
 
-    return passport_response
+    return (stamps, pages_metadata)

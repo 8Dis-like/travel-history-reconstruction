@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from ocr.base import BaseExtractor
+from ocr.local_vlm import LocalLlamaModel
 
 
 def create_extractor(provider: str, **kwargs) -> BaseExtractor:
@@ -25,7 +26,8 @@ def create_extractor(provider: str, **kwargs) -> BaseExtractor:
         return ClaudeExtractor(**kwargs)
     if provider == "local":
         from ocr.local_extractor import LocalVLMExtractor
-        return LocalVLMExtractor(**kwargs)
+        # return LocalVLMExtractor(**kwargs)
+        return LocalLlamaModel()
     if provider == "gemini":
         from ocr.gemini_extractor import GeminiExtractor
         return GeminiExtractor(**kwargs)

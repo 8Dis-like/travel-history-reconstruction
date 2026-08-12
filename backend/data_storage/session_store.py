@@ -1,12 +1,26 @@
 from collections import defaultdict
 from dataclasses import dataclass, field
-import numpy as np
+from typing import Optional, Dict
 
-from models import UploadedPageInfo
+from models import UploadedPageInfo, PageExtractionMetadata, TravelHistoryResponse, StampRecord
+
+
+@dataclass
+class Session:
+    uploaded_pages: Dict[str, UploadedPageInfo] = field(default_factory=dict)
+    pages_metadata: Dict[str, PageExtractionMetadata] = field(default_factory=dict)
+    stamps: Dict[str, StampRecord] = field(default_factory=dict)
+    travel_history_reconstruction: Optional[TravelHistoryResponse] = None
+
 
 @dataclass
 class SessionStore:
-    sessions: dict[str, list[UploadedPageInfo]] = field(default_factory=lambda: defaultdict(list))
+    sessions: Dict[str, Session] = field(default_factory=dict)
+
+
+""" @dataclass
+class OldSessionStore:
+    sessions: dict[str, list[UploadedPageInfo]] = field(default_factory=lambda: defaultdict(list)) """
 
 session_store = SessionStore()
 

@@ -5,7 +5,7 @@ import './App.css'
 import UploadPanel from "./components/UploadPanel"
 import ProcessingView from './components/ProcessingView'
 import { TableView } from './components/TableView'
-import type { AnalysisStatus, AnalysisResponse } from './types/types'
+import type { AnalysisStatus, AnalysisResponse, StampRecord, PageExtractionResponse, TravelHistoryResponse } from './types/types'
 import { analyze } from './api/analyzePassport'
 
 const { Title } = Typography;
@@ -15,7 +15,9 @@ const { Content } = Layout
 function App() {
   const [sessionId] = useState<string>(() => crypto.randomUUID())
   const [analysisStatus, setAnalysisStatus] = useState<AnalysisStatus>("idle")
-  const [analysisResponse, setAnalysisResponse] = useState<AnalysisResponse | null>(null)
+  // const [analysisResponse, setAnalysisResponse] = useState<AnalysisResponse | null>(null)
+  const [pages, setPages] = useState<PageExtractionResponse[] | null>(null)
+  const [travelHistory, setTravelHistory] = useState<TravelHistoryResponse | null>(null)
 
 
   const handleAnalyze = async () => {
@@ -26,14 +28,57 @@ function App() {
     setAnalysisStatus("processing")
 
     const analysisResult = await analyze(sessionId)
-    setAnalysisResponse(analysisResult)
 
-    console.log(analysisResult)
-
-    console.log(`There are ${analysisResult.travelHistory.stays.length} stays in the result`)
+    setPages(analysisResult.pages)
+    setTravelHistory(analysisResult.travelHistory)
+    
+    // setAnalysisResponse(analysisResult)
 
     setAnalysisStatus("done")
   }
+
+
+  const handleStampUpdate = async (updatedStamp: StampRecord) => {
+    if (pages === null) {
+      return
+    }
+
+    setPages(prevPages => {
+      if (prevPages === null) {
+        return null
+      }
+
+      return prevPages.map(page => (
+        page.pageId === updatedStamp.pageId 
+          ? {...page, stamps: page.stamps.map(stamp => (stamp.stampId === updatedStamp.stampId ? updatedStamp : stamp))} 
+          : page
+      ))
+    })
+  }
+
+
+  const handleStampDelete = async (deletedStamp: StampRecord) => {
+    if (pages === null) {
+      return
+    }
+
+    setPages(prevPages => {
+      if (prevPages === null) {
+        return null
+      }
+
+      return prevPages.map(page => ({
+        ...page,
+        stamps: page.stamps.filter(stamp => stamp.stampId !== deletedStamp.stampId)
+      }))
+    })
+  }
+
+
+  const handleTimelineRebuild = async (newTravelHistory: TravelHistoryResponse) => {
+    setTravelHistory(newTravelHistory)
+  }
+
 
   return (
     <>
@@ -44,8 +89,15 @@ function App() {
             <UploadPanel sessionId={sessionId} handleAnalyze={handleAnalyze}/>
           ) : analysisStatus === "processing" ? (
             <ProcessingView />
-          ) : analysisStatus === "done" && analysisResponse && (
-            <TableView stays={analysisResponse.travelHistory.stays} pages={analysisResponse.pages}/>
+          ) : analysisStatus === "done" && travelHistory && pages && (
+            <TableView 
+              sessionId={sessionId} 
+              stays={travelHistory.stays} 
+              pages={pages} 
+              handleStampUpdate={handleStampUpdate}
+              handleTimelineRebuild={handleTimelineRebuild}
+              handleStampDelete={handleStampDelete}
+            />
           )}
         </Content>
       </Layout>
