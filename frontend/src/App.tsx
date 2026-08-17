@@ -5,7 +5,7 @@ import './App.css'
 import UploadPanel from "./components/UploadPanel"
 import ProcessingView from './components/ProcessingView'
 import { TableView } from './components/TableView'
-import type { AnalysisStatus, AnalysisResponse, StampRecord, PageExtractionResponse, TravelHistoryResponse } from './types/types'
+import type { AnalysisStatus, StampRecord, PageExtractionResponse, TravelHistoryResponse } from './types/types'
 import { analyze } from './api/analyzePassport'
 
 const { Title } = Typography;
@@ -15,7 +15,6 @@ const { Content } = Layout
 function App() {
   const [sessionId] = useState<string>(() => crypto.randomUUID())
   const [analysisStatus, setAnalysisStatus] = useState<AnalysisStatus>("idle")
-  // const [analysisResponse, setAnalysisResponse] = useState<AnalysisResponse | null>(null)
   const [pages, setPages] = useState<PageExtractionResponse[] | null>(null)
   const [travelHistory, setTravelHistory] = useState<TravelHistoryResponse | null>(null)
 
@@ -32,8 +31,6 @@ function App() {
     setPages(analysisResult.pages)
     setTravelHistory(analysisResult.travelHistory)
     
-    // setAnalysisResponse(analysisResult)
-
     setAnalysisStatus("done")
   }
 
@@ -92,8 +89,9 @@ function App() {
           ) : analysisStatus === "done" && travelHistory && pages && (
             <TableView 
               sessionId={sessionId} 
-              stays={travelHistory.stays} 
               pages={pages} 
+              stays={travelHistory.stays} 
+              unattributableStamps={travelHistory.unattributableStamps}
               handleStampUpdate={handleStampUpdate}
               handleTimelineRebuild={handleTimelineRebuild}
               handleStampDelete={handleStampDelete}

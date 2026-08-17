@@ -9,10 +9,8 @@ def create_base64_url(img_array: np.ndarray, format: str = "png") -> str:
         img_array = np.clip(img_array, 0, 255).astype(np.uint8)
 
     if img_array.shape[-1] == 4:
-        # img_array = cv2.cvtColor(img_array, cv2.COLOR_BGRA2RGBA)
         mode = "RGBA"
     else:
-        # img_array = cv2.cvtColor(img_array, cv2.COLOR_BGR2RGB)
         mode = "RGB"
         
     img = Image.fromarray(img_array, mode=mode)

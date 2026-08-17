@@ -16,80 +16,6 @@ _SCHEMA = {
     "additionalProperties": False
 }
 
-_SYSTEM_PROMPT_current = """
-Is there a legible passport stamp? If no, return all null fields as specified. If yes, are all fields legible? 
-If a field is not legible, return null for that field.
-
-Rules:
-- date: the date in ISO 8601 format YYYY-MM-DD. If no date is clearly indicated, set to null.
-- country: the ISO-3166 alpha-3 country code (e.g. GBR, USA, FRA, ESP, HKG). If no country is clearly indicated, set to null.
-- direction: exactly "ENTRY" or "EXIT". If no direction is clearly indicated, set to null.
-- confidence reflects how legible/certain the visible fields are, from 0 (unreadable) to 1 (fully clear). If everything is null, confidence should be 0.
-
-Return ONLY a JSON object with these exact keys. Set any unreadable field to null.
-Example 1: 
-Input: Image of a stamp clearly shows the country name, date, and direction.
-{"date": "2024-03-15", "country": "GBR", "direction": "ENTRY", "confidence": 0.85}
-Example 2: 
-Input: Image shows a smudged stamp, but fields are unreadable.
-Output: {"date": null, "country": null, "direction": null, "confidence": 0}
-Example 3:
-Input: Image shows a blank page or no visible stamp.
-Output: {"date": null, "country": null, "direction": null, "confidence": 0}
-
-Critical rules:
-- If you cannot clearly identify a field, you MUST set it to null. Do NOT guess based on typical passport stamps
-"""
-
-
-_SYSTEM_PROMPT_old = """
-Task: Extract entry/exit stamp data from a passport page image.
-
-Evaluate each field INDEPENDENTLY. A stamp can have some legible fields 
-and some illegible fields at the same time — this is the normal case, 
-not an edge case. Do not let confidence in one field affect your answer 
-for another field.
-
-Fields:
-- date: ISO 8601 (YYYY-MM-DD). Only return a date if every digit is 
-  visually distinguishable. If any digit is ambiguous, smudged, or 
-  requires assumption (e.g. "this is probably a 3 because that's a 
-  common day"), set to null.
-- country: ISO-3166 alpha-3 code (e.g. GBR, USA, FRA, ESP, HKG). Only 
-  return a code if the country identifier (name, coat of arms, or 
-  unambiguous text) is directly visible. Do not infer country from 
-  language, script style, or stamp shape alone. If you cannot point to 
-  the literal visual evidence, set to null.
-- direction: exactly "ENTRY" or "EXIT". Only return this if an explicit 
-  word, arrow, or symbol indicates direction. Do not infer direction 
-  from context (e.g. "this looks like a departure stamp because it's 
-  on the left page"). If ambiguous, set to null.
-- confidence: 0 (nothing usable) to 1 (all visible fields fully clear). 
-  If everything is null, confidence must be 0.
-
-Hard rule: for each field, ask "could I point to the exact pixels that 
-prove this value?" If not, the field is null. Guessing a plausible value 
-is a critical failure — a null is always the correct answer over a guess.
-
-Return ONLY a JSON object with exactly these keys: date, country, 
-direction, confidence.
-
-Example 1 — fully legible stamp:
-{"date": "2024-03-15", "country": "GBR", "direction": "ENTRY", "confidence": 0.85}
-
-Example 2 — partially legible stamp (country and direction clear, date smudged):
-{"date": null, "country": "FRA", "direction": "EXIT", "confidence": 0.5}
-
-Example 3 — partially legible stamp (date clear, country stamp too faded to read, no direction marker visible):
-{"date": "2023-11-02", "country": null, "direction": null, "confidence": 0.4}
-
-Example 4 — smudged/illegible stamp:
-{"date": null, "country": null, "direction": null, "confidence": 0}
-
-Example 5 — no stamp:
-{"date": null, "country": null, "direction": null, "confidence": 0}
-"""
-
 
 _SYSTEM_PROMPT = """
 Task: Extract entry/exit stamp data from a passport page image.
@@ -172,13 +98,13 @@ class LocalLlamaModel:
     def __init__(self):
         self.model_type = "local"
     
-    def _create_payload(self, image_string: str):
+    def _create_payload(self, image_b64_url: str):
         payload = {
             "messages": [
                 {"role": "system", "content": _SYSTEM_PROMPT},
                 {"role": "user", "content": [
                     {"type": "text", "text": "Extract the stamp data as JSON."},
-                    {"type": "image_url", "image_url": {"url": image_string}}
+                    {"type": "image_url", "image_url": {"url": image_b64_url}}
                 ]}
             ],
             "response_format": {

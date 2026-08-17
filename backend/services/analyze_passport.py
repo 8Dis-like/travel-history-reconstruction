@@ -25,7 +25,7 @@ def analyze_passport(pages: Dict[str, UploadedPageInfo]) -> tuple[dict[str, Stam
     else:
         device = torch.device("cpu")
 
-    task = "segment"
+    task = "segment" # "detect" # "segment"
 
     page_images = [page.image for page in pages.values()]
     stamp_detector = StampDetector(device=device, task=task)

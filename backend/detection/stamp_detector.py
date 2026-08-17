@@ -32,7 +32,7 @@ class StampDetector:
         self, 
         task: str = "segment",
         imgsz: int = 1280, 
-        conf: float = 0.5, 
+        conf: float = 0.65, 
         iou: float = 0.7, 
         device: str = "cpu",
     ):

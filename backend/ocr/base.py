@@ -19,7 +19,7 @@ class ExtractionResult:
 
 class BaseExtractor(ABC):
     @abstractmethod
-    def extract(self, image: np.ndarray) -> ExtractionResult:
+    def extract(self, image_b64_url: str) -> ExtractionResult:
         """Extract structured fields from a stamp crop.
 
         Args:

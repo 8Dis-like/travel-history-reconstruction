@@ -4,20 +4,38 @@ from datetime import datetime, timezone
 import uuid
 from helpers import is_valid_date
 
-
-def stay_response_sort_key(stay: StayResponse) -> datetime:
-    if stay.entry_date is not None:
-        return datetime.strptime(stay.entry_date , "%Y-%m-%d")
+def country_sort_key(stamp: StampRecord):
+    date = datetime.strptime(stamp.extracted_fields.date, "%Y-%m-%d")
+    if stamp.extracted_fields.direction is not None and stamp.extracted_fields.direction.upper() == "ENTRY":
+        return (date, 1)
     else:
-        return datetime.strptime(stay.exit_date , "%Y-%m-%d")
+        return (date, 2)
 
 
-""" def is_valid_date(date_str: str) -> bool:
-    try:
-        datetime.strptime(date_str, "%Y-%m-%d")
-        return True
-    except ValueError:
-        return False """
+
+def stay_response_sort_key(stay: StayResponse):
+    entry = datetime.strptime(stay.entry_date, "%Y-%m-%d") if stay.entry_date else None
+    exit_ = datetime.strptime(stay.exit_date, "%Y-%m-%d") if stay.exit_date else None
+
+    primary = entry if entry is not None else exit_
+    secondary = exit_ if entry is not None else entry
+
+    secondary_sort = secondary if secondary is not None else primary
+
+    return (primary, secondary_sort)
+
+
+def flag_overlapping_stays(sorted_stays: list[StayResponse]) -> None:
+    for current, nxt in zip(sorted_stays, sorted_stays[1:]):
+        if current.exit_date is None or nxt.entry_date is None:
+            continue
+
+        exit_dt = datetime.strptime(current.exit_date, "%Y-%m-%d")
+        next_entry_dt = datetime.strptime(nxt.entry_date, "%Y-%m-%d")
+
+        if exit_dt > next_entry_dt:
+            current.status = "flagged"
+            current.flags.append(f"Exit date after next entry ({nxt.country})")
 
 
 def build_travel_history(stamps: dict[str, StampRecord]) -> TravelHistoryResponse:
@@ -30,7 +48,8 @@ def build_travel_history(stamps: dict[str, StampRecord]) -> TravelHistoryRespons
     for stamp in all_stamps:
         country = stamp.extracted_fields.country
         date = stamp.extracted_fields.date
-        if country is not None and date is not None and is_valid_date(date):
+        if all([country, date, stamp.extracted_fields.direction]):
+            # if country is not None and date is not None and is_valid_date(date):
             stamps_by_country[country].append(stamp)
         else:
             unattributable_stamps.append(stamp)
@@ -38,7 +57,7 @@ def build_travel_history(stamps: dict[str, StampRecord]) -> TravelHistoryRespons
     stay_responses = []
 
     for country, stamps in stamps_by_country.items():
-        stamps_by_date = sorted(stamps, key=lambda s: datetime.strptime(s.extracted_fields.date, "%Y-%m-%d"))
+        stamps_by_date = sorted(stamps, key=country_sort_key) #lambda s: datetime.strptime(s.extracted_fields.date, "%Y-%m-%d"))
 
         stay_response = None
 
@@ -122,6 +141,8 @@ def build_travel_history(stamps: dict[str, StampRecord]) -> TravelHistoryRespons
             stay_response = None
 
     sorted_stay_responses: list[StayResponse] = sorted(stay_responses, key=stay_response_sort_key)
+
+    flag_overlapping_stays(sorted_stay_responses)
 
     if sorted_stay_responses and sorted_stay_responses[-1].exit_date is None:
         if "No exit detected" in sorted_stay_responses[-1].flags:

@@ -1,11 +1,11 @@
 import React from 'react'
 import { useState, useEffect, useRef } from 'react'
 
-import { Table, Card, ConfigProvider, Form, Button, Input, Select, message } from 'antd'
+import { Table, Card, ConfigProvider, Form, Button, Input, Select, Tag } from 'antd'
 import { LeftOutlined, RightOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 
-import type { PageExtractionResponse, StayResponse, StampRecord, StampFieldUpdate, TravelHistoryResponse } from '../types/types'
+import type { PageExtractionResponse, StayResponse, StampRecord, TravelHistoryResponse } from '../types/types'
 import '../components/TableView.css'
 import { formatDate } from '../utils/formatters'
 
@@ -22,6 +22,7 @@ interface TimelineTableProps {
 
 interface PageCarouselProps {
   pages: PageExtractionResponse[]
+  unattributableStamps: StampRecord[]
   curPageIndex: number
   setCurPageIndex: React.Dispatch<React.SetStateAction<number>>
   clickStampId: string
@@ -40,13 +41,14 @@ interface TableViewProps {
   sessionId: string
   pages: PageExtractionResponse[]
   stays: StayResponse[]
+  unattributableStamps: StampRecord[]
   handleStampUpdate: (updatedStamp: StampRecord) => void
   handleTimelineRebuild: (travelHistory: TravelHistoryResponse) => void
   handleStampDelete: (deletedStamp: StampRecord) => void
 }
 
 
-const CustomPageCarousel: React.FC<PageCarouselProps> = ({ pages, curPageIndex, setCurPageIndex, clickStampId, onStampSelected }) => {
+const CustomPageCarousel: React.FC<PageCarouselProps> = ({ pages, unattributableStamps, curPageIndex, setCurPageIndex, clickStampId, onStampSelected }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const thumbnailRefs = useRef<(HTMLImageElement | null)[]>([])
   const imgContainerRef = useRef<HTMLImageElement>(null)
@@ -61,7 +63,6 @@ const CustomPageCarousel: React.FC<PageCarouselProps> = ({ pages, curPageIndex, 
   }
 
   const [hoverStampId, setHoverStampId] = useState('')
-  // const [clickStampId, setClickStampId] = useState('')
 
   const [imageLoaded, setImageLoaded] = useState<Boolean>(false)
 
@@ -83,6 +84,10 @@ const CustomPageCarousel: React.FC<PageCarouselProps> = ({ pages, curPageIndex, 
     setImageLoaded(false)
   }, [curPageIndex])
 
+  const unattributableStampIds = new Set(
+    unattributableStamps.map((stamp) => stamp.stampId)
+  )
+
 
   return (
     <div style={{ width: "100%", alignItems: "center", textAlign: "center" }}>
@@ -94,7 +99,7 @@ const CustomPageCarousel: React.FC<PageCarouselProps> = ({ pages, curPageIndex, 
         }}
       >
         <img 
-          src={pages[curPageIndex].origImage} // processedImage} 
+          src={pages[curPageIndex].origImage}
           ref={imgContainerRef}
           style={{ 
             height: "65vh",
@@ -117,13 +122,29 @@ const CustomPageCarousel: React.FC<PageCarouselProps> = ({ pages, curPageIndex, 
               height: "100%" 
             }}
           >
-            {pages[curPageIndex].stamps.map((stamp) => (
-              <polygon 
+            {pages[curPageIndex].stamps.map((stamp) => {
+
+              const unattributable = unattributableStampIds.has(stamp.stampId)
+
+              return <polygon 
                 key={stamp.stampId}
-                points={stamp.mask.map(([x, y]) =>`${x},${y}`).join(' ')}
-                fill={clickStampId === stamp.stampId ? "orange" : (hoverStampId === stamp.stampId ? "red" : "transparent")}
+                points={stamp.mask.map(([x, y]) =>`${x},${y}`).join(' ')}/* {[
+                  [stamp.boundingBox[0], stamp.boundingBox[1]],
+                  [stamp.boundingBox[2], stamp.boundingBox[1]],
+                  [stamp.boundingBox[2], stamp.boundingBox[3]],
+                  [stamp.boundingBox[0], stamp.boundingBox[3]],
+                ].map(([x, y]) => `${x},${y}`).join(' ')} */
+                fill={clickStampId === stamp.stampId 
+                        ? (unattributable ? "red" : "orange") 
+                        : (hoverStampId === stamp.stampId   
+                          ? (unattributable ? "red": "green") 
+                          : "transparent")
+                      }
                 fillOpacity={0.25}
-                stroke={clickStampId === stamp.stampId ? "orange" : "red"}
+                stroke={unattributable 
+                          ? "red"
+                          : (clickStampId === stamp.stampId ? "orange" : "green")
+                        }
                 strokeWidth={pages[curPageIndex].imageHeight * 0.005}
                 onMouseEnter={() => setHoverStampId(stamp.stampId)}
                 onMouseLeave={() => setHoverStampId('')}
@@ -133,7 +154,7 @@ const CustomPageCarousel: React.FC<PageCarouselProps> = ({ pages, curPageIndex, 
                 style={{ cursor: "pointer" }}
                 opacity={imageLoaded ? 1 : 0}
               />
-            ))}
+            })}
           </svg>
         )}
       </div>
@@ -354,11 +375,23 @@ const TimelineTable: React.FC<TimelineTableProps> = ({
 }) => {
   const [rebuildingTimeline, setRebuildingTimeline] = useState(false)
 
+  const flagSeverity = (flag: string) => {
+    if (flag === "No exit detected" || flag.includes("inferred")) {
+      return "info"
+    }
+    if (flag === "No entry detected") {
+      return "warning"
+    }
+    return "warning"
+  }
+
+
   const columns: ColumnsType<StayResponse> = [
     {
       title: 'Country',
       dataIndex: 'country',
       key: 'country',
+      width: '18%',
       render: (country: string | null) => country ?? 'Unknown',
     },
     {
@@ -390,6 +423,27 @@ const TimelineTable: React.FC<TimelineTableProps> = ({
             className: isSelected ? "clickable-cell selected-cell" : "clickable-cell",
           } : {}
       }
+    },
+    {
+      title: 'Flags',
+      dataIndex: 'status',
+      width: '30%',
+      render: (_, record: StayResponse) => (
+        <>
+          {record.flags
+            .filter(flag => flag !== "ongoing")
+            .map((flag, i) => (
+              <Tag 
+                key={i} 
+                color={flagSeverity(flag) === "info" ? "blue" : "red"}
+                style={{ whiteSpace: "normal", display: "inline-block", marginBottom: 4 }}
+              >
+                {flag}
+              </Tag>
+            ))
+          }
+        </>
+      )
     }
   ]
 
@@ -424,6 +478,7 @@ const TimelineTable: React.FC<TimelineTableProps> = ({
       >
         <Table 
           bordered 
+          tableLayout='fixed'
           columns={columns} 
           dataSource={stays} 
           rowKey="stayId"
@@ -444,13 +499,21 @@ const TimelineTable: React.FC<TimelineTableProps> = ({
 }
 
 
-export const TableView: React.FC<TableViewProps> = ({ sessionId, pages, stays, handleStampUpdate, handleTimelineRebuild, handleStampDelete }) => {
+export const TableView: React.FC<TableViewProps> = ({ 
+  sessionId, 
+  pages, 
+  stays, 
+  unattributableStamps,
+  handleStampUpdate, 
+  handleTimelineRebuild, 
+  handleStampDelete 
+}) => {
   // const [clickedStamp, setClickedStamp] = useState<StampRecord | null>(null)
   const [curPageIndex, setCurPageIndex] = useState(0)
   const [clickStampId, setClickStampId] = useState('')
   const [selectedTableCell, setSelectedTableCell] = useState<{ stayId: string; field: "entryStamp" | "exitStamp" } | null>(null)
   const [curTablePage, setCurTablePage] = useState(1)
-  const pageSize = 10
+  const pageSize = 8
 
   const clickedStamp = clickStampId
     ? pages?.flatMap(page => page.stamps).find(stamp => stamp.stampId === clickStampId) ?? null
@@ -506,6 +569,7 @@ export const TableView: React.FC<TableViewProps> = ({ sessionId, pages, stays, h
             <div style={{ flex: 13 }}>
               <CustomPageCarousel 
                 pages={pages} 
+                unattributableStamps={unattributableStamps}
                 curPageIndex={curPageIndex} 
                 setCurPageIndex={setCurPageIndex}
                 clickStampId={clickStampId}

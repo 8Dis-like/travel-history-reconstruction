@@ -38,13 +38,16 @@ const UploadPanel: React.FC<UploadPanelProps> = ({ sessionId, handleAnalyze }) =
     if (file.type === 'application/pdf') {
       const pageId: string = crypto.randomUUID()
 
-      const newPDF: Page = {
+      /* const newPDF: Page = {
         pageId: pageId,
         status: "converting",
         sourceFilename: truncateFilename(file.name),
-      }
+      } */
 
-      setPages(prevPages => [...prevPages, newPDF])
+      setPages(prevPages => [
+        ...prevPages, 
+        {pageId: pageId, status: "converting", sourceFilename: truncateFilename(file.name)}
+      ])
 
       const formData = new FormData();
       formData.append('file', file);
@@ -58,8 +61,6 @@ const UploadPanel: React.FC<UploadPanelProps> = ({ sessionId, handleAnalyze }) =
         console.error(`Failed to upload ${file.name} to backend.`)
       }
 
-      // const data = await response.json()
-      // console.log(data.pages)
       const pages: UploadResponse[] = await response.json()
 
       const newPages: Page[] = pages.map((page) => {
@@ -79,32 +80,38 @@ const UploadPanel: React.FC<UploadPanelProps> = ({ sessionId, handleAnalyze }) =
       
     } else if (file.type === "image/jpeg" || file.type === "image/png") {
       const pageId = crypto.randomUUID()
-      const reader = new FileReader()
 
-      reader.onload = () => {
-        const newPage: Page = {
-          pageId: pageId,
-          status: "ready",
-          sourceFilename: file.name,
-          imageSrc: reader.result as string,
-        }
-        setPages(prevPages => [...prevPages, newPage])
-      }
+      setPages(prevPages => [
+        ...prevPages,
+        { pageId, status: "converting", sourceFilename: truncateFilename(file.name)}
+      ])
 
-      reader.readAsDataURL(file)
+      const [imageSrc, response] = await Promise.all([
+        new Promise<string>((resolve) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(reader.result as string)
+          reader.readAsDataURL(file)
+        }),
+        (async () => {
+          const formData = new FormData()
+          formData.append('file', file)
+          formData.append('page_id', pageId)
+          return fetch(`/api/sessions/${sessionId}/upload-image`, {
+            method: "POST",
+            body: formData,
+          })
+        })(),
+      ])
 
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('page_id', pageId)
-
-      const response = await fetch(`/api/sessions/${sessionId}/upload-image`, {
-        method: "POST",
-        body: formData,
-      })
       if (!response.ok) {
-        console.error(`Failed to upload ${file.name} to backend.`)
+        message.error(`Failed to upload ${file.name} to backend.`)
       }
 
+      setPages(prevPages => prevPages.map(page =>
+        page.pageId === pageId
+          ? {...page, status: response.ok ? "ready" : "error", imageSrc: imageSrc}
+          : page
+      ))
 
     } else {
       message.error(`${file.name} is not a supported file type.`)
