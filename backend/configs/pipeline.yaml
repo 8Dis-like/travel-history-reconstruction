@@ -2,6 +2,13 @@
 # Travel History Reconstruction — Pipeline Configuration
 # =============================================================
 
+preprocessing:
+  target_dpi: 300
+  deskew: true
+  denoise: true
+  contrast_enhancement: true  # CLAHE
+  max_image_size: 4096        # Max dimension in pixels
+
 detection:
   model: "yolov8s"            # Options: yolov8n, yolov8s, yolov8m, yolov8l
   weights: "models/pretrained/yolov8s.pt"
@@ -11,11 +18,11 @@ detection:
   input_size: 640
 
 ocr:
-  engine: "claude" # "local"            # Options: claude (implemented), local (stub)
+  engine: "local"            # Options: claude (implemented), local (stub)
   claude:
     model: "claude-sonnet-5"  # Any Claude model id; drives ClaudeExtractor
     max_tokens: 256
-  local:                      # LocalVLMExtractor (MiniCPM-o / Qwen-VL) — not yet implemented
+  local:                      # LocalVLMExtractor (MiniCPM-o / Qwen-VL) - Must be running a VLM on port 8080
     {}
 
 reconstruction:
@@ -28,3 +35,13 @@ reconstruction:
   country_code_standard: "ISO-3166-1-alpha-3"
   confidence_threshold: 0.7   # Min confidence to include in final timeline
 
+output:
+  format: "json"              # Options: json, csv, pdf
+  include_metadata: true
+  include_crop_images: true
+  output_dir: "data/processed/results"
+
+logging:
+  level: "INFO"
+  wandb_project: "travel-history-reconstruction"
+  wandb_entity: null          # Set to your W&B team name
