@@ -148,57 +148,6 @@ class ClaudeExtractor(BaseExtractor):
                 confidence=float(data.get("confidence") or 0.0)
             )
 
-            """ text_block = next((block for block in message.content if block.type == "text"), None)
-            if text_block is None:
-                raise ValueError("No text block found in response content")
-
-            raw = re.sub(r"^```(?:json)?\s*|\s*```$", "", text_block.text.strip())
-            data = json.loads(raw)
-            return ExtractionResult(
-                date=data.get("date"),
-                country=data.get("country"),
-                direction=data.get("direction"),
-                raw_text=data.get("raw_text"),
-                confidence=float(data.get("confidence") or 0.0),
-            ) """
         except Exception as e:
             print(f"ClaudeExtractor failed: {type(e).__name__}: {e}")
             return ExtractionResult(date=None, country=None, direction=None, raw_text=None, confidence=0.0)
-
-
-    """ def extract(self, image_b64_url: str) -> ExtractionResult:
-        try:
-            _, buf = cv2.imencode(".png", image)
-            image_b64 = base64.standard_b64encode(buf.tobytes()).decode("utf-8")
-
-            if image_b64_url.startswith("data:"):
-                image_b64 = image_b64_url.split(",", 1)[1]
-            else:
-                image_b64 = image_b64_url
-
-            message = self._client.messages.create(
-                model=self._model,
-                max_tokens=self._max_tokens,
-                messages=[{
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "image",
-                            "source": {"type": "base64", "media_type": "image/png", "data": image_b64},
-                        },
-                        {"type": "text", "text": _PROMPT},
-                    ],
-                }],
-            )
-            raw = re.sub(r"^```(?:json)?\s*|\s*```$", "", message.content[0].text.strip())
-            data = json.loads(raw)
-            return ExtractionResult(
-                date=data.get("date"),
-                country=data.get("country"),
-                direction=data.get("direction"),
-                raw_text=data.get("raw_text"),
-                confidence=float(data.get("confidence") or 0.0),
-            )
-        except Exception as e:
-            print(f"ClaudeExtractor failed: {type(e).__name__}: {e}")
-            return ExtractionResult(date=None, country=None, direction=None, raw_text=None, confidence=0.0) """

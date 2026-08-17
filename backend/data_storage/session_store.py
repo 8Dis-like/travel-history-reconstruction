@@ -18,10 +18,6 @@ class SessionStore:
     sessions: Dict[str, Session] = field(default_factory=dict)
 
 
-""" @dataclass
-class OldSessionStore:
-    sessions: dict[str, list[UploadedPageInfo]] = field(default_factory=lambda: defaultdict(list)) """
-
 session_store = SessionStore()
 
 def get_session_store() -> SessionStore:
