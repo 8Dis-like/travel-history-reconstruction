@@ -18,7 +18,7 @@ detection:
   input_size: 640
 
 ocr:
-  engine: "local"            # Options: claude (implemented), local (stub)
+  engine: "claude"            # Options: claude (implemented), local (stub)
   claude:
     model: "claude-sonnet-5"  # Any Claude model id; drives ClaudeExtractor
     max_tokens: 256
