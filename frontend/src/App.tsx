@@ -1,13 +1,12 @@
-import { useEffect, useState } from 'react'
-import { Layout, Typography, Segmented } from "antd"
+import { useState } from 'react'
+import { Layout, Typography } from "antd"
 import './App.css'
 
 import UploadPanel from "./components/UploadPanel"
 import ProcessingView from './components/ProcessingView'
-import { TableView, TimelineTable, PageCarousel, StampCarousel, CustomPageCarousel } from './components/TableView'
-import type { AnalysisStatus, TravelHistoryResponse, AnalysisResponse } from './types/types'
-import { mockAnalyze, analyze } from './api/analyzePassport'
-import TimelineView from './components/TimelineView'
+import { TableView } from './components/TableView'
+import type { AnalysisStatus, StampRecord, PageExtractionResponse, TravelHistoryResponse } from './types/types'
+import { analyze } from './api/analyzePassport'
 
 const { Title } = Typography;
 const { Content } = Layout
@@ -15,13 +14,10 @@ const { Content } = Layout
 
 function App() {
   const [sessionId] = useState<string>(() => crypto.randomUUID())
-  const [analysisStatus, setAnalysisStatus] = useState<AnalysisStatus>("idle")// ("idle")
-  const [analysisResponse, setAnalysisResponse] = useState<AnalysisResponse | null>(null)
-  const [resultView, setResultView] = useState<"table" | "timeline">("table")
+  const [analysisStatus, setAnalysisStatus] = useState<AnalysisStatus>("idle")
+  const [pages, setPages] = useState<PageExtractionResponse[] | null>(null)
+  const [travelHistory, setTravelHistory] = useState<TravelHistoryResponse | null>(null)
 
-/*   useEffect(() => {
-    console.log(analysisStatus)
-  }, [analysisStatus]) */
 
   const handleAnalyze = async () => {
     if (sessionId === null) {
@@ -30,15 +26,56 @@ function App() {
 
     setAnalysisStatus("processing")
 
-    const analysisResult = await analyze(sessionId) // mockAnalyze()
-    setAnalysisResponse(analysisResult)
+    const analysisResult = await analyze(sessionId)
 
-    console.log(analysisResult)
-
-    console.log(`There are ${analysisResult.stays.length} stays in the result`)
-
+    setPages(analysisResult.pages)
+    setTravelHistory(analysisResult.travelHistory)
+    
     setAnalysisStatus("done")
   }
+
+
+  const handleStampUpdate = async (updatedStamp: StampRecord) => {
+    if (pages === null) {
+      return
+    }
+
+    setPages(prevPages => {
+      if (prevPages === null) {
+        return null
+      }
+
+      return prevPages.map(page => (
+        page.pageId === updatedStamp.pageId 
+          ? {...page, stamps: page.stamps.map(stamp => (stamp.stampId === updatedStamp.stampId ? updatedStamp : stamp))} 
+          : page
+      ))
+    })
+  }
+
+
+  const handleStampDelete = async (deletedStamp: StampRecord) => {
+    if (pages === null) {
+      return
+    }
+
+    setPages(prevPages => {
+      if (prevPages === null) {
+        return null
+      }
+
+      return prevPages.map(page => ({
+        ...page,
+        stamps: page.stamps.filter(stamp => stamp.stampId !== deletedStamp.stampId)
+      }))
+    })
+  }
+
+
+  const handleTimelineRebuild = async (newTravelHistory: TravelHistoryResponse) => {
+    setTravelHistory(newTravelHistory)
+  }
+
 
   return (
     <>
@@ -49,23 +86,16 @@ function App() {
             <UploadPanel sessionId={sessionId} handleAnalyze={handleAnalyze}/>
           ) : analysisStatus === "processing" ? (
             <ProcessingView />
-          ) : analysisStatus === "done" && analysisResponse && (
-            <>
-              <Segmented 
-                options={["Table", "Timeline"]}
-                value={resultView === "table" ? "Table" : "Timeline"}
-                onChange={(value) => setResultView(value === "Table" ? "table" : "timeline")}
-                style={{ marginBottom: '10px' }}
-              />
-              {resultView === "table" ? (
-                <TableView stays={analysisResponse.stays.stays} pages={analysisResponse.pages}/>
-                // <CustomPageCarousel data={analysisResult} setPageIndex={() => {}}/>
-                // <PageCarousel data={analysisResult}/>
-                // <StampCarousel data={analysisResult.pages[0]}/>
-              ) : (
-                <TimelineView data={analysisResponse} />
-              )}
-            </>
+          ) : analysisStatus === "done" && travelHistory && pages && (
+            <TableView 
+              sessionId={sessionId} 
+              pages={pages} 
+              stays={travelHistory.stays} 
+              unattributableStamps={travelHistory.unattributableStamps}
+              handleStampUpdate={handleStampUpdate}
+              handleTimelineRebuild={handleTimelineRebuild}
+              handleStampDelete={handleStampDelete}
+            />
           )}
         </Content>
       </Layout>

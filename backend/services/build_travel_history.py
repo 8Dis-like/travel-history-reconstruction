@@ -1,269 +1,55 @@
 from models import PageExtractionResponse, ExtractedFields, StampRecord, StayResponse, TravelHistoryResponse
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
+from helpers import is_valid_date
 
-MOCK_EXTRACTION_RESULTS = [
-    ExtractedFields(
-        date="2016-07-04",
-        country=None,
-        direction=None,
-        raw_text="4 Jul 2016",
-        extraction_confidence=0.4,
-    ),
-    ExtractedFields(
-        date="2017-08-21",
-        country="GBR",
-        direction="ENTRY",
-        raw_text="IMMIGRATION OFFICER HEATHROW (5) 21 AUG 2017 (51091)",
-        extraction_confidence=0.85,
-    ),
-    ExtractedFields(
-        date="2016-06-26",
-        country="THA",
-        direction="ENTRY",
-        raw_text="IMMIGRATION SUVARNABHUMI AIRPORT THAILAND VISACLASS ORO 26 JUN 2016 ADMITTED UNTIL 25 JUL 2016 SIGNED",
-        extraction_confidence=0.85,
-    ),
-    ExtractedFields(
-        date="2018-11-24",
-        country="THA",
-        direction="ENTRY",
-        raw_text="IMMIGRATION BANGKOK THAILAND VISACLASS 24 NOV 2018 ADMITTED UNTIL 23 DEC 2018 SIGNED",
-        extraction_confidence=0.85,
-    ),
-    ExtractedFields(
-        date="2018-12-24",
-        country="SGP",
-        direction="EXIT",
-        raw_text="4 DEC 2018 REMAIN IN SINGAPORE NINETY DAYS FOR VISIT ONLY",
-        extraction_confidence=0.6,
-    ),
-    ExtractedFields(
-        date="2018-11-17",
-        country="THA",
-        direction="ENTRY",
-        raw_text="MMIGRATION SUVARNABHUMI AIRPORT VISACLASS 17 NOV 2018 ADMITTED UNTIL 16 DEC 2018 SIGNED",
-        extraction_confidence=0.8,
-    ),
-    ExtractedFields(
-        date="2018-12-25",
-        country="THA",
-        direction="EXIT",
-        raw_text="IMMIGRATION DEPARTED 25 DEC 2018",
-        extraction_confidence=0.7,
-    ),
-    ExtractedFields(
-        date="2018-11-21",
-        country="THA",
-        direction="EXIT",
-        raw_text="IMMIGRATION DEPARTED BANGKOK 21 NOV 2018",
-        extraction_confidence=0.7,
-    ),
-    ExtractedFields(
-        date="2018-11-25",
-        country="THA",
-        direction="EXIT",
-        raw_text="IMMIGRATION DEPARTED SUVARNABHUMI AIRPORT THAILAND 25 NOV 2018 SIGNED",
-        extraction_confidence=0.85,
-    ),
-    ExtractedFields(
-        date=None,
-        country=None,
-        direction=None,
-        raw_text=None,
-        extraction_confidence=0.1,
-    ),
-    ExtractedFields(
-        date="2018-11-24",
-        country="KHM",
-        direction="EXIT",
-        raw_text="CAMBODIA IMMIGRATION SIEM REAP AIRPORT DEPARTED 24 NOV 2018 CODE: 20",
-        extraction_confidence=0.85,
-    ),
-    ExtractedFields(
-        date=None,
-        country=None,
-        direction=None,
-        raw_text=None,
-        extraction_confidence=0.1,
-    ),
-    ExtractedFields(
-        date="2018-11-21",
-        country="KHM",
-        direction="ENTRY",
-        raw_text="IMMIGRATION CAMBODIA SIEM REAP AIRPORT PERMITTED 21 NOV 2018 UNTIL 21 DEC 2018 CODE: S111 21",
-        extraction_confidence=0.85,
-    ),
-    ExtractedFields(
-        date=None,
-        country=None,
-        direction=None,
-        raw_text="KINGDOM OF CAMBODIA Siem Reap Visa No. 16093329 Issuing Post: Siem Reap Surname: WILSON Given Name: TEE Passport Number: SS1321349 Entries: Single Expiry Date: Employment Not Permitted 21 DEC 2018 Issue Date: 21 NOV 2018 Fee: 30USD",
-        extraction_confidence=0.7,
-    ),
-    ExtractedFields(
-        date="2016-07-04",
-        country="CHN",
-        direction="ENTRY",
-        raw_text="中国边检 CHINA 2016-07-04 甫宁[入] 0140060",
-        extraction_confidence=0.85,
-    ),
-    ExtractedFields(
-        date="2010-11-17",
-        country="CHN",
-        direction="ENTRY",
-        raw_text="中国边检 CHINA 2010-11-17 浦东[入] 0550457",
-        extraction_confidence=0.8
-    ),
-    ExtractedFields(
-        date="2018-12-25",
-        country="CHN",
-        direction="ENTRY",
-        raw_text="中国边检 CHINA 2018-12-25 高崎[入] 0110248",
-        extraction_confidence=0.85
-    ),
-    ExtractedFields(
-        date="2018-12-25",
-        country="CHN",
-        direction="EXIT",
-        raw_text="中国边检 CHINA 2018-12-25 高崎[出] 0110258/0110259",
-        extraction_confidence=0.85
-    ),
-    ExtractedFields(
-        date="2018-11-17",
-        country="CHN",
-        direction="EXIT",
-        raw_text="中国边检 CHINA 2018-11-17 浦东[出] 0551081",
-        extraction_confidence=0.85
-    ),
-    ExtractedFields(
-        date="2016-07-17",
-        country="CHN",
-        direction="EXIT",
-        raw_text="中国边检 CHINA 2016-07-17 浦东[出] 0551416",
-        extraction_confidence=0.85
-    ),
-    ExtractedFields(
-        date="2016",
-        country="CHN",
-        direction=None,
-        raw_text="CANCELLED 2016 ISSUED AT 签发地点 北京 DURATION OF EACH STAY 每次停留期限 060 天 DAYS AFTER ENTRY 护照号码 PASSPORT NO. 5513217 JIE LUN TEE",
-        extraction_confidence=0.6
-    ),
-    ExtractedFields(
-        date=None,
-        country="CHN",
-        direction=None,
-        raw_text="21349",
-        extraction_confidence=0.3
-    ),
-    ExtractedFields(
-        date="2019-01-04",
-        country="CHN",
-        direction="EXIT",
-        raw_text="中国边检 CHINA 2019-01-04 萬岛机场[出] 0210035",
-        extraction_confidence=0.8
-    ),
-    ExtractedFields(
-        date="2019-01-02",
-        country="CHN",
-        direction="ENTRY",
-        raw_text="中国边检 CHINA 2019-01-02 [入] 0040103",
-        extraction_confidence=0.65
-    ),
-    ExtractedFields(
-        date="2019-11-23",
-        country="CHN",
-        direction="ENTRY",
-        raw_text="中国边检 CHINA 2019-11-23 西安[入] 0180078",
-        extraction_confidence=0.85
-    ),
-    ExtractedFields(
-        date="2018-12-25",
-        country="IDN",
-        direction="ENTRY",
-        raw_text="Visas IMMIGRATION INDONESIA VISA EXEMPTION NGURAH RAI 25 DEC 2018 PERMITTED TO ENTER AND STAY FOR 30 DAYS FROM DATE SHOWN ABOVE \"WORK PROHIBITED\" \"NOT EXTENDABLE\" ART 41 ACT 6 2011",
-        extraction_confidence=0.85
-    ),
-    ExtractedFields(
-        date="2019-11-30",
-        country="CHN",
-        direction="EXIT",
-        raw_text="中国边检 CHINA 2019-11-30 重庆[出] 0220219",
-        extraction_confidence=0.85
-    ),
-    ExtractedFields(
-        date="2018-12-28",
-        country="IDN",
-        direction="EXIT",
-        raw_text="IMMIGRATION INDONESIA DEPARTURE 28 DEC '18 ART. 15 ACT. 6. 2011",
-        extraction_confidence=0.85
-    ),
-    ExtractedFields(
-        date="2017-08-21",
-        country=None,
-        direction=None,
-        raw_text="21.08.17 88",
-        extraction_confidence=0.4
-    ),
-    ExtractedFields(
-        date="2017-08-12",
-        country=None,
-        direction=None,
-        raw_text="12.08.17 26 SAYARAS JUAV",
-        extraction_confidence=0.35
-    ),
-]
-
-
-MOCK_STAMPS = []
-
-for i, extracted_fields in enumerate(MOCK_EXTRACTION_RESULTS):
-    stamp = StampRecord(
-        stamp_id=str(i),
-        stamp_image="",
-        bounding_box=[],
-        mask=None,
-        detection_confidence=0.6,
-        extracted_fields=extracted_fields,
-        page_source="",
-        page_number=i
-    )
-    MOCK_STAMPS.append(stamp)
-
-
-def stay_response_sort_key(stay: StayResponse) -> datetime:
-    if stay.entry_date is not None:
-        return datetime.strptime(stay.entry_date , "%Y-%m-%d")
+def country_sort_key(stamp: StampRecord):
+    date = datetime.strptime(stamp.extracted_fields.date, "%Y-%m-%d")
+    if stamp.extracted_fields.direction is not None and stamp.extracted_fields.direction.upper() == "ENTRY":
+        return (date, 1)
     else:
-        return datetime.strptime(stay.exit_date , "%Y-%m-%d")
+        return (date, 2)
 
 
-def is_valid_date(date_str: str) -> bool:
-    try:
-        datetime.strptime(date_str, "%Y-%m-%d")
-        return True
-    except ValueError:
-        return False
+
+def stay_response_sort_key(stay: StayResponse):
+    entry = datetime.strptime(stay.entry_date, "%Y-%m-%d") if stay.entry_date else None
+    exit_ = datetime.strptime(stay.exit_date, "%Y-%m-%d") if stay.exit_date else None
+
+    primary = entry if entry is not None else exit_
+    secondary = exit_ if entry is not None else entry
+
+    secondary_sort = secondary if secondary is not None else primary
+
+    return (primary, secondary_sort)
 
 
-def build_travel_history(pages: list[PageExtractionResponse]) -> TravelHistoryResponse:
+def flag_overlapping_stays(sorted_stays: list[StayResponse]) -> None:
+    for current, nxt in zip(sorted_stays, sorted_stays[1:]):
+        if current.exit_date is None or nxt.entry_date is None:
+            continue
+
+        exit_dt = datetime.strptime(current.exit_date, "%Y-%m-%d")
+        next_entry_dt = datetime.strptime(nxt.entry_date, "%Y-%m-%d")
+
+        if exit_dt > next_entry_dt:
+            current.status = "flagged"
+            current.flags.append(f"Exit date after next entry ({nxt.country})")
+
+
+def build_travel_history(stamps: dict[str, StampRecord]) -> TravelHistoryResponse:
     stamps_by_country: dict[str, list[StampRecord]] = defaultdict(list)
 
-    all_stamps: list[StampRecord] = []
-    for page in pages:
-        all_stamps.extend(page.stamps)
-
-    if len(pages) == 0:
-        all_stamps = MOCK_STAMPS
+    all_stamps: list[StampRecord] = list(stamps.values())
 
     unattributable_stamps: list[StampRecord] = []
 
     for stamp in all_stamps:
         country = stamp.extracted_fields.country
         date = stamp.extracted_fields.date
-        if country is not None and date is not None and is_valid_date(date):
+        if all([country, date, stamp.extracted_fields.direction]):
+            # if country is not None and date is not None and is_valid_date(date):
             stamps_by_country[country].append(stamp)
         else:
             unattributable_stamps.append(stamp)
@@ -271,7 +57,7 @@ def build_travel_history(pages: list[PageExtractionResponse]) -> TravelHistoryRe
     stay_responses = []
 
     for country, stamps in stamps_by_country.items():
-        stamps_by_date = sorted(stamps, key=lambda s: datetime.strptime(s.extracted_fields.date, "%Y-%m-%d"))
+        stamps_by_date = sorted(stamps, key=country_sort_key) #lambda s: datetime.strptime(s.extracted_fields.date, "%Y-%m-%d"))
 
         stay_response = None
 
@@ -355,6 +141,8 @@ def build_travel_history(pages: list[PageExtractionResponse]) -> TravelHistoryRe
             stay_response = None
 
     sorted_stay_responses: list[StayResponse] = sorted(stay_responses, key=stay_response_sort_key)
+
+    flag_overlapping_stays(sorted_stay_responses)
 
     if sorted_stay_responses and sorted_stay_responses[-1].exit_date is None:
         if "No exit detected" in sorted_stay_responses[-1].flags:

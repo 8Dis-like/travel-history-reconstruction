@@ -20,16 +20,23 @@ def render_pdf_page_full_res(pdf_path: str, page_num: int):
     """Create a 300 dpi image for processing in the backend"""
     with fitz.open(pdf_path) as doc:
         page = doc[page_num]
-        pix = page.get_pixmap(matrix=fitz.Matrix(300/72, 300/72))
+        pix = page.get_pixmap(
+            matrix=fitz.Matrix(300/72, 300/72),
+            colorspace=fitz.csRGB,
+            alpha=False
+        )
         img = np.frombuffer(
             pix.samples, 
             dtype=np.uint8
         ).reshape(pix.h, pix.w, pix.n)
-        if pix.n == 4:
+
+        # img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+
+        """ if pix.n == 4:
             img = cv2.cvtColor(img, cv2.COLOR_RGBA2BGR)
         elif pix.n == 3:
             img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         elif pix.n == 1:
-            img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+            img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR) """
 
     return (page_num, img)

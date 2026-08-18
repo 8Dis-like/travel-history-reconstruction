@@ -21,6 +21,8 @@ class StampSegResult(StampDetResult):
 @dataclass
 class PageProcessingResult:
     processed_img: np.ndarray
+    image_width: float
+    image_height: float
     total_stamps_detected: int
     page_stamps: list[StampDetResult]
 
@@ -30,7 +32,7 @@ class StampDetector:
         self, 
         task: str = "segment",
         imgsz: int = 1280, 
-        conf: float = 0.5, 
+        conf: float = 0.65, 
         iou: float = 0.7, 
         device: str = "cpu",
     ):
@@ -72,17 +74,17 @@ class StampDetector:
                     for box, conf, mask_points in zip(result.boxes.xyxy, result.boxes.conf, result.masks.xy):
                         points = mask_points.astype(np.int32)
                         hull = cv2.convexHull(points)
-                        cv2.polylines(processed_image, [hull], isClosed=True, color=(255, 255, 255), thickness=outline_thickness)
+                        cv2.polylines(processed_image, [hull], isClosed=True, color=(0, 100, 0), thickness=outline_thickness)
 
                         hull_mask = np.zeros((img_h, img_w), dtype=np.uint8)
                         cv2.fillConvexPoly(hull_mask, hull, 1)
 
-                        b, g, red = cv2.split(orig_img)
+                        r, g, b = cv2.split(orig_img)
                         alpha = hull_mask * 255
-                        bgra_image = cv2.merge([b, g, red, alpha])
+                        rgba_image = cv2.merge([r, g, b, alpha])
 
                         x, y, w, h = cv2.boundingRect(hull)
-                        crop = bgra_image[y:y+h, x:x+w].copy()
+                        crop = rgba_image[y:y+h, x:x+w].copy()
 
                         stamp_info = StampSegResult(
                             stamp_img=crop,
@@ -108,6 +110,8 @@ class StampDetector:
             pages.append(
                 PageProcessingResult(
                     processed_img=processed_image,
+                    image_width=img_w,
+                    image_height=img_h,
                     total_stamps_detected=num_stamp_detections,
                     page_stamps=stamps
                 )

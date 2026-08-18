@@ -22,7 +22,7 @@ ocr:
   claude:
     model: "claude-sonnet-5"  # Any Claude model id; drives ClaudeExtractor
     max_tokens: 256
-  local:                      # LocalVLMExtractor (MiniCPM-o / Qwen-VL) — not yet implemented
+  local:                      # LocalVLMExtractor (MiniCPM-o / Qwen-VL) - Must be running a VLM on port 8080
     {}
 
 reconstruction:

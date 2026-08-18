@@ -5,7 +5,7 @@ import { InboxOutlined } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
 import { Upload, Typography, message } from 'antd';
 
-import type { Page } from '../types/types';
+import type { UploadResponse, Page } from '../types/types';
 import UploadPreviewGrid from './UploadPreviewGrid';
 import AnalyzeButton from './AnalyzeButton';
 import { truncateFilename } from '../utils/formatters';
@@ -19,91 +19,40 @@ interface UploadPanelProps {
 }
 
 const UploadPanel: React.FC<UploadPanelProps> = ({ sessionId, handleAnalyze }) => {
-  // const [fileList, setFileList] = useState<UploadFile[]>([])
   const [pages, setPages] = useState<Page[]>([])
   const [previewPageId, setPreviewPageId] = useState<string | null>(null)
 
-  /*const handleChange: UploadProps['onChange'] = ({fileList: newFileList}) => {
-    setFileList(newFileList);
-  }*/
-
-  /*  const truncateFilename = (filename: string, maxLength: number = 15) => {
-    if (filename.length <= maxLength) {
-      return filename
-    }   
-
-    const lastDotIndex = filename.lastIndexOf(".")
-    const extension = filename.slice(lastDotIndex)
-    const name = filename.slice(0, lastDotIndex)
-
-    const truncatedName = name.slice(0, maxLength - extension.length - 3)
-    return `${truncatedName}...${extension}`
-  } */
-
-  const handleRemovePage = (id: string) => {
-    setPages(prevPages => prevPages.filter(page => page.id !== id))
+  const handleRemovePage = async (deletedPage: Page) => {
+    const response = await fetch(`/api/sessions/${sessionId}/delete-page/${deletedPage.pageId}`, {
+      method: "DELETE"
+    })
+    if (response.ok) {
+      setPages(prevPages => prevPages.filter(page => page.pageId !== deletedPage.pageId))
+    } else {
+      console.error(`Failed to delete ${deletedPage.sourceFilename}`)
+    }
   }
 
   const processUpload: UploadProps['beforeUpload'] = async (file) => {
 
     if (file.type === 'application/pdf') {
-      const pageID: string = crypto.randomUUID()
+      const pageId: string = crypto.randomUUID()
 
-      const newPDF: Page = {
-        id: pageID,
+      /* const newPDF: Page = {
+        pageId: pageId,
         status: "converting",
-        sourceFileName: truncateFilename(file.name),
-      }
+        sourceFilename: truncateFilename(file.name),
+      } */
 
-      setPages(prevPages => [...prevPages, newPDF])
+      setPages(prevPages => [
+        ...prevPages, 
+        {pageId: pageId, status: "converting", sourceFilename: truncateFilename(file.name)}
+      ])
 
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('session_id', sessionId);
 
-      const response = await fetch("/api/upload-pdf", {
-        method: "POST",
-        body: formData,
-      })
-
-      const data = await response.json()
-      // console.log(data.pages)
-
-      const newPages = data.pages.map((page: {pageNumber: number, imgUrl: string}) => {
-        return {
-          id: crypto.randomUUID(),
-          status: "ready",
-          imageSrc: page.imgUrl,
-          sourceFileName: `${file.name}_pg${page.pageNumber + 1}`,
-        }
-      })
-
-      setPages(prevPages => {
-        const desiredPages = prevPages.filter((page) => page.id !== pageID)
-        const result = [...desiredPages, ...newPages]
-        return result
-      })
-      
-    } else if (file.type === "image/jpeg" || file.type === "image/png") {
-      const reader = new FileReader()
-
-      reader.onload = () => {
-        const newPage: Page = {
-          id: file.uid,
-          status: "ready",
-          imageSrc: reader.result as string,
-          sourceFileName: file.name,
-        }
-        setPages(prevPages => [...prevPages, newPage])
-      }
-
-      reader.readAsDataURL(file)
-
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('session_id', sessionId)
-
-      const response = await fetch("/api/upload-image", {
+      const response = await fetch(`/api/sessions/${sessionId}/upload-pdf`, {
         method: "POST",
         body: formData,
       })
@@ -111,6 +60,59 @@ const UploadPanel: React.FC<UploadPanelProps> = ({ sessionId, handleAnalyze }) =
       if (!response.ok) {
         console.error(`Failed to upload ${file.name} to backend.`)
       }
+
+      const pages: UploadResponse[] = await response.json()
+
+      const newPages: Page[] = pages.map((page) => {
+        return {
+          pageId: page.pageId,
+          status: "ready",
+          sourceFilename: page.sourceFilename,
+          imageSrc: page.imageSrc,
+        }
+      })
+
+      setPages(prevPages => {
+        const desiredPages = prevPages.filter((page) => page.pageId !== pageId)
+        const result = [...desiredPages, ...newPages]
+        return result
+      })
+      
+    } else if (file.type === "image/jpeg" || file.type === "image/png") {
+      const pageId = crypto.randomUUID()
+
+      setPages(prevPages => [
+        ...prevPages,
+        { pageId, status: "converting", sourceFilename: truncateFilename(file.name)}
+      ])
+
+      const [imageSrc, response] = await Promise.all([
+        new Promise<string>((resolve) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(reader.result as string)
+          reader.readAsDataURL(file)
+        }),
+        (async () => {
+          const formData = new FormData()
+          formData.append('file', file)
+          formData.append('page_id', pageId)
+          return fetch(`/api/sessions/${sessionId}/upload-image`, {
+            method: "POST",
+            body: formData,
+          })
+        })(),
+      ])
+
+      if (!response.ok) {
+        message.error(`Failed to upload ${file.name} to backend.`)
+      }
+
+      setPages(prevPages => prevPages.map(page =>
+        page.pageId === pageId
+          ? {...page, status: response.ok ? "ready" : "error", imageSrc: imageSrc}
+          : page
+      ))
+
     } else {
       message.error(`${file.name} is not a supported file type.`)
       return Upload.LIST_IGNORE
@@ -120,9 +122,6 @@ const UploadPanel: React.FC<UploadPanelProps> = ({ sessionId, handleAnalyze }) =
   }
 
   const props: UploadProps = {
-    // listType: "picture-card",
-    // fileList: fileList,
-    // onChange: handleChange,
     showUploadList: false,
     beforeUpload: processUpload,
     accept: ".pdf,image/jpeg,image/png",

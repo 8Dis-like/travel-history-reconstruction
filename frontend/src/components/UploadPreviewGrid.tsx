@@ -11,7 +11,7 @@ import { truncateFilename } from '../utils/formatters'
 
 interface PageGridProps {
     pages: Page[],
-    onRemove: (id: string) => void,
+    onRemove: (deletedPage: Page) => void,
     previewPageId: string | null,
     onPreviewChange: (id: string | null) => void,
 }
@@ -32,7 +32,7 @@ const UploadPreviewGrid: React.FC<PageGridProps> = ({ pages, onRemove, previewPa
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
           {pages.map((page) => (
             <Card
-              key={page.id}
+              key={page.pageId}
               style={{ width: 104, height: 104 }}
               styles={{ body: { padding: 0, width: '100%', height: '100%' } }}
               className="page-tile"
@@ -40,13 +40,13 @@ const UploadPreviewGrid: React.FC<PageGridProps> = ({ pages, onRemove, previewPa
               {page.status === 'ready' && (
                 <Image
                   src={page.imageSrc}
-                  alt={truncateFilename(page.sourceFileName)}
+                  alt={truncateFilename(page.sourceFilename)}
                   width="100%"
                   height="100%"
                   style={{ objectFit: 'contain' }}
                   preview={{
-                    open: previewPageId === page.id,
-                    onOpenChange: (open) => onPreviewChange(open ? page.id : null)
+                    open: previewPageId === page.pageId,
+                    onOpenChange: (open) => onPreviewChange(open ? page.pageId : null)
                   }}
                 />
               )}
@@ -65,7 +65,7 @@ const UploadPreviewGrid: React.FC<PageGridProps> = ({ pages, onRemove, previewPa
                     boxSizing: 'border-box',
                     padding: '0px 3px'
                   }}>
-                    Processing {truncateFilename(page.sourceFileName)}
+                    Processing {truncateFilename(page.sourceFilename)}
                   </p>
                 </div>
               )}
@@ -78,12 +78,12 @@ const UploadPreviewGrid: React.FC<PageGridProps> = ({ pages, onRemove, previewPa
                 <div className='hover-overlay'>
                   <span className='overlay-icon'>
                     <EyeOutlined 
-                      onClick={() => onPreviewChange(page.id)}
+                      onClick={() => onPreviewChange(page.pageId)}
                     />
                   </span>
                   <span className='overlay-icon'>
                     <DeleteOutlined 
-                      onClick={() => onRemove(page.id)}
+                      onClick={() => onRemove(page)}
                     />
                   </span>
                 </div>

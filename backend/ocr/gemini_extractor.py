@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+import base64
 import cv2
 import numpy as np
 
@@ -40,15 +41,20 @@ class GeminiExtractor(BaseExtractor):
                 genai.configure(api_key=actual_key)
                 self._model = genai.GenerativeModel(model)
 
-    def extract(self, image: np.ndarray) -> ExtractionResult:
+    def extract(self, image_b64_url: str) -> ExtractionResult:
         if self._model is None:
             return ExtractionResult(date=None, country=None, direction=None, raw_text=None, confidence=0.0)
             
         try:
             # Convert OpenCV BGR to RGB, then to PIL Image for Gemini
             from PIL import Image
-            rgb_img = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            pil_img = Image.fromarray(rgb_img)
+            import io as _io
+            if image_b64_url.startswith("data:"):
+                image_b64 = image_b64_url.split(",", 1)[1]
+            else:
+                image_b64 = image_b64_url
+            img_bytes = base64.b64decode(image_b64)
+            pil_img = Image.open(_io.BytesIO(img_bytes)).convert("RGB")
 
             response = self._model.generate_content([_PROMPT, pil_img])
             raw = re.sub(r"^```(?:json)?\s*|\s*```$", "", response.text.strip())

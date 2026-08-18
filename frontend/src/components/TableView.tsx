@@ -1,38 +1,71 @@
 import React from 'react'
 import { useState, useEffect, useRef } from 'react'
 
-import { Table, Carousel, Card } from 'antd'
+import { Table, Card, ConfigProvider, Form, Button, Input, Select, Tag } from 'antd'
 import { LeftOutlined, RightOutlined } from '@ant-design/icons'
+import type { ColumnsType } from 'antd/es/table'
 
-import type { PageExtractionResponse, StayResponse } from '../types/types'
+import type { PageExtractionResponse, StayResponse, StampRecord, TravelHistoryResponse } from '../types/types'
 import '../components/TableView.css'
 import { formatDate } from '../utils/formatters'
 
 interface TimelineTableProps {
   stays: StayResponse[]
+  handleClickedStamp: (stamp: StampRecord | null) => void
+  selectedCell: { stayId: string; field: "entryStamp" | "exitStamp" } | null
+  curTablePage: number
+  setCurTablePage: (pageNumber: number) => void
+  pageSize: number
+  sessionId: string
+  onTimelineRebuild: (travelHistory: TravelHistoryResponse) => void
 }
 
 interface PageCarouselProps {
   pages: PageExtractionResponse[]
-  setPageIndex: (index: number) => void
+  unattributableStamps: StampRecord[]
+  curPageIndex: number
+  setCurPageIndex: React.Dispatch<React.SetStateAction<number>>
+  clickStampId: string
+  onStampSelected: (stamp: StampRecord | null) => void
 }
 
-interface StampCarouselProps {
-  data: PageExtractionResponse
+interface StampDetailViewProps {
+  sessionId: string
+  stamp: StampRecord | null
+  handleStampUpdate: (updatedStamp: StampRecord) => void
+  handleStampDelete: (deletedStamp: StampRecord) => void
+  handleStampSelected: (stamp: StampRecord | null) => void
 }
 
 interface TableViewProps {
+  sessionId: string
   pages: PageExtractionResponse[]
   stays: StayResponse[]
+  unattributableStamps: StampRecord[]
+  handleStampUpdate: (updatedStamp: StampRecord) => void
+  handleTimelineRebuild: (travelHistory: TravelHistoryResponse) => void
+  handleStampDelete: (deletedStamp: StampRecord) => void
 }
 
 
-export const CustomPageCarousel: React.FC<PageCarouselProps> = ({ pages, setPageIndex }) => {
-  const [curPageIndex, setCurPageIndex] = useState(0)
+const CustomPageCarousel: React.FC<PageCarouselProps> = ({ pages, unattributableStamps, curPageIndex, setCurPageIndex, clickStampId, onStampSelected }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const thumbnailRefs = useRef<(HTMLImageElement | null)[]>([])
-  const goPrev = () => setCurPageIndex((next) => (next - 1 + pages.length) % pages.length)
-  const goNext = () => setCurPageIndex((prev) => (prev + 1) % pages.length)
+  const imgContainerRef = useRef<HTMLImageElement>(null)
+
+  const goPrev = () => {
+    setCurPageIndex((next) => (next - 1 + pages.length) % pages.length)
+    onStampSelected(null)
+  }
+  const goNext = () => {
+    setCurPageIndex((prev) => (prev + 1) % pages.length)
+    onStampSelected(null)
+  }
+
+  const [hoverStampId, setHoverStampId] = useState('')
+
+  const [imageLoaded, setImageLoaded] = useState<Boolean>(false)
+
 
   useEffect(() => {
     const container = scrollContainerRef.current
@@ -46,22 +79,87 @@ export const CustomPageCarousel: React.FC<PageCarouselProps> = ({ pages, setPage
     }
   }, [curPageIndex])
 
+
+  useEffect(() => {
+    setImageLoaded(false)
+  }, [curPageIndex])
+
+  const unattributableStampIds = new Set(
+    unattributableStamps.map((stamp) => stamp.stampId)
+  )
+
+
   return (
-    <div style={{ width: "65%", alignItems: "center" }}>
-      <img 
-        src={pages[curPageIndex].processedImage} 
+    <div style={{ width: "100%", alignItems: "center", textAlign: "center" }}>
+      <div 
         style={{ 
-          height: "65vh",
-          width: "auto",
-          maxWidth: "100%",
-          objectFit: "contain",
-          display: "block",
-          margin: "0 auto"
+          position: "relative", 
+          display: "inline-block", 
+          margin: "0 auto" 
         }}
-      />
+      >
+        <img 
+          src={pages[curPageIndex].origImage}
+          ref={imgContainerRef}
+          style={{ 
+            height: "65vh",
+            width: "auto",
+            maxWidth: "100%",
+            display: "block",
+            margin: "0 auto"
+          }}
+          onLoad={() => setImageLoaded(true)}
+        />
+        {imageLoaded && (
+          <svg 
+            viewBox={`0 0 ${pages[curPageIndex].imageWidth} ${pages[curPageIndex].imageHeight}`} 
+            preserveAspectRatio="none"
+            style={{ 
+              position: "absolute", 
+              top: 0, 
+              left: 0, 
+              width: "100%", 
+              height: "100%" 
+            }}
+          >
+            {pages[curPageIndex].stamps.map((stamp) => {
+
+              const unattributable = unattributableStampIds.has(stamp.stampId)
+
+              return <polygon 
+                key={stamp.stampId}
+                points={stamp.mask.map(([x, y]) =>`${x},${y}`).join(' ')}/* {[
+                  [stamp.boundingBox[0], stamp.boundingBox[1]],
+                  [stamp.boundingBox[2], stamp.boundingBox[1]],
+                  [stamp.boundingBox[2], stamp.boundingBox[3]],
+                  [stamp.boundingBox[0], stamp.boundingBox[3]],
+                ].map(([x, y]) => `${x},${y}`).join(' ')} */
+                fill={clickStampId === stamp.stampId 
+                        ? (unattributable ? "red" : "orange") 
+                        : (hoverStampId === stamp.stampId   
+                          ? (unattributable ? "red": "green") 
+                          : "transparent")
+                      }
+                fillOpacity={0.25}
+                stroke={unattributable 
+                          ? "red"
+                          : (clickStampId === stamp.stampId ? "orange" : "green")
+                        }
+                strokeWidth={pages[curPageIndex].imageHeight * 0.005}
+                onMouseEnter={() => setHoverStampId(stamp.stampId)}
+                onMouseLeave={() => setHoverStampId('')}
+                onClick={() => {
+                  onStampSelected(stamp)
+                }}
+                style={{ cursor: "pointer" }}
+                opacity={imageLoaded ? 1 : 0}
+              />
+            })}
+          </svg>
+        )}
+      </div>
       <div style={{ 
         display: "flex", 
-        // justifyContent: "center", 
         alignItems: "center",
         gap: "2px", 
         width: "100%", 
@@ -86,7 +184,12 @@ export const CustomPageCarousel: React.FC<PageCarouselProps> = ({ pages, setPage
                   border: index === curPageIndex ? "2px solid green" : "2px solid transparent",
                   cursor: "pointer"
                 }}
-                onClick={() => setCurPageIndex(index)}
+                onClick={() => {
+                  if (index !== curPageIndex) {
+                    setCurPageIndex(index)
+                    onStampSelected(null)
+                  }
+                }}
               />
             )}
           </div>
@@ -100,75 +203,195 @@ export const CustomPageCarousel: React.FC<PageCarouselProps> = ({ pages, setPage
 }
 
 
-export const StampCarousel: React.FC<StampCarouselProps> = ({ data }) => {
-  const [stampIndex, setStampIndex] = useState(0);
+const StampDetailView: React.FC<StampDetailViewProps> = ({ sessionId, stamp, handleStampUpdate, handleStampDelete, handleStampSelected }) => {
+  const [editing, setEditing] = useState(false)
+  const [form] = Form.useForm()
 
-  const carouselChildren = data.stamps.map((stamp, index) => (
-    <div key={index} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-      <img
-        src={stamp.stampImage}
-        alt={`Slide ${index + 1}`}
-        style={{
-          width: "100%",
-          maxHeight: "20vh",
-          objectFit: "contain",
-        }}
-      />
-    </div>
-  ))
+  useEffect(() => {
+    setEditing(false)
+  }, [stamp])
 
-  const currentStamp = data.stamps[stampIndex].extractedFields
+
+  const handleEdit = () => {
+    if (stamp) {
+      form.setFieldsValue({
+        country: stamp.extractedFields.country,
+        date: stamp.extractedFields.date ?? null,
+        direction: stamp.extractedFields.direction ?? "Unknown",
+      })
+    }
+    setEditing(true)
+  }
+
+  if (stamp === null) {
+    return null
+  }
+
+  const handleSave = async () => {
+    try {
+      const values = await form.validateFields()
+      const response = await fetch(`/api/sessions/${sessionId}/stamps/${stamp.stampId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          country: values.country,
+          direction: values.direction !== "Unknown" ? values.direction : null,
+          date: values.date || null
+        })
+      })
+      if (!response.ok) {
+        throw new Error("Update failed")
+      }
+      const updatedStamp: StampRecord = await response.json()
+      handleStampUpdate(updatedStamp)
+      setEditing(false)
+    } catch (e) {
+      console.log("Could not save changes")
+    }
+  }
+
+
+  const handleDelete = async () => {
+    try {
+      const response = await fetch(`/api/sessions/${sessionId}/delete-stamp/${stamp.stampId}`, {
+        method: "DELETE"
+      })
+      if (!response.ok) {
+        throw new Error("Delete failed")
+      }
+      const deletedStamp: StampRecord = await response.json()
+      handleStampDelete(deletedStamp)
+      handleStampSelected(null)
+    } catch (e) {
+      console.log("Could not delete stamp")
+    }
+  }
 
   return (
-    <div className='carousel-container'>
-      <Carousel 
-        afterChange={(index) => setStampIndex(index)}
-      >
-        {carouselChildren}
-      </Carousel>
-      <div style={{ textAlign: 'center', marginTop: '12px' }}>
-        <div>Country: {currentStamp.country}</div>
-        <div>Date: {currentStamp.date !== null ? formatDate(currentStamp.date) : "Unreadable"}</div>
-        <div>Entry/Exit: {currentStamp.direction === "arrival" ? "Entry" : "Exit"}</div>
+    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+      <div 
+        style={{ 
+          display: "flex", 
+          width: "100%", 
+          alignItems: "center", 
+          border: "2px solid black", 
+          borderRadius: "30px",
+          overflow: "hidden",
+        }}>
+        <img 
+          src={stamp.stampImage}
+          style={{
+            height: "30vh",
+            width: "auto",
+            maxWidth: "100%",
+            margin: "0 auto",
+            objectFit: "contain"
+          }}
+        />
       </div>
+      {!editing ? (
+        <>
+          <div style={{ textAlign: "center", marginTop: "12px" }}>
+            <div>Country: {stamp.extractedFields.country !== null ? stamp.extractedFields.country : "Unknown"}</div>
+            <div>Date: {stamp.extractedFields.date !== null ? formatDate(stamp.extractedFields.date) : "Unknown"}</div>
+            <div>Entry/Exit: {stamp.extractedFields.direction !== null ? stamp.extractedFields.direction : "Unknown"}</div>
+          </div>
+          <div style={{ textAlign: "center", marginTop: "auto", display: "flex", flexDirection: "column", gap: "8px" }}>
+            <Button 
+              type="primary"
+              style={{ width: "100%" }}
+              onClick={handleEdit}
+            >
+              Edit Stamp
+            </Button>
+            <Button 
+              type="primary"
+              style={{ width: "100%" }}
+              onClick={handleDelete}
+            >
+              Delete Stamp
+            </Button>
+          </div>
+        </>
+      ) : (
+        <>
+          <Form 
+            form={form} 
+            labelAlign="right"
+            labelCol={{ flex: "110px" }}
+            style={{ 
+              marginTop: "12px", 
+            }}
+          >
+            <Form.Item name="country" label="Country">
+              <Input />
+            </Form.Item>
+            <Form.Item name="date" label="Date">
+              <Input type="date"/>
+            </Form.Item>
+            <Form.Item name="direction" label="Direction">
+              <Select
+                options={[
+                  {value: "Unknown", label: "Unknown"},
+                  {value: "ENTRY", label: "ENTRY"},
+                  {value: "EXIT", label: "EXIT"}
+                ]}
+              />
+            </Form.Item>
+          </Form>
+
+          <div style={{ textAlign: "center", marginTop: "auto", display: "flex", flexDirection: "column", gap: "8px" }}>
+            <Button 
+              type="primary"
+              style={{ width: "100%" }}
+              onClick={handleSave}
+            >
+              Save Edit
+            </Button>
+            <Button 
+              type="primary"
+              style={{ width: "100%" }}
+              onClick={() => setEditing(false)}
+            >
+              Cancel Edit
+            </Button>
+          </div>
+        </>
+      )}
     </div>
   )
 }
 
 
-export const PageCarousel: React.FC<PageCarouselProps> = ({ pages, setPageIndex }) => {
-  const carouselChildren = pages.map((page, index) => (
-    <div key={index}>
-      <img
-        src={page.processedImage}
-        alt={`Slide ${index + 1}`}
-        style={{
-          width: "100%",
-          maxHeight: "70vh",
-          objectFit: "contain",
-        }}
-      />
-    </div>
-  ))
+const TimelineTable: React.FC<TimelineTableProps> = ({ 
+  stays, 
+  handleClickedStamp, 
+  selectedCell, 
+  curTablePage, 
+  setCurTablePage, 
+  pageSize, 
+  sessionId,
+  onTimelineRebuild
+}) => {
+  const [rebuildingTimeline, setRebuildingTimeline] = useState(false)
 
-  return (
-    <div className='carousel-container'>
-      <Carousel 
-        afterChange={(index) => setPageIndex(index)}
-      >
-        {carouselChildren}
-      </Carousel>
-    </div>
-  )
-}
+  const flagSeverity = (flag: string) => {
+    if (flag === "No exit detected" || flag.includes("inferred")) {
+      return "info"
+    }
+    if (flag === "No entry detected") {
+      return "warning"
+    }
+    return "warning"
+  }
 
 
-export const TimelineTable: React.FC<TimelineTableProps> = ({ stays }) => {
-  const columns = [
+  const columns: ColumnsType<StayResponse> = [
     {
       title: 'Country',
       dataIndex: 'country',
       key: 'country',
+      width: '18%',
       render: (country: string | null) => country ?? 'Unknown',
     },
     {
@@ -176,6 +399,14 @@ export const TimelineTable: React.FC<TimelineTableProps> = ({ stays }) => {
       dataIndex: 'entryDate',
       key: 'entryDate',
       render: (entryDate: string | null) => (entryDate ? formatDate(entryDate) : 'Unknown'),
+      onCell: (record) => {
+        const isSelected = selectedCell?.stayId === record.stayId && selectedCell.field === "entryStamp"
+        return record.entryStamp !== null
+          ? {
+            onClick: () => { handleClickedStamp(record.entryStamp) },
+            className: isSelected ? "clickable-cell selected-cell" : "clickable-cell",
+          } : {}
+      }
     },
     {
       title: 'Date of Exit',
@@ -184,32 +415,179 @@ export const TimelineTable: React.FC<TimelineTableProps> = ({ stays }) => {
       render: (exitDate: string | null, record: StayResponse) => (
         exitDate ? formatDate(exitDate) : (record.flags.includes('ongoing') ? 'Ongoing': 'Unknown')
       ),
+      onCell: (record) => {
+        const isSelected = selectedCell?.stayId === record.stayId && selectedCell.field === "exitStamp"
+        return record.exitStamp !== null
+          ? {
+            onClick: () => { handleClickedStamp(record.exitStamp) },
+            className: isSelected ? "clickable-cell selected-cell" : "clickable-cell",
+          } : {}
+      }
+    },
+    {
+      title: 'Flags',
+      dataIndex: 'status',
+      width: '30%',
+      render: (_, record: StayResponse) => (
+        <>
+          {record.flags
+            .filter(flag => flag !== "ongoing")
+            .map((flag, i) => (
+              <Tag 
+                key={i} 
+                color={flagSeverity(flag) === "info" ? "blue" : "red"}
+                style={{ whiteSpace: "normal", display: "inline-block", marginBottom: 4 }}
+              >
+                {flag}
+              </Tag>
+            ))
+          }
+        </>
+      )
     }
   ]
 
+  const rebuildTimeline = async () => {
+    setRebuildingTimeline(true)
+    try {
+      const response = await fetch(`/api/sessions/${sessionId}/rebuild-travel-history`, {
+        method: "POST"
+      })
+      if (!response.ok) {
+        throw new Error("Timeline rebuild failed")
+      }
+      const newTimeline: TravelHistoryResponse = await response.json()
+      onTimelineRebuild(newTimeline)
+    } catch (e) {
+      console.log("Could not rebuild timeline")
+    } finally {
+      setRebuildingTimeline(false)
+    }
+  }
+
   return (
-    <div>
-      <Table columns={columns} dataSource={stays} rowKey="stayId"/>
+    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+      <ConfigProvider
+        theme={{
+          components: {
+            Table: {
+              rowHoverBg: "transparent",
+            }
+          }
+        }}
+      >
+        <Table 
+          bordered 
+          tableLayout='fixed'
+          columns={columns} 
+          dataSource={stays} 
+          rowKey="stayId"
+          pagination={{ current: curTablePage, pageSize: pageSize, onChange: setCurTablePage }}
+        />
+      </ConfigProvider>
+      <div style={{ textAlign: "center", marginTop: "auto" }}>
+        <Button 
+          type="primary"
+          style={{ width: "100%" }}
+          onClick={rebuildTimeline}
+        >
+          Reconstruct Travel Timeline
+        </Button>
+      </div>
     </div>
   )
 }
 
 
-export const TableView: React.FC<TableViewProps> = ({ pages, stays }) => {
-  const [pageIndex, setPageIndex] = useState(0)
+export const TableView: React.FC<TableViewProps> = ({ 
+  sessionId, 
+  pages, 
+  stays, 
+  unattributableStamps,
+  handleStampUpdate, 
+  handleTimelineRebuild, 
+  handleStampDelete 
+}) => {
+  // const [clickedStamp, setClickedStamp] = useState<StampRecord | null>(null)
+  const [curPageIndex, setCurPageIndex] = useState(0)
+  const [clickStampId, setClickStampId] = useState('')
+  const [selectedTableCell, setSelectedTableCell] = useState<{ stayId: string; field: "entryStamp" | "exitStamp" } | null>(null)
+  const [curTablePage, setCurTablePage] = useState(1)
+  const pageSize = 8
+
+  const clickedStamp = clickStampId
+    ? pages?.flatMap(page => page.stamps).find(stamp => stamp.stampId === clickStampId) ?? null
+    : null
+
+  const handleStampSelected = (stamp: StampRecord | null) => {
+    setClickStampId(stamp?.stampId ?? "")
+
+    if (stamp == null) {
+      setSelectedTableCell(null)
+      return
+    }
+
+    const targetIndex = pages.findIndex((page) => page.pageId === stamp.pageId)
+    if (targetIndex !== -1) {
+      setCurPageIndex(targetIndex)
+    }
+
+    const stayIndex = stays.findIndex(s =>
+      s.entryStamp?.stampId === stamp.stampId || s.exitStamp?.stampId === stamp.stampId
+    )
+
+    if (stayIndex === -1) {
+      setSelectedTableCell(null)
+      return
+    }
+
+    const stay = stays[stayIndex]
+    const field = stay.entryStamp?.stampId === stamp.stampId ? "entryStamp" : "exitStamp"
+
+    setSelectedTableCell({ stayId: stay.stayId, field: field })
+    setCurTablePage(Math.floor(stayIndex / pageSize) + 1)
+  }
+
 
   return (
-    <div style={{ display: 'flex', gap: "2%" }}>
+    <div style={{ display: "flex", gap: "2%" }}>
       <div style={{ flex: 1 }}>
-        <TimelineTable stays={stays}/>
+        <TimelineTable 
+          stays={stays} 
+          handleClickedStamp={handleStampSelected} 
+          selectedCell={selectedTableCell}
+          curTablePage={curTablePage}
+          setCurTablePage={setCurTablePage}
+          pageSize={pageSize}
+          sessionId={sessionId}
+          onTimelineRebuild={handleTimelineRebuild}
+        />
       </div>
       <div style={{ flex: 2 }}>
-        <Card>
-          <CustomPageCarousel pages={pages} setPageIndex={setPageIndex}/>
+        <Card style={{ height: "100%" }}>
+          <div style={{ display: "flex", gap: "2%" }}>
+            <div style={{ flex: 13 }}>
+              <CustomPageCarousel 
+                pages={pages} 
+                unattributableStamps={unattributableStamps}
+                curPageIndex={curPageIndex} 
+                setCurPageIndex={setCurPageIndex}
+                clickStampId={clickStampId}
+                onStampSelected={handleStampSelected}
+              />
+            </div>
+            <div style={{ flex: 7 }}>
+              <StampDetailView 
+                sessionId={sessionId} 
+                stamp={clickedStamp} 
+                handleStampUpdate={handleStampUpdate}
+                handleStampDelete={handleStampDelete}
+                handleStampSelected={handleStampSelected}
+              />
+            </div>
+          </div>
         </Card>
       </div>
-
-      {/* <StampCarousel data={data.pages[pageIndex]}/> */}
     </div>
   )
 }

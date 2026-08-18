@@ -1,6 +1,23 @@
 .processed-page-scroll-container {
   scrollbar-width: none;
 }
+
 .processed-page-scroll-container::-webkit-scrollbar {
   display: none;
+}
+
+.clickable-cell {
+  cursor: pointer;
+}
+
+.selected-cell {
+  background-color: orange;
+}
+
+.ant-table-tbody > tr > td.clickable-cell:hover {
+  background-color: lightblue !important;
+}
+
+.ant-form-item {
+  margin-bottom: 6px;
 }
