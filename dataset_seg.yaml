@@ -1,0 +1,7 @@
+path: G:\Abroad\UCLA\MSEng\Capstone\Securiport\data\synthetic_dataset
+train: train/images
+val: val/images
+
+# Classes
+names:
+  0: stamp

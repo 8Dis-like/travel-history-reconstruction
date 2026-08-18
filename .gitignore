@@ -96,3 +96,10 @@ htmlcov/
 .superpowers/
 
 synthetic_dataset.zip
+data/*.zip
+data/__MACOSX/
+data/backgrounds/
+data/clean_stamps_cropped/
+data/full_page_pngs/
+out.txt
+
