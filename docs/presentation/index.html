@@ -1,140 +1,438 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Travel History Reconstruction - UCLA Samueli Engineering Capstone 2026</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css22family=Inter:wght@00;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Travel History Reconstruction - UCLA MENG Capstone 2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
   <style>
-    :root {
-      --ucla-blue: #2774AE;
-      --ucla-dark-blue: #003B6D;
-      --ucla-navy: #0B1E36;
-      --ucla-gold: #FFD100;
-      --ucla-light-gold: #FFE57F;
-      --w: #FFFFFF;
-      --wd: rgba(255,255,255,0.85);
-      --card-bg: rgba(0, 59, 109, 0.55);
-      --card-border: rgba(39, 116, 174, 0.4);
-      --green: #06D6A0;
-      --red: #EF476F;
-    }
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #050C1A; display:flex; flex-direction:column; align-items:center; min-height:100vh; padding:20px 0 80px; color:var(--w); }
-    .ctrl { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); display:flex; gap:12px; align-items:center; x-index:1000; background:rgba(11, 30, 54, 0.95); backdrop-filter:bur(12px); border:1px solid rgba(255, 209, 0, 0.4); border-radius:40px; padding:10px 22px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-    .ctrl button { background:rgba(255, 209, 0, 0.15); border:1px solid var(--ucla-gold); color:var(--ucla-gold); border-radius:50%; width:40px; height:40px; font-size:20px; cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; }
-    .ctrl button:hover { background:var(--ucla-gold); color:var(--ucla-navy); }
-    #sc { color:var(--wd); font-size:13px; font-weight:600; min-width:65px; text-align:center; }
-    
-    .slide { width:1280px; max-width:100vw; height:720px; max-height:calc(100vw*.5625); background: linear-gradient(135deg, var(--ucla-navy) 0%, #061326 100%); border-radius:8px; overflow:hidden; position:relative; display:none; flex-direction:column; box-shadow:0 40px 120px rgba(0,0,0,0.2), 0 0 0 1px rgba(39,116,174,0.3); }
-    .slide.active { display:flex; }
-    
-    .hdr { height;64px; background: linear-gradient(90deg, var(--ucla-dark-blue) 0%, var(--ucla-navy) 100%); border-bottom: 3px solid var(--ucla-gold); display:flex; align-items:center; justify-content:space-between; padding:0 40px; flex-shrink:0; }
-    .hdr-brand { display:flex; align-items:center; gap:14px; }
-    .ucla-logo { background: var(--ucla-gold); color: var(--ucla-navy); font-weight:900; font-size:18px; padding:3px 10px; border-radius:4px; letter-spacing:0.05em; }
-    .hdr-title { font-size:13px; font-weight:700; color:var(--w); letter-spacing:0.03em; text-transform:uppercase; }
-    .hdr-dept { font-size:11px; color:var(--ucla-light-gold); font-weight:500; }
-    
-    .ftr { position:absolute; bottom:0; left:0; right:0; height:36px; background: var(--ucla-dark-blue); border-top: 1px solid rgba(255,209,0,0.3); display:flex; align-items:center; justify-content:space-between; padding:0 40px; font-size:11px; color:var(--wd); z-index:10; }
-    .ftr-gold { color: var(--ucla-gold); font-weight:600; }
-    
-    .sh { padding: 28px 60px 0; flex-shrink:0; }
-    .sl { font-size:11px; font-weight:800; letter-spacing:.15em; text-transform:uppercase; color:var(--ucla-gold); margin-bottom:6px; }
-    .st { font-size:32px; font-weight:800; color:var(--w); line-height:1.2; }
-    .div { width:50px; height:3px; background: var(--ucla-gold); margin:10px 0 0; border-radius:2px; }
-    
-    .card { background: var(--card-bg); border:1px solid var(--card-border); border-radius:10px; padding: 16px 20px; }
-    .tbox { background: rgba(39, 116, 174, 0.15); border:1px solid var(--ucla-blue); border-radius:10px; padding: 16px 20px; }
-    .gbox { background: rgba(255, 209, 0, 0.1); border:1px solid var(--ucla-gold); border-radius:10px; padding: 16px 20px; }
-    .rbox { background: rgba(239, 71, 111, 0.1); border:1px solid var(--red); border-radius:10px; padding: 16px 20px; }
-    
-    .rt { width:100%; border-collapse:collapse; }
-    .rt th { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:var(--ucla-navy); background: var(--ucla-gold); padding:10px 14px; text-align:left; }
-    .rt td { font-size:12xx; padding:10px 14px; border-bottom:1px solid rgba(39,116,174,0.3); color:var(--wd); background: rgba(0, 59, 109, 0.3); }
-    .rt tr:hover td { background: rgba(39, 116, 174, 0.4); }
-    
-    .vg { color:var(--green); font-weight:700; font-family:'JetBrains Mono',monospace; }
-    .vy { color:var(--ucla-gold); font-weight:700; font-family:'JetBrains Mono',monospace; }
-    .vr { color:var(--red); font-weight:700; font-family:'JetBrains Mono',monospace; }
-    
-    .tag { display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; }
-    .tg { background:rgba(39,116,174,0.3); color:var(--w); border:1px solid var(--ucla-blue); }
-    .gg { background:rgba(255,209,0,0.2); color:var(--ucla-gold); border:1px solid var(--ucla-gold); }
-    .ng { background:rgba(6,214,160,0.2); color:var(--green); border:1px solid var(--green); }
-    
-    .ps { flex:1; background:var(--card-bg); border:1px solid var(--card-border); border-radius:10px; padding:16px 12px; display:flex; flex-direction:column; align-items:center; text-align:center; }
-    .pa { display:flex; align-items:center; padding:0 4px; color:var(--ucla-gold); font-size:20px; flex-shrink:0; }
+    :root{--navy:#0a0f2e;--teal:#00c8d4;--tg:rgba(0,200,212,.14);--gold:#ffd166;--w:#f0f4ff;--wd:rgba(240,244,255,.7);--wf:rgba(240,244,255,.08);--red:#ef476f;--green:#06d6a0}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:Inter,sans-serif;background:#050810;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:20px 0 80px;color:var(--w)}
+    .ctrl{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:12px;align-items:center;z-index:1000;background:rgba(10,15,46,.95);backdrop-filter:blur(12px);border:1px solid rgba(0,200,212,.3);border-radius:40px;padding:10px 20px}
+    .ctrl button{background:rgba(0,200,212,.1);border:1px solid rgba(0,200,212,.4);color:var(--teal);border-radius:50%;width:40px;height:40px;font-size:20px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center}
+    .ctrl button:hover{background:var(--teal);color:var(--navy)}
+    #sc{color:var(--wd);font-size:13px;min-width:60px;text-align:center}
+    .slide{width:1280px;max-width:100vw;height:720px;max-height:calc(100vw*.5625);background:var(--navy);border-radius:8px;overflow:hidden;position:relative;display:none;flex-direction:column;box-shadow:0 40px 120px rgba(0,0,0,.7),0 0 0 1px rgba(0,200,212,.12)}
+    .slide.active{display:flex}
+    .sf{position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--teal),#06f)}
+    .sn{position:absolute;bottom:14px;right:28px;font-size:11px;color:rgba(240,244,255,.2)}
+    .grid{position:absolute;inset:0;background-image:radial-gradient(rgba(0,200,212,.07) 1px,transparent 1px);background-size:32px 32px;pointer-events:none}
+    .sl{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--teal);margin-bottom:10px}
+    .dv{width:40px;height:3px;background:linear-gradient(90deg,var(--teal),transparent);margin:12px 0;border-radius:2px}
+    .sh{padding:32px 70px 0;flex-shrink:0}
+    .tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+    .tg{background:rgba(0,200,212,.12);color:var(--teal);border:1px solid rgba(0,200,212,.3)}
+    .gg{background:rgba(255,209,102,.12);color:var(--gold);border:1px solid rgba(255,209,102,.3)}
+    .rg{background:rgba(239,71,111,.12);color:var(--red);border:1px solid rgba(239,71,111,.3)}
+    .ng{background:rgba(6,214,160,.12);color:var(--green);border:1px solid rgba(6,214,160,.3)}
+    .card{background:var(--wf);border:1px solid rgba(255,255,255,.08);border-radius:12px}
+    .tbox{background:var(--tg);border:1px solid rgba(0,200,212,.25);border-radius:14px}
+    .gbox{background:rgba(255,209,102,.06);border:1px solid rgba(255,209,102,.2);border-radius:14px}
+    .rbox{background:rgba(239,71,111,.06);border:1px solid rgba(239,71,111,.2);border-radius:14px}
+    .mv{font-size:28px;font-weight:800;color:var(--teal);line-height:1;margin-bottom:4px}
+    .ml{font-size:11px;color:var(--wd)}
+    .mc{background:rgba(0,200,212,.05);border:1px solid rgba(0,200,212,.2);border-radius:12px;padding:14px 18px;text-align:center}
+    .rt{width:100%;border-collapse:collapse}
+    .rt th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--teal);padding:8px 12px;text-align:left;border-bottom:1px solid rgba(0,200,212,.2)}
+    .rt td{font-size:12px;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--wd)}
+    .rt tr:hover td{background:var(--wf)}
+    .vg{color:var(--green);font-weight:700;font-family:'JetBrains Mono',monospace}
+    .vy{color:var(--gold);font-weight:700;font-family:'JetBrains Mono',monospace}
+    .vr{color:var(--red);font-weight:700;font-family:'JetBrains Mono',monospace}
+    .br{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+    .bl{display:flex;justify-content:space-between;font-size:11px}
+    .bt{height:10px;background:rgba(255,255,255,.05);border-radius:5px;overflow:hidden}
+    .bf{height:100%;border-radius:5px}
+    .bt-t{background:linear-gradient(90deg,var(--teal),#06f)}
+    .bt-r{background:linear-gradient(90deg,var(--red),#ff6b35)}
+    .ps{flex:1;background:var(--wf);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px 12px;display:flex;flex-direction:column;align-items:center;text-align:center}
+    .pa{display:flex;align-items:center;padding:0 6px;color:var(--teal);font-size:18px;flex-shrink:0}
+    .casc{background:var(--wf);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px 18px}
+    .casc .cs{font-size:10px;color:var(--teal);font-weight:700;text-transform:uppercase;margin-bottom:3px}
+    .casc .cv{font-size:22px;font-weight:800}
+    .casc .cd{font-size:11px;color:var(--wd);margin-top:3px}
+    .c-g .cv{color:var(--green)}.c-y .cv{color:var(--gold)}.c-r .cv{color:var(--red)}
   </style>
 </head>
 <body>
-
-<!-- SLIDE 1: TITLE SLIDE (UCLA ACADEMIC HERO) -->
-<div class="slide active" style="background: linear-gradient(135deg, #002B54 0%, #001A33 100%);">
-  <div style="position:absolute; inset:0; background-image: radial-gradient(rgba(255,209,0,0.08) 1px, transparent 1px); background-size: 36px 36px;"></div>
-  <div style="position:absolute; top:0; left:0; right:0; height:8px; background: linear-gradient(90deg, var(--ucla-gold), var(--ucla-blue));"></div>
-  
-  <div style="z-index:2; display:flex; flex-direction:column; height:100%; padding:60px 80px 80px;">
-    <div style="display:flex; align-items:center; gap:16px; margin-bottom:28px;">
-      <span class="ucla-logo" style="font-size:22px; padding:4px 14px;">UCLA</span>
-      <span style="font-size:13px; font-weight:700; color:var(--ucla-gold); letter-spacing:0.1em; text-transform:uppercase;">Samueli School of Engineering</span>
-      <span style="color:rgba(255,255,255,0.4);">|</span>
-      <span style="font-size:13px; color:var(--wd); font-weight:600;">Capstone Project 2026</span>
+<!-- S1 TITLE -->
+<div class="slide active">
+  <div class="grid"></div>
+  <div style="position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(0,200,212,.1),transparent 70%);top:-150px;right:-50px;pointer-events:none;"></div>
+  <div style="z-index:2;display:flex;flex-direction:column;justify-content:center;height:100%;padding:70px 80px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <div style="width:32px;height:2px;background:var(--teal);border-radius:2px;"></div>
+      <span class="tag tg">UCLA MENG Capstone 2026</span>
+      <span class="tag gg">Securiport LLC</span>
     </div>
-    
-    <h1 style="font-size:46px; font-weight:900; line-height:1.15; margin-bottom:20px; color:var(--w); max-width:850px;">
-      Travel History <span style="color:var(--ucla-gold);">Reconstruction</span><br/>from Travel Documents
-    </h1>
-    
-    <p style="font-size:15px; color:var(--wd); max-width:700px; line-height:1.7; margin-bottom:36px;">
-      An end-to-end AI system converting scanned passport pages into structured, reviewable travel timelines combining YOLOv26 instance segmentation with Visual Language Model extraction.
-    </p>
-    
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; max-width:750px; background: rgba(0, 59, 109, 0.4); border:1px solid var(--ucla-blue); border-radius:12px; padding:20px 24px;">
-      <div>
-        <div style="font-size:10px; text-transform:uppercase; color:var(--ucla-gold); font-weight:800; letter-spacing:0.1em; margin-bottom:6px;">Capstone Team</div>
-        <div style="font-size:14px; font-weight:700; color:var(--w); line-height:1.5;">Hao Zhang &nbsp;&tiles;&nbsp; Zuyan Tao &nbsp;&tiles;&nbsp; Wilson Tee</div>
+    <h1 style="font-size:48px;font-weight:900;line-height:1.1;margin-bottom:22px;max-width:700px;">Travel History <span style="color:var(--teal);">Reconstruction</span><br/>from Travel Documents</h1>
+    <p style="font-size:14px;color:var(--wd);max-width:580px;line-height:1.7;margin-bottom:26px;">An end-to-end AI pipeline converting scanned passport pages into structured, reviewable travel timelines &mdash; combining YOLOv26 instance segmentation with VLM extraction.</p>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="font-size:13px;color:var(--wd);display:flex;align-items:center;gap:8px;"><span style="width:5px;height:5px;background:var(--teal);border-radius:50%;flex-shrink:0;"></span><strong style="color:var(--w);">Team:</strong>&nbsp;Hao Zhang &nbsp;&middot;&nbsp; Zuyan Tao &nbsp;&middot;&nbsp; Wilson Tee</div>
+      <div style="font-size:13px;color:var(--wd);display:flex;align-items:center;gap:8px;"><span style="width:5px;height:5px;background:var(--teal);border-radius:50%;flex-shrink:0;"></span><strong style="color:var(--w);">Sponsor:</strong>&nbsp;Alvaro Ramirez &mdash; Securiport LLC</div>
+      <div style="font-size:13px;color:var(--wd);display:flex;align-items:center;gap:8px;"><span style="width:5px;height:5px;background:var(--teal);border-radius:50%;flex-shrink:0;"></span><strong style="color:var(--w);">Advisor:</strong>&nbsp;Prof. Bruce Robins, UCLA Samueli</div>
+      <div style="font-size:13px;color:var(--wd);display:flex;align-items:center;gap:8px;"><span style="width:5px;height:5px;background:var(--teal);border-radius:50%;flex-shrink:0;"></span><strong style="color:var(--w);">Presentation:</strong>&nbsp;August 25&ndash;26, 2026</div>
+    </div>
+  </div>
+  <div style="position:absolute;bottom:44px;right:70px;background:rgba(240,244,255,.06);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px 22px;text-align:center;z-index:2;">
+    <div style="font-size:10px;color:var(--wd);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Sponsored by</div>
+    <div style="font-size:18px;font-weight:900;letter-spacing:.04em;">SECURIPORT</div>
+    <div style="font-size:10px;color:var(--wd);margin-top:2px;">Border Intelligence Solutions</div>
+  </div>
+  <div class="sf"></div><div class="sn">1 / 14</div>
+</div>
+<!-- S2 TEAM -->
+<div class="slide">
+  <div class="grid"></div>
+  <div class="sh"><div class="sl">The People</div><h2 style="font-size:34px;font-weight:800;">Meet the Team</h2><div class="dv"></div></div>
+  <div style="flex:1;padding:16px 70px 28px;display:flex;flex-direction:column;gap:18px;">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+      <div class="card" style="padding:22px 18px;">
+        <div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--teal),#06f);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;margin-bottom:10px;">HZ</div>
+        <div style="font-size:15px;font-weight:700;margin-bottom:4px;">Hao Zhang</div>
+        <div style="font-size:11px;color:var(--teal);font-weight:600;margin-bottom:6px;">Detection &amp; Integration Lead</div>
+        <div style="font-size:11px;color:var(--wd);line-height:1.5;">Preprocessing &middot; Multi-Rotation Strategy &middot; YOLO training &middot; System integration &middot; Project coordination &middot; Report</div>
       </div>
-      <div>
-        <div style="font-size:10px; text-transform:uppercase; color:var(--ucla-gold); font-weight:800; letter-spacing:0.1em; margin-bottom:6px;">Project Advisors</div>
-        <div style="font-size:13px; color:var(--wd); line-height:1.5;">
-          <strong>Faculty:</strong> Prof. Bruce Robins (UCLA)<br/>
-          <strong>Sponsor:</strong> Alvaro Ramirez (Securiport LLC)
+      <div class="card" style="padding:22px 18px;">
+        <div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#06f);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;margin-bottom:10px;">ZT</div>
+        <div style="font-size:15px;font-weight:700;margin-bottom:4px;">Zuyan Tao</div>
+        <div style="font-size:11px;color:var(--teal);font-weight:600;margin-bottom:6px;">VLM/OCR &amp; Backend Lead</div>
+        <div style="font-size:11px;color:var(--wd);line-height:1.5;">VLM integration &middot; FastAPI backend &middot; OCR pipeline &middot; Timeline logic &middot; API endpoint design</div>
+      </div>
+      <div class="card" style="padding:22px 18px;">
+        <div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#059669,#06f);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;margin-bottom:10px;">WT</div>
+        <div style="font-size:15px;font-weight:700;margin-bottom:4px;">Wilson Tee</div>
+        <div style="font-size:11px;color:var(--teal);font-weight:600;margin-bottom:6px;">Dataset &amp; Frontend Lead</div>
+        <div style="font-size:11px;color:var(--wd);line-height:1.5;">Synthetic dataset &middot; YOLOv26 model &middot; U-Net segmentation &middot; React/Ant Design frontend</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:16px;">
+      <div class="gbox" style="flex:1;padding:14px 18px;display:flex;align-items:center;gap:12px;">
+        <span style="font-size:26px;">&#127891;</span>
+        <div><div style="font-size:10px;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px;">Faculty Advisor</div><div style="font-size:14px;font-weight:700;">Prof. Bruce Robins</div><div style="font-size:11px;color:var(--wd);">UCLA Henry Samueli School of Engineering</div></div>
+      </div>
+      <div class="tbox" style="flex:1;padding:14px 18px;display:flex;align-items:center;gap:12px;">
+        <span style="font-size:26px;">&#129309;</span>
+        <div><div style="font-size:10px;color:var(--teal);font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px;">Industry Sponsor</div><div style="font-size:14px;font-weight:700;">Alvaro Ramirez</div><div style="font-size:11px;color:var(--wd);">Securiport LLC &mdash; Border Intelligence Solutions</div></div>
+      </div>
+      <div class="card" style="flex:1;padding:14px 18px;display:flex;align-items:center;gap:12px;">
+        <span style="font-size:26px;">&#128197;</span>
+        <div><div style="font-size:10px;color:var(--wd);font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px;">Timeline</div><div style="font-size:14px;font-weight:700;">June &ndash; August 2026</div><div style="font-size:11px;color:var(--wd);">2 sprints &middot; 10 weeks &middot; UCLA MENG Capstone</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="sf"></div><div class="sn">2 / 14</div>
+</div>
+<!-- S3 AGENDA -->
+<div class="slide">
+  <div class="grid"></div>
+  <div class="sh"><div class="sl">Overview</div><h2 style="font-size:34px;font-weight:800;">Agenda</h2><div class="dv"></div></div>
+  <div style="flex:1;padding:12px 70px 28px;display:flex;gap:40px;">
+    <div style="flex:1;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="card" style="padding:11px 14px;display:flex;gap:10px;align-items:center;"><div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--teal),#06f);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">1</div><span style="font-size:12px;color:var(--wd);">Problem Statement</span></div>
+        <div class="card" style="padding:11px 14px;display:flex;gap:10px;align-items:center;"><div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--teal),#06f);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">2</div><span style="font-size:12px;color:var(--wd);">Objectives &amp; Scope</span></div>
+        <div class="card" style="padding:11px 14px;display:flex;gap:10px;align-items:center;"><div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--teal),#06f);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">3</div><span style="font-size:12px;color:var(--wd);">Related Work</span></div>
+        <div class="card" style="padding:11px 14px;display:flex;gap:10px;align-items:center;"><div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--teal),#06f);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">4</div><span style="font-size:12px;color:var(--wd);">System Architecture</span></div>
+        <div class="card" style="padding:11px 14px;display:flex;gap:10px;align-items:center;"><div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--teal),#06f);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">5</div><span style="font-size:12px;color:var(--wd);">Dataset Construction</span></div>
+        <div class="card" style="padding:11px 14px;display:flex;gap:10px;align-items:center;"><div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--teal),#06f);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">6</div><span style="font-size:12px;color:var(--wd);">Detection Results</span></div>
+        <div class="card" style="padding:11px 14px;display:flex;gap:10px;align-items:center;"><div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--teal),#06f);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">7</div><span style="font-size:12px;color:var(--wd);">VLM Benchmarks</span></div>
+        <div class="card" style="padding:11px 14px;display:flex;gap:10px;align-items:center;"><div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--teal),#06f);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">8</div><span style="font-size:12px;color:var(--wd);">System-Level Eval</span></div>
+        <div class="card" style="padding:11px 14px;display:flex;gap:10px;align-items:center;"><div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--teal),#06f);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">9</div><span style="font-size:12px;color:var(--wd);">Live Demo</span></div>
+        <div class="card" style="padding:11px 14px;display:flex;gap:10px;align-items:center;"><div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--teal),#06f);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">10</div><span style="font-size:12px;color:var(--wd);">Conclusions &amp; Future Work</span></div>
+      </div>
+    </div>
+    <div style="flex:0 0 380px;display:flex;flex-direction:column;gap:14px;justify-content:center;">
+      <div class="tbox" style="padding:20px;"><div class="sl" style="margin-bottom:8px;">Project Goal</div><p style="font-size:13px;color:var(--wd);line-height:1.7;">Design an end-to-end system to <strong style="color:var(--w);">reconstruct travel histories</strong> from scanned passport pages &mdash; detecting stamps, extracting dates/countries/directions, and presenting a structured, reviewable timeline.</p></div>
+      <div class="card" style="padding:16px;"><div class="sl" style="margin-bottom:8px;">Sprint Structure</div><div style="font-size:12px;color:var(--wd);line-height:1.7;"><strong style="color:var(--teal);">Sprint 1</strong> (June&ndash;July): MVP &mdash; YOLOv8, VLM extraction, frontend<br/><strong style="color:var(--teal);">Sprint 2</strong> (July&ndash;Aug): YOLOv26, timeline reconstruction, real-world eval</div></div>
+    </div>
+  </div>
+  <div class="sf"></div><div class="sn">3 / 14</div>
+</div>
+<!-- S4 PROBLEM -->
+<div class="slide">
+  <div class="grid"></div>
+  <div class="sh"><div class="sl">Motivation</div><h2 style="font-size:34px;font-weight:800;">The Problem</h2><div class="dv"></div></div>
+  <div style="flex:1;padding:12px 70px 28px;display:flex;gap:40px;">
+    <div style="flex:1;">
+      <p style="font-size:13px;color:var(--wd);line-height:1.7;margin-bottom:16px;max-width:500px;">Passport stamps are the primary record of international travel, but <strong style="color:var(--w);">manual history reconstruction is slow, error-prone, and linguistically demanding.</strong></p>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="card" style="padding:14px 16px;display:flex;gap:12px;align-items:flex-start;"><span style="font-size:20px;">&#9201;</span><div><div style="font-size:12px;font-weight:700;margin-bottom:3px;">Processing Bottleneck</div><div style="font-size:11px;color:var(--wd);line-height:1.5;">Stamps are not chronologically ordered. Manual reconstruction becomes error-prone as stamp counts grow.</div></div></div>
+        <div class="card" style="padding:14px 16px;display:flex;gap:12px;align-items:flex-start;"><span style="font-size:20px;">&#127758;</span><div><div style="font-size:12px;font-weight:700;margin-bottom:3px;">Language Barrier</div><div style="font-size:11px;color:var(--wd);line-height:1.5;">190+ nations, different languages, Gregorian &amp; Hijri calendars. No officer can reliably parse all variants.</div></div></div>
+        <div class="card" style="padding:14px 16px;display:flex;gap:12px;align-items:flex-start;"><span style="font-size:20px;">&#128269;</span><div><div style="font-size:12px;font-weight:700;margin-bottom:3px;">Visual Degradation</div><div style="font-size:11px;color:var(--wd);line-height:1.5;">Stamps overlap, suffer faded ink and aging &mdash; challenging for automated detection.</div></div></div>
+      </div>
+    </div>
+    <div style="flex:0 0 400px;display:flex;flex-direction:column;gap:16px;justify-content:center;">
+      <div class="tbox" style="padding:20px;"><div class="sl" style="margin-bottom:8px;">Research Gap</div><p style="font-size:13px;color:var(--wd);line-height:1.7;">No widely available solution <strong style="color:var(--w);">reliably generalizes</strong> across varying stamp designs. Prior work (Zaaboub et al., 2020) relies on structure-dependent methods failing on real-world degraded pages.</p></div>
+      <div class="gbox" style="padding:20px;"><div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px;">&#127970; Industry Need (Securiport)</div><p style="font-size:13px;color:var(--wd);line-height:1.7;">Securiport requires an <strong style="color:var(--w);">automated document intelligence solution</strong> to scan passport pages, localize stamps, and reconstruct structured travel timelines.</p></div>
+    </div>
+  </div>
+  <div class="sf"></div><div class="sn">4 / 14</div>
+</div>
+<!-- S5 OBJECTIVES -->
+<div class="slide">
+  <div class="grid"></div>
+  <div class="sh"><div class="sl">Goals</div><h2 style="font-size:34px;font-weight:800;">Objectives &amp; Scope</h2><div class="dv"></div></div>
+  <div style="flex:1;padding:12px 70px 28px;display:flex;gap:40px;">
+    <div style="flex:1;">
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div style="display:flex;gap:14px;align-items:flex-start;"><div style="font-size:32px;font-weight:900;color:rgba(0,200,212,.2);line-height:1;flex-shrink:0;width:34px;">01</div><div><div style="font-size:13px;font-weight:700;margin-bottom:4px;">Construct a Training Dataset</div><div style="font-size:12px;color:var(--wd);line-height:1.5;">Synthetic passport pages with overlaid real stamps. Expanded via U-Net to 871 stamps and 5,000 training images.</div></div></div>
+        <div style="display:flex;gap:14px;align-items:flex-start;"><div style="font-size:32px;font-weight:900;color:rgba(0,200,212,.2);line-height:1;flex-shrink:0;width:34px;">02</div><div><div style="font-size:13px;font-weight:700;margin-bottom:4px;">Train a Stamp Detection Model</div><div style="font-size:12px;color:var(--wd);line-height:1.5;">YOLOv26s instance segmentation with Multi-Rotation Strategy for real-world orientation robustness.</div></div></div>
+        <div style="display:flex;gap:14px;align-items:flex-start;"><div style="font-size:32px;font-weight:900;color:rgba(0,200,212,.2);line-height:1;flex-shrink:0;width:34px;">03</div><div><div style="font-size:13px;font-weight:700;margin-bottom:4px;">Integrate a Visual Language Model</div><div style="font-size:12px;color:var(--wd);line-height:1.5;">Config-driven VLM (Claude/Gemini/local) to parse stamp content as structured JSON with date, country, direction.</div></div></div>
+        <div style="display:flex;gap:14px;align-items:flex-start;"><div style="font-size:32px;font-weight:900;color:rgba(0,200,212,.2);line-height:1;flex-shrink:0;width:34px;">04</div><div><div style="font-size:13px;font-weight:700;margin-bottom:4px;">Build a Web Application</div><div style="font-size:12px;color:var(--wd);line-height:1.5;">React/FastAPI web app for uploading passport scans, viewing stamps, and rendering a reviewable, editable timeline.</div></div></div>
+      </div>
+    </div>
+    <div style="flex:0 0 360px;display:flex;flex-direction:column;gap:16px;">
+      <div class="rbox" style="padding:18px;"><div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:8px;">&#9888; Out of Scope (Phase 1)</div><div style="font-size:11px;color:var(--wd);line-height:1.8;">&#8594; Biographical page / MRZ parsing<br/>&#8594; Production auth, security, scalability<br/>&#8594; Non-Latin multilingual full support<br/>&#8594; Real-time deployment architecture</div></div>
+      <div class="tbox" style="padding:18px;"><div class="sl" style="margin-bottom:8px;">Staged Milestones</div><div style="font-size:12px;color:var(--wd);line-height:1.9;"><span style="color:var(--teal);font-weight:700;">Stage 1</span> &mdash; Stamp detection<br/><span style="color:var(--teal);font-weight:700;">Stage 2</span> &mdash; Date extraction<br/><span style="color:var(--teal);font-weight:700;">Stage 3</span> &mdash; Full field extraction<br/><span style="color:var(--teal);font-weight:700;">Stage 4</span> &mdash; Timeline reconstruction<br/><span style="color:rgba(240,244,255,.3);font-weight:700;">Stage 5*</span> &mdash; Multilingual (stretch)</div></div>
+    </div>
+  </div>
+  <div class="sf"></div><div class="sn">5 / 14</div>
+</div>
+<!-- S6 RELATED WORK -->
+<div class="slide">
+  <div class="grid"></div>
+  <div class="sh"><div class="sl">Literature</div><h2 style="font-size:34px;font-weight:800;">Background &amp; Related Work</h2><div class="dv"></div></div>
+  <div style="flex:1;padding:10px 70px 24px;display:flex;gap:28px;">
+    <div style="flex:1;display:flex;flex-direction:column;gap:10px;">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,200,212,.7);">Object Detection</div>
+      <div class="card" style="padding:12px 14px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;">YOLO Family &rarr; YOLOv26 (2016&ndash;2025)</div><div style="font-size:11px;color:var(--wd);line-height:1.5;">Single-shot real-time detectors. YOLOv26 adds segmentation head, improved recall &mdash; backbone of our detection stage.</div></div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,200,212,.7);margin-top:4px;">Document AI</div>
+      <div class="card" style="padding:12px 14px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;">LayoutLM / Donut / DocVQA (2020&ndash;2022)</div><div style="font-size:11px;color:var(--wd);line-height:1.5;">Document models leveraging layout structure. Fail on faded, rotated, multilingual stamps without clean OCR.</div></div>
+      <div class="card" style="padding:12px 14px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;">Zaaboub et al. (2020) &mdash; Closest Prior Work</div><div style="font-size:11px;color:var(--wd);line-height:1.5;">Neural network stamp classification. Structure-dependent &mdash; does not generalize across diverse country designs or degraded ink.</div></div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:10px;">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,200,212,.7);">Language Models &amp; VLMs</div>
+      <div class="card" style="padding:12px 14px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;">Transformers / Attention (Vaswani et al., 2017)</div><div style="font-size:11px;color:var(--wd);line-height:1.5;">Foundational attention enabling VLMs (Claude, Gemini) to understand visual context holistically without structured OCR.</div></div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,200,212,.7);margin-top:4px;">Segmentation</div>
+      <div class="card" style="padding:12px 14px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;">U-Net / ResNet-34 Instance Segmentation</div><div style="font-size:11px;color:var(--wd);line-height:1.5;">Used to recover 490 additional stamps that Otsu thresholding couldn&apos;t cleanly separate &mdash; enabling our dataset expansion.</div></div>
+      <div class="tbox" style="padding:16px;margin-top:4px;"><div style="font-size:12px;font-weight:700;color:var(--teal);margin-bottom:7px;">&#10022; Our Novel Approach</div><p style="font-size:11px;color:var(--wd);line-height:1.6;">Combine <strong style="color:var(--w);">YOLOv26 instance segmentation</strong> for precise stamp localization with a <strong style="color:var(--w);">config-driven VLM extraction layer</strong> &mdash; moving beyond structure-dependent OCR to holistic visual understanding. Each component specializes, improving robustness on degraded, rotated, multilingual stamps.</p></div>
+    </div>
+  </div>
+  <div class="sf"></div><div class="sn">6 / 14</div>
+</div>
+<!-- S7 ARCHITECTURE -->
+<div class="slide">
+  <div class="grid"></div>
+  <div class="sh"><div class="sl">Design</div><h2 style="font-size:34px;font-weight:800;">System Architecture</h2><div class="dv"></div></div>
+  <div style="flex:1;padding:8px 70px 24px;display:flex;flex-direction:column;gap:14px;">
+    <div style="display:flex;align-items:stretch;gap:4px;">
+      <div class="ps"><div style="font-size:26px;margin-bottom:8px;">&#128196;</div><div style="font-size:11px;font-weight:700;margin-bottom:4px;">Upload</div><div style="font-size:9px;color:var(--teal);font-weight:600;font-family:monospace;margin-bottom:6px;">FastAPI / React</div><div style="font-size:10px;color:var(--wd);line-height:1.5;">PDF/JPEG/PNG upload. Split into per-page images. Session-based storage.</div></div>
+      <div class="pa">&#8594;</div>
+      <div class="ps"><div style="font-size:26px;margin-bottom:8px;">&#128269;</div><div style="font-size:11px;font-weight:700;margin-bottom:4px;">Stamp Localization</div><div style="font-size:9px;color:var(--teal);font-weight:600;font-family:monospace;margin-bottom:6px;">YOLOv26s-seg + Rotation</div><div style="font-size:10px;color:var(--wd);line-height:1.5;">Instance segmentation. 4-rotation strategy (0/90/180/270). Mask + bbox per stamp.</div></div>
+      <div class="pa">&#8594;</div>
+      <div class="ps"><div style="font-size:26px;margin-bottom:8px;">&#129302;</div><div style="font-size:11px;font-weight:700;margin-bottom:4px;">VLM Extraction</div><div style="font-size:9px;color:var(--teal);font-weight:600;font-family:monospace;margin-bottom:6px;">Claude / Gemini / Local</div><div style="font-size:10px;color:var(--wd);line-height:1.5;">Structured JSON: date, country, direction. Swappable via pipeline.yaml.</div></div>
+      <div class="pa">&#8594;</div>
+      <div class="ps"><div style="font-size:26px;margin-bottom:8px;">&#128506;</div><div style="font-size:11px;font-weight:700;margin-bottom:4px;">Timeline Construction</div><div style="font-size:9px;color:var(--teal);font-weight:600;font-family:monospace;margin-bottom:6px;">Python / Pairing Logic</div><div style="font-size:10px;color:var(--wd);line-height:1.5;">Entry/exit pairing, chronological sort, conflict flags. Output: StayRecord list.</div></div>
+      <div class="pa">&#8594;</div>
+      <div class="ps"><div style="font-size:26px;margin-bottom:8px;">&#9999;</div><div style="font-size:11px;font-weight:700;margin-bottom:4px;">Review &amp; Edit</div><div style="font-size:9px;color:var(--teal);font-weight:600;font-family:monospace;margin-bottom:6px;">React + Ant Design</div><div style="font-size:10px;color:var(--wd);line-height:1.5;">Interactive timeline. SVG overlays. Edit and rebuild for analysts.</div></div>
+    </div>
+    <div style="display:flex;gap:12px;">
+      <div class="tbox" style="flex:1;padding:10px 14px;"><strong style="font-size:10px;display:block;margin-bottom:3px;">Backend</strong><span style="font-size:10px;color:var(--wd);">Python FastAPI &middot; Session state &middot; PATCH/POST/DELETE endpoints</span></div>
+      <div class="tbox" style="flex:1;padding:10px 14px;"><strong style="font-size:10px;display:block;margin-bottom:3px;">Frontend</strong><span style="font-size:10px;color:var(--wd);">React (TypeScript) &middot; Ant Design &middot; Upload &rarr; Processing &rarr; Review</span></div>
+      <div class="tbox" style="flex:1;padding:10px 14px;"><strong style="font-size:10px;display:block;margin-bottom:3px;">AI Models</strong><span style="font-size:10px;color:var(--wd);">YOLOv26s-seg (detection) &middot; Claude Sonnet (extraction)</span></div>
+      <div class="tbox" style="flex:1;padding:10px 14px;"><strong style="font-size:10px;display:block;margin-bottom:3px;">Config-Driven</strong><span style="font-size:10px;color:var(--wd);">configs/pipeline.yaml &middot; swap VLM without code changes</span></div>
+    </div>
+  </div>
+  <div class="sf"></div><div class="sn">7 / 14</div>
+</div>
+
+<!-- S8 DATASET -->
+<div class="slide">
+  <div class="grid"></div>
+  <div class="sh"><div class="sl">Data</div><h2 style="font-size:34px;font-weight:800;">Dataset Construction</h2><div class="dv"></div></div>
+  <div style="flex:1;padding:10px 70px 28px;display:flex;gap:40px;">
+    <div style="flex:1;">
+      <p style="font-size:13px;color:var(--wd);line-height:1.7;margin-bottom:14px;">Real passports are sensitive; we built a <strong style="color:var(--w);">synthetic dataset</strong> by overlaying real stamps onto blank passport backgrounds, then expanded it using a segmentation model.</p>
+      <div style="display:flex;flex-direction:column;gap:11px;">
+        <div style="display:flex;gap:10px;align-items:flex-start;"><div style="width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,var(--teal),#06f);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">1</div><div style="font-size:12px;color:var(--wd);line-height:1.5;"><strong style="color:var(--w);">Stamp Collection:</strong> 1,517 stamps from Wikimedia Commons. Cleaned to 381 via Otsu thresholding.</div></div>
+        <div style="display:flex;gap:10px;align-items:flex-start;"><div style="width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,var(--teal),#06f);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">2</div><div style="font-size:12px;color:var(--wd);line-height:1.5;"><strong style="color:var(--w);">U-Net/ResNet-34 Recovery:</strong> Segmentation model recovered 490 additional stamps &mdash; <strong style="color:var(--teal);">doubling the library to 871</strong>.</div></div>
+        <div style="display:flex;gap:10px;align-items:flex-start;"><div style="width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,var(--teal),#06f);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">3</div><div style="font-size:12px;color:var(--wd);line-height:1.5;"><strong style="color:var(--w);">Synthetic Generation:</strong> Two versions (initial 381-stamp; expanded 871-stamp overlap-biased). 4,000 train / 1,000 val images. 421 blank passport backgrounds.</div></div>
+        <div style="display:flex;gap:10px;align-items:flex-start;"><div style="width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,var(--teal),#06f);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">4</div><div style="font-size:12px;color:var(--wd);line-height:1.5;"><strong style="color:var(--w);">Real-World Eval Set:</strong> 194 real passport pages with 1,002 hand-labeled stamps for detection evaluation.</div></div>
+      </div>
+    </div>
+    <div style="flex:0 0 320px;display:flex;flex-direction:column;gap:11px;justify-content:center;">
+      <div class="card" style="padding:14px 16px;display:flex;align-items:center;gap:14px;"><div style="font-size:24px;font-weight:800;color:var(--teal);flex-shrink:0;">1,517</div><div style="font-size:11px;color:var(--wd);line-height:1.4;">Raw stamps collected<br/>from Wikimedia Commons</div></div>
+      <div class="card" style="padding:14px 16px;display:flex;align-items:center;gap:14px;"><div style="font-size:24px;font-weight:800;color:var(--teal);flex-shrink:0;">871</div><div style="font-size:11px;color:var(--wd);line-height:1.4;">Usable stamps after U-Net<br/><span style="color:var(--green);">+490 via segmentation model</span></div></div>
+      <div class="card" style="padding:14px 16px;display:flex;align-items:center;gap:14px;"><div style="font-size:24px;font-weight:800;color:var(--teal);flex-shrink:0;">5,000</div><div style="font-size:11px;color:var(--wd);line-height:1.4;">Synthetic training images<br/>4,000 train / 1,000 val</div></div>
+      <div class="card" style="padding:14px 16px;display:flex;align-items:center;gap:14px;"><div style="font-size:24px;font-weight:800;color:var(--teal);flex-shrink:0;">1,002</div><div style="font-size:11px;color:var(--wd);line-height:1.4;">Hand-labeled real stamps<br/>across 194 passport pages</div></div>
+    </div>
+  </div>
+  <div class="sf"></div><div class="sn">8 / 14</div>
+</div>
+<!-- S9 DETECTION RESULTS -->
+<div class="slide">
+  <div class="grid"></div>
+  <div class="sh"><div class="sl">Experiment 1</div><h2 style="font-size:34px;font-weight:800;">Detection Model Results</h2><div class="dv"></div></div>
+  <div style="flex:1;padding:8px 70px 24px;display:flex;flex-direction:column;gap:12px;">
+    <p style="font-size:13px;color:var(--wd);line-height:1.6;max-width:860px;">Evaluated at two levels: synthetic validation and real-world (194 pages). Upgrade from <strong style="color:var(--w);">YOLOv8s (box)</strong> to <strong style="color:var(--teal);">YOLOv26s (segmentation)</strong> on the expanded overlap-aware dataset delivered substantial real-world gains.</p>
+    <table class="rt">
+      <thead><tr><th>Model</th><th>Dataset</th><th>mAP50</th><th>mAP50:95</th><th>Precision</th><th>Recall</th><th>F1</th></tr></thead>
+      <tbody>
+        <tr><td style="font-weight:600;color:var(--w);">YOLOv8s (detection)</td><td>Synthetic Val</td><td class="vg">0.9950</td><td class="vg">0.9784</td><td class="vg">0.9983</td><td class="vg">0.9968</td><td class="vg">0.9975</td></tr>
+        <tr><td style="font-weight:600;color:var(--w);">YOLOv8s (detection)</td><td>Real-World (194 pages)</td><td class="vy">&mdash;</td><td class="vy">&mdash;</td><td class="vy">&mdash;</td><td class="vy">83.3%</td><td class="vy">0.859</td></tr>
+        <tr style="background:rgba(0,200,212,.04);"><td style="font-weight:700;color:var(--teal);">YOLOv26s-seg &#10022; NEW</td><td>Real-World (194 pages)</td><td class="vg">&mdash;</td><td class="vg">&mdash;</td><td class="vg">&mdash;</td><td class="vg">94.8%</td><td class="vg">0.927</td></tr>
+      </tbody>
+    </table>
+    <div style="display:flex;gap:14px;">
+      <div class="mc" style="flex:1;"><div class="mv">+11.5%</div><div class="ml">Recall improvement<br/>YOLOv8 &rarr; YOLOv26</div></div>
+      <div class="mc" style="flex:1;"><div class="mv">0.927</div><div class="ml">F1 Score<br/>YOLOv26 real-world</div></div>
+      <div class="mc" style="flex:1;"><div class="mv">1,002</div><div class="ml">Hand-labeled stamps<br/>in real-world test set</div></div>
+      <div class="mc" style="flex:1;"><div class="mv">0.995</div><div class="ml">mAP50 (Synthetic)<br/>YOLOv8 validation</div></div>
+    </div>
+    <div class="tbox" style="padding:11px 16px;"><p style="font-size:12px;color:var(--wd);line-height:1.6;">&#128161; <strong style="color:var(--w);">Key insight:</strong> YOLOv8 performed near-perfectly on synthetic val (mAP50: 0.995) but struggled on real scans (Recall: 83.3%). The expanded overlap-aware dataset + segmentation architecture closed this gap and reduced cross-stamp bounding-box contamination.</p></div>
+  </div>
+  <div class="sf"></div><div class="sn">9 / 14</div>
+</div>
+<!-- S10 VLM BENCHMARKS -->
+<div class="slide">
+  <div class="grid"></div>
+  <div class="sh"><div class="sl">Experiment 2</div><h2 style="font-size:34px;font-weight:800;">VLM Extraction Benchmarks</h2><div class="dv"></div></div>
+  <div style="flex:1;padding:8px 70px 24px;display:flex;gap:40px;">
+    <div style="flex:1;">
+      <p style="font-size:13px;color:var(--wd);line-height:1.7;margin-bottom:12px;"><strong style="color:var(--w);">Exp A:</strong> Combined field accuracy on 30 hand-labeled curated stamps. <strong style="color:var(--w);">Exp B:</strong> Rotation robustness across 7 angles.</p>
+      <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,200,212,.7);margin-bottom:10px;">Combined Field Accuracy (Date + Country + Direction)</div>
+      <div class="br"><div class="bl"><span style="color:var(--wd);">Claude Fable-5 (cloud)</span><span style="color:var(--w);font-weight:700;font-family:monospace;">100% &#9733;</span></div><div class="bt"><div class="bf bt-t" style="width:100%;"></div></div></div>
+      <div class="br"><div class="bl"><span style="color:var(--wd);">Gemini 1.5 Flash (cloud)</span><span style="color:var(--w);font-weight:700;font-family:monospace;">100% &#9733;</span></div><div class="bt"><div class="bf bt-t" style="width:100%;"></div></div></div>
+      <div class="br"><div class="bl"><span style="color:var(--wd);">Claude Sonnet-5 (cloud)</span><span style="color:var(--w);font-weight:700;font-family:monospace;">80%</span></div><div class="bt"><div class="bf bt-t" style="width:80%;"></div></div></div>
+      <div class="br"><div class="bl"><span style="color:var(--wd);">Qwen2-VL-2B (local)</span><span style="color:var(--w);font-weight:700;font-family:monospace;">~40%</span></div><div class="bt"><div class="bf bt-r" style="width:40%;"></div></div></div>
+      <div class="rbox" style="padding:10px 14px;margin-top:8px;"><p style="font-size:11px;color:var(--wd);line-height:1.5;">&#9888; <strong style="color:var(--w);">Local bottleneck:</strong> Qwen2-VL-2B requires ~4.5GB VRAM. Date: 18.2%, Country: 45.5%, Direction: 85.7%. System timeline accuracy drops to 21.6%.</p></div>
+    </div>
+    <div style="flex:0 0 370px;display:flex;flex-direction:column;gap:12px;">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,200,212,.7);">Rotation Robustness (Sonnet-5, 30 stamps)</div>
+      <table class="rt" style="margin-top:4px;"><thead><tr><th>Angle</th><th>Date</th><th>Country</th><th>Direction</th></tr></thead><tbody>
+        <tr><td>0&#176; &ndash; 75&#176;</td><td class="vg">High</td><td class="vg">High</td><td class="vg">High</td></tr>
+        <tr><td>90&#176;</td><td class="vy">Moderate</td><td class="vg">High</td><td class="vg">High</td></tr>
+        <tr><td>180&#176; &ndash; 220&#176;</td><td class="vr">Low</td><td class="vy">Moderate</td><td class="vy">Moderate</td></tr>
+      </tbody></table>
+      <div class="gbox" style="padding:14px;"><div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:7px;">Cloud vs. Local</div><p style="font-size:11px;color:var(--wd);line-height:1.6;margin-bottom:6px;"><strong style="color:var(--w);">Cloud API:</strong> Superior accuracy. Rate limit risk (429). Requires key management.</p><p style="font-size:11px;color:var(--wd);line-height:1.6;"><strong style="color:var(--w);">Local (Qwen2-VL-2B):</strong> Offline. Poor accuracy on degraded stamps. ~4.5GB VRAM.</p></div>
+      <div class="tbox" style="padding:12px 14px;"><p style="font-size:12px;color:var(--wd);line-height:1.5;">&#128161; <strong style="color:var(--w);">Recommendation:</strong> Claude as primary. Config-driven swap via pipeline.yaml &mdash; no code changes.</p></div>
+    </div>
+  </div>
+  <div class="sf"></div><div class="sn">10 / 14</div>
+</div>
+<!-- S11 SYSTEM EVAL -->
+<div class="slide">
+  <div class="grid"></div>
+  <div class="sh"><div class="sl">Experiment 3</div><h2 style="font-size:34px;font-weight:800;">System-Level Evaluation</h2><div class="dv"></div></div>
+  <div style="flex:1;padding:8px 70px 28px;display:flex;gap:40px;">
+    <div style="flex:1;">
+      <p style="font-size:13px;color:var(--wd);line-height:1.7;margin-bottom:12px;">End-to-end evaluation on <strong style="color:var(--w);">5 real passports</strong>. Reveals a critical cascading accuracy problem &mdash; strong components do not guarantee a strong timeline.</p>
+      <div class="card" style="padding:16px;margin-bottom:12px;"><div style="font-size:12px;font-weight:700;margin-bottom:7px;">&#9939; The Cascading Error Problem</div><p style="font-size:12px;color:var(--wd);line-height:1.7;">A stay record is correct <em>only if</em>: (1) every stamp detected, (2) every field extracted correctly, (3) entry/exit paired correctly, AND (4) chronological position is right. <strong style="color:var(--w);">One wrong field flips a confirmed stay to flagged.</strong></p></div>
+      <div class="rbox" style="padding:16px;"><div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:7px;">&#128273; Central Finding</div><p style="font-size:12px;color:var(--wd);line-height:1.7;">The <strong style="color:var(--w);">~27-point gap</strong> between stamp-level accuracy (62.3%) and system timeline accuracy (35.8%) is stable &mdash; confirmed in two independent evaluation rounds. <strong style="color:var(--w);">Reconstruction logic is the pipeline&apos;s primary bottleneck.</strong></p></div>
+    </div>
+    <div style="flex:0 0 310px;display:flex;flex-direction:column;gap:7px;justify-content:center;">
+      <div class="casc c-g"><div class="cs">Stage 1 &middot; Detection (Real-World)</div><div class="cv">94.8%</div><div class="cd">Recall &mdash; YOLOv26s, 194 pages, 1,002 stamps</div></div>
+      <div style="text-align:center;color:var(--wd);font-size:15px;">&#8595; crops passed to VLM</div>
+      <div class="casc c-y"><div class="cs">Stage 2 &middot; Stamp-Level Extraction</div><div class="cv">62.3%</div><div class="cd">Combined field accuracy on real passport pages</div></div>
+      <div style="text-align:center;color:var(--wd);font-size:15px;">&#8595; pairing + ordering applied</div>
+      <div class="casc c-r"><div class="cs">Stage 3 &middot; System Timeline Accuracy</div><div class="cv">35.8%</div><div class="cd">End-to-end &mdash; 5 real passports, full reconstruction</div></div>
+      <div class="tbox" style="padding:11px 14px;margin-top:4px;"><p style="font-size:11px;color:var(--wd);line-height:1.5;">&#128161; 27-pt gap is the largest lever. <strong style="color:var(--w);">Deploy as triage aid with analyst review.</strong></p></div>
+    </div>
+  </div>
+  <div class="sf"></div><div class="sn">11 / 14</div>
+</div>
+<!-- S12 DEMO -->
+<div class="slide">
+  <div class="grid"></div>
+  <div class="sh"><div class="sl">Live Demonstration</div><h2 style="font-size:34px;font-weight:800;">System Demo</h2><div class="dv"></div></div>
+  <div style="flex:1;padding:8px 70px 24px;display:flex;gap:40px;">
+    <div style="flex:1;display:flex;flex-direction:column;gap:11px;justify-content:center;">
+      <p style="font-size:13px;color:var(--wd);line-height:1.7;max-width:440px;">A full React/FastAPI web application wired to the live detection and extraction pipeline. Every stamp is paired with its source page for analyst review.</p>
+      <div style="display:flex;gap:10px;align-items:flex-start;"><span style="font-size:16px;">&#128228;</span><div style="font-size:12px;color:var(--wd);line-height:1.5;"><strong style="color:var(--w);">Upload:</strong> Drag-and-drop PDF or JPEG/PNG. Server-side PDF splitting.</div></div>
+      <div style="display:flex;gap:10px;align-items:flex-start;"><span style="font-size:16px;">&#9634;</span><div style="font-size:12px;color:var(--wd);line-height:1.5;"><strong style="color:var(--w);">Detection view:</strong> SVG polygon overlays from segmentation masks on passport page.</div></div>
+      <div style="display:flex;gap:10px;align-items:flex-start;"><span style="font-size:16px;">&#128197;</span><div style="font-size:12px;color:var(--wd);line-height:1.5;"><strong style="color:var(--w);">Timeline table:</strong> Color-coded flags (confirmed / inferred / flagged). Each entry links to source stamp.</div></div>
+      <div style="display:flex;gap:10px;align-items:flex-start;"><span style="font-size:16px;">&#9999;</span><div style="font-size:12px;color:var(--wd);line-height:1.5;"><strong style="color:var(--w);">Edit &amp; Rebuild:</strong> Correct any field via PATCH. One-click full timeline reconstruction.</div></div>
+      <div class="tbox" style="padding:10px 14px;margin-top:4px;"><p style="font-size:11px;color:var(--wd);">Stack: React + TypeScript + Ant Design &middot; FastAPI + Python &middot; YOLOv26s-seg + Claude Sonnet</p></div>
+    </div>
+    <div style="flex:0 0 480px;">
+      <div style="background:#0d1635;border:1px solid rgba(0,200,212,.2);border-radius:12px;overflow:hidden;height:100%;">
+        <div style="background:rgba(0,200,212,.06);padding:9px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid rgba(0,200,212,.1);">
+          <div style="width:9px;height:9px;border-radius:50%;background:var(--red);"></div>
+          <div style="width:9px;height:9px;border-radius:50%;background:var(--gold);"></div>
+          <div style="width:9px;height:9px;border-radius:50%;background:var(--green);"></div>
+          <span style="font-size:10px;color:var(--wd);margin-left:8px;font-family:monospace;">Travel History Reconstruction &mdash; Review</span>
+        </div>
+        <div style="padding:14px;display:flex;gap:12px;height:calc(100% - 38px);">
+          <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+            <div style="font-size:10px;color:var(--teal);font-weight:700;text-transform:uppercase;letter-spacing:.1em;">&#9992; Travel Timeline</div>
+            <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:7px;padding:9px 11px;display:flex;gap:9px;align-items:flex-start;"><span style="font-size:17px;">&#127482;&#127480;</span><div><div style="font-size:11px;font-weight:700;">United States</div><div style="font-size:9px;color:var(--wd);">Entry: 2024-03-15 &middot; Exit: 2024-04-02</div><span class="tag ng" style="font-size:9px;padding:1px 7px;margin-top:3px;display:inline-block;">Confirmed</span></div></div>
+            <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:7px;padding:9px 11px;display:flex;gap:9px;align-items:flex-start;"><span style="font-size:17px;">&#127471;&#127477;</span><div><div style="font-size:11px;font-weight:700;">Japan</div><div style="font-size:9px;color:var(--wd);">Entry: 2024-04-08 &middot; Exit: &mdash;</div><span class="tag gg" style="font-size:9px;padding:1px 7px;margin-top:3px;display:inline-block;">No Exit</span></div></div>
+            <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:7px;padding:9px 11px;display:flex;gap:9px;align-items:flex-start;"><span style="font-size:17px;">&#127467;&#127479;</span><div><div style="font-size:11px;font-weight:700;">France</div><div style="font-size:9px;color:var(--wd);">Entry: 2024-01-10 &middot; Exit: 2024-01-25</div><span class="tag tg" style="font-size:9px;padding:1px 7px;margin-top:3px;display:inline-block;">Inferred</span></div></div>
+          </div>
+          <div style="width:148px;background:rgba(0,200,212,.05);border:1px solid rgba(0,200,212,.15);border-radius:8px;padding:11px;display:flex;flex-direction:column;gap:7px;">
+            <div style="font-size:11px;font-weight:700;color:var(--w);">Stamp Detail</div>
+            <div style="font-size:10px;color:var(--wd);background:rgba(255,255,255,.03);border-radius:4px;padding:4px 7px;">&#127988; Country: Japan</div>
+            <div style="font-size:10px;color:var(--wd);background:rgba(255,255,255,.03);border-radius:4px;padding:4px 7px;">&#128197; Date: 2024-04-08</div>
+            <div style="font-size:10px;color:var(--wd);background:rgba(255,255,255,.03);border-radius:4px;padding:4px 7px;">&#8599; Entry</div>
+            <div style="font-size:10px;color:var(--wd);background:rgba(255,255,255,.03);border-radius:4px;padding:4px 7px;">&#9889; Conf: 0.94</div>
+            <div style="margin-top:auto;background:var(--teal);color:var(--navy);border-radius:4px;font-size:10px;font-weight:700;text-align:center;padding:5px 7px;cursor:pointer;">Save Edit</div>
+            <div style="background:rgba(0,200,212,.1);color:var(--teal);border:1px solid rgba(0,200,212,.3);border-radius:4px;font-size:10px;font-weight:700;text-align:center;padding:5px 7px;cursor:pointer;">Rebuild</div>
+          </div>
         </div>
       </div>
     </div>
   </div>
-  
-  <div class="ftr">
-    <span>Department of Electrical and Computer Engineering &nbsp;|&nbsp; Master of Engineering</span>
-    <span class="ftr-gold">August 25&ndash;26, 2026</span>
-  </div>
+  <div class="sf"></div><div class="sn">12 / 14</div>
 </div>
-
- SLIDE 2 TO 14 OMITTED FOR BREVITY - FULLY RENDERED IN LOCAL HTML -->
-
+<!-- S13 CONCLUSIONS -->
+<div class="slide">
+  <div class="grid"></div>
+  <div class="sh"><div class="sl">Summary</div><h2 style="font-size:34px;font-weight:800;">Conclusions</h2><div class="dv"></div></div>
+  <div style="flex:1;padding:8px 70px 28px;display:flex;gap:40px;">
+    <div style="flex:1;">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,200,212,.7);margin-bottom:8px;">Major Contributions</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="card" style="padding:13px 14px;display:flex;gap:10px;align-items:flex-start;"><span style="font-size:18px;">&#128202;</span><div><div style="font-size:12px;font-weight:700;margin-bottom:3px;">Dataset Expansion via U-Net</div><div style="font-size:11px;color:var(--wd);line-height:1.5;">381 &rarr; 871 stamps. Overlap-aware dataset. YOLOv26 real-world Recall: 83.3% &rarr; <span style="color:var(--green);font-weight:700;">94.8%</span>. F1: 0.859 &rarr; <span style="color:var(--green);font-weight:700;">0.927</span>.</div></div></div>
+        <div class="card" style="padding:13px 14px;display:flex;gap:10px;align-items:flex-start;"><span style="font-size:18px;">&#129302;</span><div><div style="font-size:12px;font-weight:700;margin-bottom:3px;">VLM-over-OCR, Validated Empirically</div><div style="font-size:11px;color:var(--wd);line-height:1.5;">Config-driven BaseExtractor factory supporting Claude, Gemini, local stubs. Concrete evidence for VLM superiority over traditional OCR on degraded stamps.</div></div></div>
+        <div class="card" style="padding:13px 14px;display:flex;gap:10px;align-items:flex-start;"><span style="font-size:18px;">&#128187;</span><div><div style="font-size:12px;font-weight:700;margin-bottom:3px;">Review-First Frontend</div><div style="font-size:11px;color:var(--wd);line-height:1.5;">React/Ant Design interface pairing every timeline entry with source stamp and page. Color-coded flags, edit-and-rebuild loop &mdash; a triage tool, not a black box.</div></div></div>
+      </div>
+    </div>
+    <div style="flex:0 0 370px;display:flex;flex-direction:column;gap:14px;">
+      <div class="rbox" style="padding:16px;"><div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:8px;">&#9888; Known Limitations</div><div style="font-size:11px;color:var(--wd);line-height:1.8;">&#8594; System timeline accuracy (35.8%) far below components<br/>&#8594; Small system eval (5 passports) &mdash; direction not bounded<br/>&#8594; English-only evaluation &mdash; multilingual untested<br/>&#8594; Cross-stamp contamination not isolated as metric</div></div>
+      <div class="tbox" style="padding:18px;"><div class="sl" style="margin-bottom:8px;">Positioning for Securiport</div><p style="font-size:13px;color:var(--wd);line-height:1.7;">Deploy as a <strong style="color:var(--w);">human-in-the-loop triage and transcription aid</strong>. Detection alone already boxes every stamp &mdash; the core manual bottleneck. Analyst review via the frontend ensures accuracy until reconstruction improves.</p></div>
+    </div>
+  </div>
+  <div class="sf"></div><div class="sn">13 / 14</div>
+</div>
+<!-- S14 FUTURE WORK -->
+<div class="slide">
+  <div class="grid"></div>
+  <div class="sh"><div class="sl">Looking Ahead</div><h2 style="font-size:34px;font-weight:800;">Future Work &amp; Recommendations</h2><div class="dv"></div></div>
+  <div style="flex:1;padding:8px 70px 28px;display:flex;gap:40px;">
+    <div style="flex:1;">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,200,212,.7);margin-bottom:8px;">Priority Areas</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="card" style="padding:13px 14px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;">&#128279; Reconstruction &amp; Conflict-Resolution Logic</div><div style="font-size:11px;color:var(--wd);line-height:1.5;">Geographic plausibility checks, better handling of unrecoverable dates, wider system-level test set to improve on the 35.8% baseline.</div></div>
+        <div class="card" style="padding:13px 14px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;">&#128300; Isolate Cross-Stamp Contamination</div><div style="font-size:11px;color:var(--wd);line-height:1.5;">Dedicated experiment measuring accuracy on contaminated vs. clean crops &mdash; quantifying this failure mode&apos;s contribution to the 27-point gap.</div></div>
+        <div class="card" style="padding:13px 14px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;">&#128193; Real-World Dataset Growth</div><div style="font-size:11px;color:var(--wd);line-height:1.5;">Expand annotated real passport set beyond 194 pages and 5 full passports for tighter accuracy estimates.</div></div>
+        <div class="card" style="padding:13px 14px;"><div style="font-size:12px;font-weight:700;margin-bottom:3px;">&#127760; Multilingual Expansion</div><div style="font-size:11px;color:var(--wd);line-height:1.5;">Arabic, Cyrillic, CJK support &mdash; target only after reconstruction stage is no longer the dominant error source.</div></div>
+      </div>
+    </div>
+    <div style="flex:0 0 380px;display:flex;flex-direction:column;gap:14px;">
+      <div class="tbox" style="padding:18px;"><div class="sl" style="margin-bottom:8px;">&#10022; Recommendations to Securiport</div><div style="font-size:11px;color:var(--wd);line-height:1.9;">&#8594; Continue with Claude as extraction backend<br/>&#8594; Prioritize timeline reconstruction in next cycle<br/>&#8594; Deploy as human-in-the-loop triage aid only<br/>&#8594; Revisit automation posture after larger validation set</div></div>
+      <div class="card" style="padding:22px;text-align:center;">
+        <div style="font-size:30px;margin-bottom:8px;">&#128591;</div>
+        <div style="font-size:18px;font-weight:800;margin-bottom:8px;">Thank You</div>
+        <div style="font-size:12px;color:var(--wd);line-height:1.7;"><span style="color:var(--teal);font-family:monospace;font-size:11px;">8Dis-like/travel-history-reconstruction</span><br/><span style="margin-top:4px;display:block;">Questions welcome!</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="sf"></div><div class="sn">14 / 14</div>
+</div>
+<!-- CONTROLS -->
 <div class="ctrl">
   <button id="bp">&#8249;</button>
   <span id="sc">1 / 14</span>
   <button id="bn">&#8250;</button>
 </div>
-
 <script>
-  const sl = document.querySelectorAll('.slide');
-  let c = 0;
-  function go(n) {
-    sl[c].classList.remove('active');
-    c = Math.max(0, Math.min(n, sl.length - 1));
-    sl[c].classList.add('active');
-    document.getElementById('sc').textContent = (c + 1) + ' / ' + sl.length;
-  }
-  document.getElementById('bp').onClick = () => go(c - 1);
-  document.getElementById('bn').onClick = () => go(c + 1);
-  document.addEventListener('keydown', e => {
-    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(c + 1); }
-    if (e.key === 'ArrowLeft') { e.preventDefault(); go(c - 1); }
-  });
+const sl=document.querySelectorAll(".slide");let c=0;
+function go(n){sl[c].classList.remove("active");c=Math.max(0,Math.min(n,sl.length-1));sl[c].classList.add("active");document.getElementById("sc").textContent=(c+1)+" / "+sl.length;}
+document.getElementById("bp").onclick=()=>go(c-1);
+document.getElementById("bn").onclick=()=>go(c+1);
+document.addEventListener("keydown",e=>{if(e.key=="ArrowRight"||e.key==" "){e.preventDefault();go(c+1);}if(e.key=="ArrowLeft"){e.preventDefault();go(c-1);}});
+let tx=0;document.addEventListener("touchstart",e=>{tx=e.touches[0].clientX;});document.addEventListener("touchend",e=>{let d=e.changedTouches[0].clientX-tx;if(d<-50)go(c+1);if(d>50)go(c-1);});
 </script>
-
 </body>
 </html>
